@@ -19,7 +19,7 @@ use KoolKode\Util\UUID;
  * execution / process data (variables, business key, etc) but must not take control of 
  * execution flow (transitions and signals).
  * 
- * @author Martin Schr�der
+ * @author Martin Schröder
  */
 interface DelegateExecutionInterface
 {

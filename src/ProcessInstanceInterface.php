@@ -16,7 +16,7 @@ use KoolKode\Util\UUID;
 /**
  * Process instances are top-level executions within a BPMN 2.0 process.
  * 
- * @author Martin Schr�der
+ * @author Martin Schröder
  */
 interface ProcessInstanceInterface extends ExecutionInterface
 {

@@ -16,7 +16,7 @@ use KoolKode\Util\UUID;
 /**
  * represents a user task instance.
  * 
- * @author Martin Schr�der
+ * @author Martin Schröder
  */
 interface TaskInterface
 {

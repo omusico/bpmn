@@ -17,7 +17,7 @@ use KoolKode\Util\UUID;
  * Each token in a BPMN 2.0 process is modeled as an execution that is part of the
  * execution hierarchy of a process.
  * 
- * @author Martin Schr�der
+ * @author Martin Schröder
  */
 interface ExecutionInterface
 {
