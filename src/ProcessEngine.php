@@ -24,6 +24,8 @@ class ProcessEngine
 	protected $commands;
 	protected $handleTransactions;
 	
+	protected $delegateTaskFactory;
+	
 	protected $repositoryService;
 	protected $runtimeService;
 	protected $taskService;
@@ -167,6 +169,21 @@ class ProcessEngine
 	public function pushCommand(CommandInterface $command)
 	{
 		$this->commands->insert($command, $command->getPriority());
+	}
+	
+	public function setDelegateTaskFactory(DelegateTaskFactoryInterface $factory = NULL)
+	{
+		$this->delegateTaskFactory = $factory;
+	}
+	
+	public function createDelegateTask($typeName)
+	{
+		if($this->delegateTaskFactory === NULL)
+		{
+			throw new \RuntimeException('Process engine cannot delegate tasks without a delegate task factory');
+		}
+		
+		return $this->delegateTaskFactory->createDelegateTask($typeName);
 	}
 	
 	public function registerExecution(InternalExecution $execution, array $clean = NULL)

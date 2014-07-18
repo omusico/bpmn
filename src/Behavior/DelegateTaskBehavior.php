@@ -27,10 +27,7 @@ class DelegateTaskBehavior implements ActivityInterface
 	
 	public function execute(Execution $execution)
 	{
-		// FIXME: Create a factory component that can be decoupled from the DI container.
-		
-		$container = $execution->getEngine()->getContainer();
-		$task = $container->get($this->typeName);
+		$task = $execution->getProcessEngine()->createDelegateTask($this->typeName);
 		
 		if($task instanceof DelegateTaskInterface)
 		{

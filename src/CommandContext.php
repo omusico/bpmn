@@ -40,11 +40,6 @@ class CommandContext
 		$this->engine->pushCommand($command);
 	}
 	
-	public function getContainer()
-	{
-		return $this->engine->getInternalEngine()->getContainer();
-	}
-	
 	public function notify($event)
 	{
 		return $this->engine->getInternalEngine()->notify($event);

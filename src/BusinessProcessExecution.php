@@ -30,11 +30,6 @@ class BusinessProcessExecution
 		return $this->execution->getProcessEngine();
 	}
 	
-	public function getContainer()
-	{
-		return $this->execution->getProcessEngine()->getInternalEngine()->getContainer();
-	}
-	
 	public function isActive()
 	{
 		return $this->execution->isActive();

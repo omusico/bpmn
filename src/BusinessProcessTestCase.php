@@ -2,21 +2,18 @@
 
 namespace KoolKode\BPMN;
 
-// FIXME: Adjust to composer packages and decoupling!
-use KoolKode\K2\Context\Container;
-use KoolKode\K2\Database\PDOConnection;
-
 use KoolKode\Event\EventDispatcher;
+use KoolKode\Expression\ExpressionContextFactory;
+use KoolKode\Process\ExecutionExpressionResolver;
 use KoolKode\Process\TestEngine;
 
 /**
  * Sets up in in-memory Sqlite databse and a process engine using it.
  * 
- * @author Martin Schr�der
+ * @author Martin Schröder
  */
 abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 {
-	protected static $logger;
 	protected static $pdo;
 	
 	protected $processEngine;
@@ -24,17 +21,14 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	protected $runtimeService;
 	protected $taskService;
 	
-	protected $container;
 	protected $eventDispatcher;
+	protected $delegateTasks;
 	
 	public static function setUpBeforeClass()
 	{
 		parent::setUpBeforeClass();
 		
-		self::$logger = new \KoolKode\K2\Log\Logger();
-// 		self::$logger->addWriter(new \KoolKode\K2\Log\Writer\StreamLogWriter('php://stdout'));
-		
-		self::$pdo = new PDOConnection(self::$logger, 'sqlite::memory:');
+		self::$pdo = new ExtendedPDO('sqlite::memory:');
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		
 		self::$pdo->exec("PRAGMA journal_mode = WAL");
@@ -61,15 +55,17 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUp();
 		
-		$this->container = new Container();
-		$this->eventDispatcher = new EventDispatcher($this->container, self::$logger);
-		$this->container->bindInstance('KoolKode\K2\Event\EventDispatcherInterface', $this->eventDispatcher);
+		$this->eventDispatcher = new EventDispatcher();
 		
-		$engine = new TestEngine($this->container);
-		$engine->setLogger(self::$logger);
-		$engine->setEventDispatcher($this->eventDispatcher);
+		$factory = new ExpressionContextFactory();
+		$factory->getResolvers()->registerResolver(new ExecutionExpressionResolver());
+		
+		$engine = new TestEngine($this->eventDispatcher, $factory);
+		
+		$this->delegateTasks = new DelegateTaskRegistry();
 		
 		$this->processEngine = new ProcessEngine($engine, self::$pdo);
+		$this->processEngine->setDelegateTaskFactory($this->delegateTasks);
 		
 		$this->repositoryService = $this->processEngine->getRepositoryService();
 		$this->runtimeService = $this->processEngine->getRuntimeService();
