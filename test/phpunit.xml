@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit backupStaticAttributes="false" backupGlobals="false" processIsolation="false" bootstrap="./phpunit.php">
+
+  <testsuites>
+    <testsuite name="unit">
+      <directory suffix="Test.php">./unit</directory>
+    </testsuite>
+  </testsuites>
+
+  <filter>
+    <whitelist>
+      <directory suffix=".php">../src/</directory>
+      <exclude>
+        <directory suffix="Interface.php">../src/</directory>
+        <directory suffix="Exception.php">../src/</directory>
+      </exclude>
+    </whitelist>
+  </filter>
+
+</phpunit>
