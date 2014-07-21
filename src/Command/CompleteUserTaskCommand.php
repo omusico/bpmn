@@ -12,6 +12,7 @@
 namespace KoolKode\BPMN\Command;
 
 use KoolKode\BPMN\CommandContext;
+use KoolKode\BPMN\Event\UserTaskCompletedEvent;
 use KoolKode\Util\Uuid;
 
 class CompleteUserTaskCommand extends AbstractCommand
@@ -27,20 +28,14 @@ class CompleteUserTaskCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$sql = "	SELECT *
-					FROM `#__bpm_user_task`
-					WHERE `id` = :id
-		";
-		$stmt = $context->prepareQuery($sql);
-		$stmt->bindValue('id', $this->taskId->toBinary());
-		$stmt->execute();
-		$task = $stmt->fetch(\PDO::FETCH_ASSOC);
-			
-		if($task === false)
-		{
-			throw new \OutOfBoundsException(sprintf('User Task not found: "%s"', $this->taskId));
-		}
-			
+		$task = $context->getProcessEngine()
+						->getTaskService()
+						->createTaskQuery()
+						->taskId($this->taskId)
+						->findOne();
+		
+		$context->notify(new UserTaskCompletedEvent($task, $context->getProcessEngine()));
+		
 		$sql = "	DELETE FROM `#__bpm_user_task`
 					WHERE `id` = :id
 		";
@@ -48,7 +43,7 @@ class CompleteUserTaskCommand extends AbstractCommand
 		$stmt->bindValue('id', $this->taskId->toBinary());
 		$stmt->execute();
 		
-		$execution = $context->loadExecution(new Uuid($task['execution_id']));
+		$execution = $context->loadExecution($task->getExecutionId());
 
 		$context->pushCommand(new SignalExecutionCommand($execution, NULL, $this->variables));
 	}

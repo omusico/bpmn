@@ -14,26 +14,26 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 		
 		$this->eventDispatcher->connect(function(MessageThrownEvent $event) use($businessKey) {
 			
-			switch($event->getActivityId())
+			switch($event->activityId)
 			{
 				case 'sendPizzaOrder':
 					$this->runtimeService->startProcessInstanceByMessage('pizzaOrderReceived', $businessKey, [
-						'csustomerProcessId' => $event->getProcessInstanceId()
+						'csustomerProcessId' => $event->processInstanceId
 					]);
 					break;
 				case 'deliverPizza':
-					$id = $event->getVariables()['csustomerProcessId'];
+					$id = $event->variables['csustomerProcessId'];
 					$target = $this->runtimeService->createExecutionQuery()
 								   ->processInstanceId($id)
 								   ->messageEventSubscriptionName('pizzaReceived')
 								   ->findOne();
 					
 					$this->runtimeService->messageEventReceived('pizzaReceived', $target->getId(), [
-						'pizzaServiceProcessId' => $event->getProcessInstanceId()
+						'pizzaServiceProcessId' => $event->processInstanceId
 					]);
 					break;
 				case 'payForPizza':
-					$id = $event->getVariables()['pizzaServiceProcessId'];
+					$id = $event->variables['pizzaServiceProcessId'];
 					$target = $this->runtimeService->createExecutionQuery()
 								   ->processInstanceId($id)
 								   ->messageEventSubscriptionName('pizzaPaymentReceived')

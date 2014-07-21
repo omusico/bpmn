@@ -16,11 +16,13 @@ use KoolKode\Util\Uuid;
 
 class MessageThrownEvent
 {
-	protected $processInstanceId;
-	protected $activityId;
-	protected $variables;
+	public $processInstanceId;
 	
-	protected $engine;
+	public $activityId;
+	
+	public $variables;
+	
+	public $engine;
 	
 	public function __construct(UUID $processInstanceId, $activityId, array $variables, ProcessEngine $engine)
 	{
@@ -28,25 +30,5 @@ class MessageThrownEvent
 		$this->activityId = (string)$activityId;
 		$this->variables = $variables;
 		$this->engine = $engine;
-	}
-	
-	public function getProcessInstanceId()
-	{
-		return $this->processInstanceId;
-	}
-	
-	public function getActivityId()
-	{
-		return $this->activityId;
-	}
-	
-	public function getVariables()
-	{
-		return $this->variables;
-	}
-	
-	public function getProcessEngine()
-	{
-		return $this->engine;
 	}
 }
