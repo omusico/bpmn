@@ -41,7 +41,7 @@ class ProcessEngine
 		$this->pdo = $pdo;
 		$this->handleTransactions = $handleTransactions ? true : false;
 		
-		$this->commands = new \SplPriorityQueue();
+		$this->commands = [];
 		
 		$this->repositoryService = new RepositoryService($this);
 		$this->runtimeService = new RuntimeService($this);
@@ -150,12 +150,12 @@ class ProcessEngine
 	{
 		while($this->engine->executeNextCommand());
 		
-		if($this->commands->isEmpty())
+		if(empty($this->commands))
 		{
 			return NULL;
 		}
 		
-		$command = $this->commands->extract();
+		$command = array_shift($this->commands);
 		
 		$this->engine->debug('COMMAND [priority = {0}]: {1}', [$command->getPriority(), get_class($command)]);
 		
@@ -168,7 +168,19 @@ class ProcessEngine
 	
 	public function pushCommand(CommandInterface $command)
 	{
-		$this->commands->insert($command, $command->getPriority());
+		$priority = $command->getPriority();
+		
+		for($count = count($this->commands), $i = 0; $i < $count; $i++)
+		{
+			if($this->commands[$i]->getPriority() < $priority)
+			{
+				array_splice($this->commands, $i, 0, [$command]);
+				
+				return;
+			}
+		}
+		
+		$this->commands[] = $command;
 	}
 	
 	public function setDelegateTaskFactory(DelegateTaskFactoryInterface $factory = NULL)

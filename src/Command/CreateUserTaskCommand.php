@@ -26,11 +26,6 @@ class CreateUserTaskCommand extends AbstractCommand
 		$this->execution = $execution;
 	}
 	
-	public function getPriority()
-	{
-		return 1500;
-	}
-	
 	public function execute(CommandContext $context)
 	{
 		$conn = $context->getDatabaseConnection();

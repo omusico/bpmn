@@ -30,6 +30,11 @@ class SignalEventReceivedCommand extends AbstractCommand
 		$this->executionId = $executionId;
 	}
 	
+	public function getPriority()
+	{
+		return self::PRIORITY_DEFAULT - 100;
+	}
+	
 	public function execute(CommandContext $context)
 	{
 		$conn = $context->getDatabaseConnection();

@@ -17,8 +17,6 @@ use KoolKode\Util\Uuid;
 
 class ThrowMessageCommand extends AbstractCommand
 {
-	const PRIORITY = 100;
-	
 	protected $processInstanceId;
 	
 	protected $activityId;
@@ -34,7 +32,7 @@ class ThrowMessageCommand extends AbstractCommand
 	
 	public function getPriority()
 	{
-		return self::PRIORITY;
+		return self::PRIORITY_DEFAULT - 500;
 	}
 	
 	public function execute(CommandContext $context)

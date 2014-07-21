@@ -27,6 +27,11 @@ class DeployBusinessProcessCommand extends AbstractCommand
 		$this->builder = $builder;
 	}
 	
+	public function getPriority()
+	{
+		return self::PRIORITY_DEFAULT * 2;
+	}
+	
 	public function execute(CommandContext $context)
 	{
 		$conn = $context->getDatabaseConnection();
