@@ -12,7 +12,7 @@
 namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\Command\CreateSignalSubscriptionCommand;
-use KoolKode\ProcessExecution;
+use KoolKode\Process\Execution;
 use KoolKode\Process\SignalableActivityInterface;
 
 class AwaitSignalBehavior implements SignalableActivityInterface
