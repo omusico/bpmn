@@ -35,8 +35,6 @@ class MessageEventReceivedCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
-		
 		$sql = "	SELECT s.`id` AS sub_id, s.`execution_id` AS sub_eid,
 						e.*, d.`definition`
 					FROM `#__bpm_event_subscription` AS s
@@ -48,7 +46,7 @@ class MessageEventReceivedCommand extends AbstractCommand
 					ORDER BY s.`created_at`
 					LIMIT 1
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('message', $this->messageName);
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 		$stmt->bindValue('eid', $this->executionId->toBinary());
@@ -74,7 +72,7 @@ class MessageEventReceivedCommand extends AbstractCommand
 			$sql = "	DELETE FROM `#__bpm_event_subscription`
 						WHERE `id` IN ($list)
 			";
-			$stmt = $conn->prepare($sql);
+			$stmt = $context->prepareQuery($sql);
 			$stmt->execute($ids);
 		}
 		

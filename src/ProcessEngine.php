@@ -68,6 +68,31 @@ class ProcessEngine
 		return $this->engine;
 	}
 	
+	/**
+	 * Create a prepared statement from the given SQL.
+	 * 
+	 * @param string $sql
+	 * @return \PDOStatement
+	 */
+	public function prepareQuery($sql)
+	{
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
+		
+		return $stmt;
+	}
+	
+	/**
+	 * get the last ID that has been inserted / next sequence value.
+	 * 
+	 * @param string $seq Name of the sequence to be used.
+	 * @return integer
+	 */
+	public function getLastInsertId($seq = NULL)
+	{
+		return $this->pdo->lastInsertId($seq);
+	}
+	
 	public function getPdo()
 	{
 		return $this->pdo;

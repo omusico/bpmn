@@ -29,13 +29,12 @@ class SetProcessVariableCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
 		$sql = "	SELECT e.*, d.`definition`
 					FROM `#__bpm_execution` AS e
 					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
 					WHERE e.`id` = :id
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', $this->executionId->toBinary());
 		$stmt->execute();
 		$row = $stmt->fetch(\PDO::FETCH_ASSOC);

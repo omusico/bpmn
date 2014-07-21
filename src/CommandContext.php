@@ -25,9 +25,9 @@ class CommandContext
 		return $this->engine;
 	}
 	
-	public function getDatabaseConnection()
+	public function prepareQuery($sql)
 	{
-		return $this->engine->getPdo();
+		return $this->engine->prepareQuery($sql);
 	}
 	
 	public function executeCommand(CommandInterface $command)

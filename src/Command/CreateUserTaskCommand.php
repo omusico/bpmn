@@ -28,14 +28,12 @@ class CreateUserTaskCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
-		
 		$sql = "	INSERT INTO `#__bpm_user_task`
 						(`id`, `execution_id`, `name`, `activity`, `created_at`)
 					VALUES
 						(:id, :eid, :name, :activity, :created)
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', UUID::createRandom()->toBinary());
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
 		$stmt->bindValue('name', $this->name);

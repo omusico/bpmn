@@ -17,8 +17,7 @@ class IntermediateMessageThrowBehavior implements ActivityInterface
 		
 		$vars = ($parent === NULL) ? $execution->getVariables() : $parent->getVariables();
 		
-		$command = new ThrowMessageCommand($pid, $id, $vars);
-		$execution->getProcessEngine()->pushCommand($command);
+		$execution->getProcessEngine()->pushCommand(new ThrowMessageCommand($pid, $id, $vars));
 		
 		$execution->takeAll(NULL, [$execution]);
 	}

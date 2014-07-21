@@ -34,15 +34,13 @@ class DeployBusinessProcessCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
-		
 		$sql = "	SELECT `revision`
 					FROM `#__bpm_process_definition`
 					WHERE `process_key` = :key
 					ORDER BY `revision` DESC
 					LIMIT 1
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->execute();
 		$revision = $stmt->fetchColumn(0) ?: 0;
@@ -56,7 +54,7 @@ class DeployBusinessProcessCommand extends AbstractCommand
 					VALUES
 						(:id, :key, :revision, :model, :name, :deployed)
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', $id->toBinary());
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->bindValue('revision', $revision + 1);
@@ -80,7 +78,7 @@ class DeployBusinessProcessCommand extends AbstractCommand
 								WHERE `process_key` = :key
 							)
 				";
-				$stmt = $conn->prepare($sql);
+				$stmt = $context->prepareQuery($sql);
 				$stmt->bindValue('key', $this->builder->getKey());
 				$stmt->execute();
 				
@@ -89,7 +87,7 @@ class DeployBusinessProcessCommand extends AbstractCommand
 							VALUES
 								(:id, :def, :flags, :message)
 				";
-				$stmt = $conn->prepare($sql);
+				$stmt = $context->prepareQuery($sql);
 				$stmt->bindValue('id', UUID::createRandom()->toBinary());
 				$stmt->bindValue('def', $id->toBinary());
 				$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);

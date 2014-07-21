@@ -27,13 +27,11 @@ class UpdateBusinessKeyCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
-		
 		$sql = "	UPDATE `#__bpm_execution`
 					SET `business_key` = :key
 					WHERE `process_id` = :pid
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('key', $this->businessKey);
 		$stmt->bindValue('pid', $this->processInstanceId->toBinary());
 		$stmt->execute();

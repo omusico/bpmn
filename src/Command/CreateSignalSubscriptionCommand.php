@@ -30,14 +30,12 @@ class CreateSignalSubscriptionCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
-		
 		$sql = "	INSERT INTO `#__bpm_event_subscription`
 						(`id`, `execution_id`, `process_instance_id`, `flags`, `name`, `created_at`)
 					VALUES
 						(:id, :eid, :pid, :flags, :signal, :created)
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', UUID::createRandom()->toBinary());
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
 		$stmt->bindValue('pid', $this->execution->getProcessInstance()->getId()->toBinary());

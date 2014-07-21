@@ -37,8 +37,6 @@ class SignalEventReceivedCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
-		
 		$sql = "	SELECT  s.`id` AS sub_id, s.`execution_id` AS sub_eid,
 							e.*, d.`definition`
 					FROM `#__bpm_event_subscription` AS s
@@ -53,7 +51,7 @@ class SignalEventReceivedCommand extends AbstractCommand
 			$sql .= ' AND s.`execution_id` = :eid';
 		}
 			
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('signal', $this->signal);
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_SIGNAL);
 			
@@ -84,7 +82,7 @@ class SignalEventReceivedCommand extends AbstractCommand
 			$sql = "	DELETE FROM `#__bpm_event_subscription`
 						WHERE `id` IN ($list)
 			";
-			$stmt = $conn->prepare($sql);
+			$stmt = $context->prepareQuery($sql);
 			$stmt->execute($ids);
 		}
 			

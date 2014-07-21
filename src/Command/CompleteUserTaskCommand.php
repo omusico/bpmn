@@ -27,13 +27,11 @@ class CompleteUserTaskCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$conn = $context->getDatabaseConnection();
-		
 		$sql = "	SELECT *
 					FROM `#__bpm_user_task`
 					WHERE `id` = :id
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', $this->taskId->toBinary());
 		$stmt->execute();
 		$task = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -46,16 +44,18 @@ class CompleteUserTaskCommand extends AbstractCommand
 		$sql = "	DELETE FROM `#__bpm_user_task`
 					WHERE `id` = :id
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', $this->taskId->toBinary());
 		$stmt->execute();
 			
+		// FIXME: Load execution using engine / command context.
+		
 		$sql = "	SELECT e.*, d.`definition`
 					FROM `#__bpm_execution` AS e
 					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
 					WHERE e.`id` = :id
 		";
-		$stmt = $conn->prepare($sql);
+		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', $task['execution_id']);
 		$stmt->execute();
 		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
