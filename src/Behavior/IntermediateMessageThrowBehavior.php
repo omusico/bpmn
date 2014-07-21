@@ -11,14 +11,11 @@ class IntermediateMessageThrowBehavior implements ActivityInterface
 {
 	public function execute(Execution $execution)
 	{
-		$pid = $execution->getProcessInstance()->getId();
 		$id = $execution->getNode()->getId();
-		$parent = $execution->getParentExecution();
-		
+		$parent = $execution->getParentExecution();	
 		$vars = ($parent === NULL) ? $execution->getVariables() : $parent->getVariables();
 		
-		$execution->getProcessEngine()->pushCommand(new ThrowMessageCommand($pid, $id, $vars));
-		
+		$execution->getProcessEngine()->pushCommand(new ThrowMessageCommand($execution->getId(), $id, $vars));
 		$execution->takeAll(NULL, [$execution]);
 	}
 }

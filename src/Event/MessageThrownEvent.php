@@ -11,12 +11,13 @@
 
 namespace KoolKode\BPMN\Event;
 
+use KoolKode\BPMN\ExecutionInterface;
 use KoolKode\BPMN\ProcessEngine;
 use KoolKode\Util\Uuid;
 
 class MessageThrownEvent
 {
-	public $processInstanceId;
+	public $execution;
 	
 	public $activityId;
 	
@@ -24,9 +25,9 @@ class MessageThrownEvent
 	
 	public $engine;
 	
-	public function __construct(UUID $processInstanceId, $activityId, array $variables, ProcessEngine $engine)
+	public function __construct(ExecutionInterface $execution, $activityId, array $variables, ProcessEngine $engine)
 	{
-		$this->processInstanceId = $processInstanceId;
+		$this->execution = $execution;
 		$this->activityId = (string)$activityId;
 		$this->variables = $variables;
 		$this->engine = $engine;

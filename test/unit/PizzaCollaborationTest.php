@@ -18,7 +18,7 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 			{
 				case 'sendPizzaOrder':
 					$this->runtimeService->startProcessInstanceByMessage('pizzaOrderReceived', $businessKey, [
-						'csustomerProcessId' => $event->processInstanceId
+						'csustomerProcessId' => $event->execution->getProcessInstanceId()
 					]);
 					break;
 				case 'deliverPizza':
@@ -29,7 +29,7 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 								   ->findOne();
 					
 					$this->runtimeService->messageEventReceived('pizzaReceived', $target->getId(), [
-						'pizzaServiceProcessId' => $event->processInstanceId
+						'pizzaServiceProcessId' => $event->execution->getProcessInstanceId()
 					]);
 					break;
 				case 'payForPizza':

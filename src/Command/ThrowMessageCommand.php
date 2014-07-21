@@ -17,15 +17,15 @@ use KoolKode\Util\Uuid;
 
 class ThrowMessageCommand extends AbstractCommand
 {
-	protected $processInstanceId;
+	protected $executionId;
 	
 	protected $activityId;
 	
 	protected $payload;
 	
-	public function __construct(UUID $procesInstanceId, $activityId, array $payload = NULL)
+	public function __construct(UUID $executionId, $activityId, array $payload = NULL)
 	{
-		$this->processInstanceId = $procesInstanceId;
+		$this->executionId = $executionId;
 		$this->activityId = (string)$activityId;
 		$this->payload = $payload;
 	}
@@ -37,8 +37,14 @@ class ThrowMessageCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
+		$execution = $context->getProcessEngine()
+							 ->getRuntimeService()
+							 ->createExecutionQuery()
+							 ->executionId($this->executionId)
+							 ->findOne();
+		
 		$context->notify(new MessageThrownEvent(
-			$this->processInstanceId,
+			$execution,
 			$this->activityId,
 			$this->payload,
 			$context->getProcessEngine()
