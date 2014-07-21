@@ -14,7 +14,7 @@ namespace KoolKode\BPMN\Event;
 use KoolKode\BPMN\ProcessEngine;
 use KoolKode\Util\Uuid;
 
-class MessageThrowEvent
+class MessageThrownEvent
 {
 	protected $processInstanceId;
 	protected $activityId;

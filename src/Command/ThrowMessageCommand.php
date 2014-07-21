@@ -12,7 +12,7 @@
 namespace KoolKode\BPMN\Command;
 
 use KoolKode\BPMN\CommandContext;
-use KoolKode\BPMN\Event\MessageThrowEvent;
+use KoolKode\BPMN\Event\MessageThrownEvent;
 use KoolKode\Util\Uuid;
 
 class ThrowMessageCommand extends AbstractCommand
@@ -21,13 +21,13 @@ class ThrowMessageCommand extends AbstractCommand
 	
 	protected $activityId;
 	
-	protected $processVariables;
+	protected $payload;
 	
-	public function __construct(UUID $procesInstanceId, $activityId, array $processVariables = NULL)
+	public function __construct(UUID $procesInstanceId, $activityId, array $payload = NULL)
 	{
 		$this->processInstanceId = $procesInstanceId;
 		$this->activityId = (string)$activityId;
-		$this->processVariables = $processVariables;
+		$this->payload = $payload;
 	}
 	
 	public function getPriority()
@@ -37,10 +37,11 @@ class ThrowMessageCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		// TODO: Integrate with domain events (queue events in dispatcher and trigger them when a transaction is commited successfully)
-		
-		$event = new MessageThrowEvent($this->processInstanceId, $this->activityId, $this->processVariables, $context->getProcessEngine());
-		
-		$context->notify($event);
+		$context->notify(new MessageThrownEvent(
+			$this->processInstanceId,
+			$this->activityId,
+			$this->payload,
+			$context->getProcessEngine()
+		));
 	}
 }

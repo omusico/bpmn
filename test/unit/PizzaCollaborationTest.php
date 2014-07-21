@@ -2,7 +2,7 @@
 
 namespace KoolKode\BPMN;
 
-use KoolKode\BPMN\Event\MessageThrowEvent;
+use KoolKode\BPMN\Event\MessageThrownEvent;
 
 class PizzaCollaborationTest extends BusinessProcessTestCase
 {
@@ -12,7 +12,7 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 		
 		$businessKey = 'Pizza Funghi';
 		
-		$this->eventDispatcher->connect(function(MessageThrowEvent $event) use($businessKey) {
+		$this->eventDispatcher->connect(function(MessageThrownEvent $event) use($businessKey) {
 			
 			switch($event->getActivityId())
 			{
