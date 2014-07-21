@@ -93,11 +93,6 @@ class ProcessEngine
 		return $this->pdo->lastInsertId($seq);
 	}
 	
-	public function getPdo()
-	{
-		return $this->pdo;
-	}
-	
 	protected $needSync = true;
 	protected $needTransactionCommit = false;
 	

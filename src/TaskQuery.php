@@ -203,9 +203,7 @@ class TaskQuery
 			$sql .= sprintf(' LIMIT %u OFFSET %u', $limit, $offset);
 		}
 		
-		$pdo = $this->engine->getPdo();
-		$stmt = $pdo->prepare($sql);
-		
+		$stmt = $this->engine->prepareQuery($sql);
 		$stmt->execute($params);
 		
 		return $stmt;
