@@ -34,6 +34,8 @@ class ProcessEngine
 	
 	protected $engine;
 	protected $pdo;
+	protected $needSync = true;
+	protected $needTransactionCommit = false;
 	
 	public function __construct(EngineInterface $engine, \PDO $pdo, $handleTransactions = true)
 	{
@@ -92,9 +94,6 @@ class ProcessEngine
 	{
 		return $this->pdo->lastInsertId($seq);
 	}
-	
-	protected $needSync = true;
-	protected $needTransactionCommit = false;
 	
 	public function executeCommand(CommandInterface $command)
 	{
@@ -216,6 +215,25 @@ class ProcessEngine
 		}
 		
 		return $this->delegateTaskFactory->createDelegateTask($typeName);
+	}
+	
+	public function findExecution(UUID $id)
+	{
+		$sql = "	SELECT e.*, d.`definition`
+					FROM `#__bpm_execution` AS e
+					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
+					WHERE e.`id` = :eid
+		";
+		$stmt = $this->prepareQuery($sql);
+		$stmt->bindValue('eid', $id->toBinary());
+		$stmt->execute();
+		
+		if(false === ($row = $stmt->fetch(\PDO::FETCH_ASSOC)))
+		{
+			throw new \OutOfBoundsException(sprintf('Execution not found: %s', $id));
+		}
+		
+		return $this->unserializeExecution($row);
 	}
 	
 	public function registerExecution(InternalExecution $execution, array $clean = NULL)
@@ -424,31 +442,4 @@ class ProcessEngine
 			$this->syncExecution($child, $this->executions[(string)$child->getId()]);
 		}
 	}
-	
-// 	public function setProcessVariable(UUID $executionId, $name, $value)
-// 	{
-// 		$this->executeOperation(function() use($executionId, $name, $value) {
-			
-// 			$sql = "	SELECT e.*, d.`definition`
-// 						FROM `#__bpm_execution` AS e
-// 						INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
-// 						WHERE e.`id` = :id
-// 			";
-// 			$stmt = $this->pdo->prepare($sql);
-// 			$stmt->bindValue('id', $executionId->toBinary());
-// 			$stmt->execute();
-// 			$row = $stmt->fetch(\PDO::FETCH_ASSOC);
-			
-// 			$execution = $this->unserializeExecution($row);
-			
-// 			if($value !== NULL)
-// 			{
-// 				$execution->setVariable($name, $value);
-// 			}
-// 			else
-// 			{
-// 				$execution->removeVariable($name);
-// 			}
-// 		});
-// 	}
 }

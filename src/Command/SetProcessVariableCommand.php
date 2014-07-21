@@ -29,25 +29,7 @@ class SetProcessVariableCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$sql = "	SELECT e.*, d.`definition`
-					FROM `#__bpm_execution` AS e
-					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
-					WHERE e.`id` = :id
-		";
-		$stmt = $context->prepareQuery($sql);
-		$stmt->bindValue('id', $this->executionId->toBinary());
-		$stmt->execute();
-		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
-			
-		$execution = $context->getProcessEngine()->unserializeExecution($row);
-			
-		if($this->variableValue !== NULL)
-		{
-			$execution->setVariable($this->variableName, $this->variableValue);
-		}
-		else
-		{
-			$execution->removeVariable($this->variableName);
-		}
+		$execution = $context->loadExecution($this->executionId);
+		$execution->setVariable($this->variableName, $this->variableValue);
 	}
 }

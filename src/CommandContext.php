@@ -11,6 +11,9 @@
 
 namespace KoolKode\BPMN;
 
+use KoolKode\Process\Execution;
+use KoolKode\Util\UUID;
+
 class CommandContext
 {
 	protected $engine;
@@ -28,6 +31,21 @@ class CommandContext
 	public function prepareQuery($sql)
 	{
 		return $this->engine->prepareQuery($sql);
+	}
+	
+	public function loadExecution($execution)
+	{
+		if($execution instanceof Execution)
+		{
+			return $execution;
+		}
+		
+		if(is_array($execution))
+		{
+			return $this->engine->unserializeExecution($execution);
+		}
+		
+		return $this->engine->findExecution(new UUID($execution));
 	}
 	
 	public function executeCommand(CommandInterface $command)

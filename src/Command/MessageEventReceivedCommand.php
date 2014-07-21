@@ -35,8 +35,7 @@ class MessageEventReceivedCommand extends AbstractCommand
 	
 	public function execute(CommandContext $context)
 	{
-		$sql = "	SELECT s.`id` AS sub_id, s.`execution_id` AS sub_eid,
-						e.*, d.`definition`
+		$sql = "	SELECT s.`id` AS sub_id, s.`execution_id` AS sub_eid, e.*, d.`definition`
 					FROM `#__bpm_event_subscription` AS s
 					INNER JOIN `#__bpm_execution` AS e ON (e.`id` = s.`execution_id`)
 					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
