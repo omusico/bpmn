@@ -13,10 +13,10 @@ namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\DelegateExecution;
 use KoolKode\BPMN\DelegateTaskInterface;
-use KoolKode\Process\ActivityInterface;
+use KoolKode\Process\BehaviorInterface;
 use KoolKode\Process\Execution;
 
-class DelegateTaskBehavior implements ActivityInterface
+class DelegateTaskBehavior implements BehaviorInterface
 {
 	protected $typeName;
 	

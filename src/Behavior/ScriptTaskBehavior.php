@@ -11,10 +11,10 @@
 
 namespace KoolKode\BPMN\Behavior;
 
-use KoolKode\Process\ActivityInterface;
+use KoolKode\Process\BehaviorInterface;
 use KoolKode\Process\Execution;
 
-class ScriptTaskBehavior implements ActivityInterface
+class ScriptTaskBehavior implements BehaviorInterface
 {
 	protected $name;
 	protected $language;

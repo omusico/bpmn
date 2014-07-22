@@ -12,10 +12,10 @@
 namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\Command\CreateUserTaskCommand;
-use KoolKode\Process\SignalableActivityInterface;
+use KoolKode\Process\SignalableBehaviorInterface;
 use KoolKode\Process\Execution;
 
-class UserTaskBehavior implements SignalableActivityInterface
+class UserTaskBehavior implements SignalableBehaviorInterface
 {
 	protected $name;
 	

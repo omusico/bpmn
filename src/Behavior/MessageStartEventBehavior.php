@@ -11,10 +11,10 @@
 
 namespace KoolKode\BPMN\Behavior;
 
-use KoolKode\Process\ActivityInterface;
+use KoolKode\Process\BehaviorInterface;
 use KoolKode\Process\Execution;
 
-class MessageStartEventBehavior implements ActivityInterface
+class MessageStartEventBehavior implements BehaviorInterface
 {
 	protected $messageName;
 	

@@ -13,9 +13,9 @@ namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\Command\CreateSignalSubscriptionCommand;
 use KoolKode\Process\Execution;
-use KoolKode\Process\SignalableActivityInterface;
+use KoolKode\Process\SignalableBehaviorInterface;
 
-class AwaitSignalBehavior implements SignalableActivityInterface
+class AwaitSignalBehavior implements SignalableBehaviorInterface
 {
 	public function execute(Execution $execution)
 	{

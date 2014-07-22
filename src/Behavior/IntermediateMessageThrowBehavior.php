@@ -4,10 +4,10 @@ namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\Command\ThrowMessageCommand;
 use KoolKode\BPMN\ProcessEngine;
-use KoolKode\Process\ActivityInterface;
+use KoolKode\Process\BehaviorInterface;
 use KoolKode\Process\Execution;
 
-class IntermediateMessageThrowBehavior implements ActivityInterface
+class IntermediateMessageThrowBehavior implements BehaviorInterface
 {
 	public function execute(Execution $execution)
 	{
