@@ -27,7 +27,7 @@ class DelegateExecution implements DelegateExecutionInterface
 	
 	public function getProcessInstanceId()
 	{
-		return $this->execution->getProcessInstance()->getId();
+		return $this->execution->getRootExecution()->getId();
 	}
 	
 	public function getBusinessKey()

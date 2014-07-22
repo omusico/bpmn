@@ -69,4 +69,14 @@ class InternalExecution extends Execution
 	
 		return $this->childExecutions[] = $execution;
 	}
+	
+	protected function processCreatedExecution(Execution $execution)
+	{
+		parent::processCreatedExecution($execution);
+		
+		if($execution instanceof self)
+		{
+			$execution->businessKey = $this->businessKey;
+		}
+	}
 }

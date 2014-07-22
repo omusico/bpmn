@@ -253,7 +253,7 @@ class ProcessEngine
 		return [
 			'id' => $execution->getId()->toBinary(),
 			'pid' => $pid,
-			'process' => $execution->getProcessInstance()->getId()->toBinary(),
+			'process' => $execution->getRootExecution()->getId()->toBinary(),
 			'def' => $execution->getProcessDefinition()->getId()->toBinary(),
 			'state' => $execution->getState(),
 			'active' => $execution->getTimestamp(),

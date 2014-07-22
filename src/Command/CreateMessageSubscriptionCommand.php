@@ -38,7 +38,7 @@ class CreateMessageSubscriptionCommand extends AbstractCommand
 		$stmt = $context->prepareQuery($sql);
 		$stmt->bindValue('id', UUID::createRandom()->toBinary());
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
-		$stmt->bindValue('pid', $this->execution->getProcessInstance()->getId()->toBinary());
+		$stmt->bindValue('pid', $this->execution->getRootExecution()->getId()->toBinary());
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 		$stmt->bindValue('message', $this->message);
 		$stmt->bindValue('created', time());
