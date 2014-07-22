@@ -12,8 +12,8 @@
 namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\Command\CreateMessageSubscriptionCommand;
+use KoolKode\Process\Behavior\SignalableBehaviorInterface;
 use KoolKode\Process\Execution;
-use KoolKode\Process\SignalableBehaviorInterface;
 
 class IntermediateMessageCatchBehavior implements SignalableBehaviorInterface
 {

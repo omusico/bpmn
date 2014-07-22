@@ -4,7 +4,7 @@ namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\Command\ThrowMessageCommand;
 use KoolKode\BPMN\ProcessEngine;
-use KoolKode\Process\BehaviorInterface;
+use KoolKode\Process\Behavior\BehaviorInterface;
 use KoolKode\Process\Execution;
 
 class IntermediateMessageThrowBehavior implements BehaviorInterface

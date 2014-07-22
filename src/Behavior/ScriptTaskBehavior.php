@@ -11,7 +11,7 @@
 
 namespace KoolKode\BPMN\Behavior;
 
-use KoolKode\Process\BehaviorInterface;
+use KoolKode\Process\Behavior\BehaviorInterface;
 use KoolKode\Process\Execution;
 
 class ScriptTaskBehavior implements BehaviorInterface

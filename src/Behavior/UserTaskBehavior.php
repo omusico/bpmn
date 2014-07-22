@@ -12,7 +12,7 @@
 namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\Command\CreateUserTaskCommand;
-use KoolKode\Process\SignalableBehaviorInterface;
+use KoolKode\Process\Behavior\SignalableBehaviorInterface;
 use KoolKode\Process\Execution;
 
 class UserTaskBehavior implements SignalableBehaviorInterface

@@ -13,7 +13,7 @@ namespace KoolKode\BPMN\Behavior;
 
 use KoolKode\BPMN\DelegateExecution;
 use KoolKode\BPMN\DelegateTaskInterface;
-use KoolKode\Process\BehaviorInterface;
+use KoolKode\Process\Behavior\BehaviorInterface;
 use KoolKode\Process\Execution;
 
 class DelegateTaskBehavior implements BehaviorInterface
