@@ -13,7 +13,6 @@ namespace KoolKode\BPMN;
 
 use KoolKode\Process\EngineInterface;
 use KoolKode\Process\ProcessDefinition;
-use KoolKode\Process\ExecutionInfo;
 use KoolKode\Util\Uuid;
 
 class ProcessEngine
