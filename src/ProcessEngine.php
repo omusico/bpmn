@@ -166,8 +166,6 @@ class ProcessEngine
 	
 	public function executeNextCommand()
 	{
-		while($this->engine->executeNextCommand());
-		
 		if(empty($this->commands))
 		{
 			return NULL;
@@ -178,9 +176,7 @@ class ProcessEngine
 		$this->engine->debug('COMMAND [priority = {0}]: {1}', [$command->getPriority(), get_class($command)]);
 		
 		$command->execute(new CommandContext($this));
-		
-		while($this->engine->executeNextCommand());
-		
+			
 		return $command;
 	}
 	

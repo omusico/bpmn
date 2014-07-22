@@ -91,7 +91,6 @@ class StartProcessInstanceCommand extends AbstractCommand
 		$processEngine = $context->getProcessEngine();
 		
 		$process = new InternalProcessInstance(UUID::createRandom(), $processEngine, $definition, $this->businessKey);
-		$process->execute(array_shift($initial));
 			
 		foreach($this->variables as $k => $v)
 		{
@@ -99,10 +98,9 @@ class StartProcessInstanceCommand extends AbstractCommand
 		}
 		
 		$processEngine->registerExecution($process);
+		$process->execute(array_shift($initial));
 
 		$engine = $processEngine->getInternalEngine();
-	
-		while($engine->executeNextCommand());
 		
 		$nid = ($process->getNode() === NULL) ? NULL : $process->getNode()->getId();
 		
