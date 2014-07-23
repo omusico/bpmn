@@ -106,8 +106,6 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$this->repositoryService = $this->processEngine->getRepositoryService();
 		$this->runtimeService = $this->processEngine->getRuntimeService();
 		$this->taskService = $this->processEngine->getTaskService();
-	
-		chdir(dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 	}
 	
 	protected function tearDown()
@@ -128,5 +126,15 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		{
 			self::$pdo->exec("DELETE FROM $table");
 		}
+	}
+	
+	protected function deployFile($file)
+	{
+		if(!preg_match("'^(?:(?:[a-z]:)|(/+)|([^:]+://))'i", $file))
+		{
+			$file = dirname((new \ReflectionClass(get_class($this)))->getFileName()) . DIRECTORY_SEPARATOR . $file;
+		}
+		
+		return $this->repositoryService->deployDiagram($file);
 	}
 }

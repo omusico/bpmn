@@ -8,7 +8,7 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 {
 	public function testPizzaProcess()
 	{
-		$this->repositoryService->deployDiagram('PizzaCollaboration.bpmn');
+		$this->deployFile('PizzaCollaboration.bpmn');
 		
 		$businessKey = 'Pizza Funghi';
 		
