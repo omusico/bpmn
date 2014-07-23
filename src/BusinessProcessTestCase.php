@@ -99,6 +99,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			$logger->pushProcessor(new PsrLogMessageProcessor());
 			
 			fwrite(STDERR, "\n");
+			fwrite(STDERR, sprintf("TEST CASE: %s\n", $this->getName()));
 		}
 		
 		$this->eventDispatcher = new EventDispatcher();
