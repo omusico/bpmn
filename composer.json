@@ -22,7 +22,8 @@
 		"koolkode/xml" : "dev-master"
 	},
 	"require-dev" : {
-		"phpunit/phpunit" : "4.*"
+		"phpunit/phpunit" : "4.*",
+		"monolog/monolog" : "~1.0"
 	},
 	"autoload" : {
 		"psr-4" : {

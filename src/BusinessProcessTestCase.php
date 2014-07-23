@@ -11,6 +11,9 @@ use KoolKode\BPMN\Task\TaskService;
 use KoolKode\Event\EventDispatcher;
 use KoolKode\Expression\ExpressionContextFactory;
 use KoolKode\Process\ExecutionExpressionResolver;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Monolog\Processor\PsrLogMessageProcessor;
 
 /**
  * Sets up in in-memory Sqlite databse and a process engine using it.
@@ -57,10 +60,6 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		self::$pdo = new ExtendedPDO('sqlite::memory:');
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		
-		self::$pdo->exec("PRAGMA journal_mode = WAL");
-		self::$pdo->exec("PRAGMA locking_mode = EXCLUSIVE");
-		self::$pdo->exec("PRAGMA synchronous = NORMAL");
 		self::$pdo->exec("PRAGMA foreign_keys = ON");
 		
 		$chunks = explode(';', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'BusinessProcessTestCase.sqlite.sql'));
@@ -82,6 +81,17 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUp();
 		
+		$logger = NULL;
+		
+		if(!empty($_SERVER['KK_LOG']))
+		{
+			$logger = new Logger('BPMN');
+			$logger->pushHandler(new StreamHandler(STDERR));
+			$logger->pushProcessor(new PsrLogMessageProcessor());
+			
+			fwrite(STDERR, "\n");
+		}
+		
 		$this->eventDispatcher = new EventDispatcher();
 		
 		$factory = new ExpressionContextFactory();
@@ -89,25 +99,34 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		$this->delegateTasks = new DelegateTaskRegistry();
 		
-		$this->processEngine = new ProcessEngine(self::$pdo, $this->eventDispatcher, $factory, false);
+		$this->processEngine = new ProcessEngine(self::$pdo, $this->eventDispatcher, $factory);
 		$this->processEngine->setDelegateTaskFactory($this->delegateTasks);
+		$this->processEngine->setLogger($logger);
 		
 		$this->repositoryService = $this->processEngine->getRepositoryService();
 		$this->runtimeService = $this->processEngine->getRuntimeService();
 		$this->taskService = $this->processEngine->getTaskService();
 	
 		chdir(dirname((new \ReflectionClass(get_class($this)))->getFileName()));
-		
-		self::$pdo->beginTransaction();
 	}
 	
 	protected function tearDown()
 	{
+		static $tables = [
+			'bpm_process_definition',
+			'bpm_process_subscription',
+			'bpm_execution',
+			'bpm_event_subscription',
+			'bpm_user_task'
+		];
+		
 		parent::tearDown();
 		
-		if(self::$pdo->inTransaction())
+		self::$pdo->exec("PRAGMA foreign_keys = OFF");
+		
+		foreach($tables as $table)
 		{
-			self::$pdo->rollBack();
+			self::$pdo->exec("DELETE FROM $table");
 		}
 	}
 }

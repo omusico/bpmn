@@ -52,18 +52,6 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		$this->taskService = new TaskService($this);
 	}
 	
-	public function log($level, $message, array $context = NULL)
-	{
-		$replacements = [];
-		
-		foreach((array)$context as $k => $v)
-		{
-			$replacements['{' . $k . '}'] = is_string($v) ? $v : var_export($v, true);
-		}
-		
-		fwrite(STDERR, strtr($message, $replacements) . "\n");
-	}
-	
 	public function getRepositoryService()
 	{
 		return $this->repositoryService;

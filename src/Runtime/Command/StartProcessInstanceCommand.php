@@ -90,7 +90,9 @@ class StartProcessInstanceCommand extends AbstractBusinessCommand
 		
 		$process = new VirtualExecution(UUID::createRandom(), $engine, $definition);
 		$process->setBusinessKey($this->businessKey);
-			
+		
+		$engine->debug('Created {0}', [(string)$process]);
+		
 		foreach($this->variables as $k => $v)
 		{
 			$process->setVariable($k, $v);
