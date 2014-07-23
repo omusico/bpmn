@@ -2,10 +2,15 @@
 
 namespace KoolKode\BPMN;
 
+use KoolKode\BPMN\Delegate\DelegateTaskRegistry;
+use KoolKode\BPMN\Engine\ExtendedPDO;
+use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Repository\RepositoryService;
+use KoolKode\BPMN\Runtime\RuntimeService;
+use KoolKode\BPMN\Task\TaskService;
 use KoolKode\Event\EventDispatcher;
 use KoolKode\Expression\ExpressionContextFactory;
 use KoolKode\Process\ExecutionExpressionResolver;
-use KoolKode\Process\TestEngine;
 
 /**
  * Sets up in in-memory Sqlite databse and a process engine using it.
@@ -16,13 +21,35 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 {
 	protected static $pdo;
 	
-	protected $processEngine;
-	protected $repositoryService;
-	protected $runtimeService;
-	protected $taskService;
-	
+	/**
+	 * @var EventDispatcher
+	 */
 	protected $eventDispatcher;
+	
+	/**
+	 * @var ProcessEngine
+	 */
+	protected $processEngine;
+	
+	/**
+	 * @var DelegateTaskRegistry
+	 */
 	protected $delegateTasks;
+	
+	/**
+	 * @var RepositoryService
+	 */
+	protected $repositoryService;
+	
+	/**
+	 * @var RuntimeService
+	 */
+	protected $runtimeService;
+	
+	/**
+	 * @var TaskService
+	 */
+	protected $taskService;
 	
 	public static function setUpBeforeClass()
 	{
@@ -60,11 +87,9 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$factory = new ExpressionContextFactory();
 		$factory->getResolvers()->registerResolver(new ExecutionExpressionResolver());
 		
-		$engine = new TestEngine($this->eventDispatcher, $factory);
-		
 		$this->delegateTasks = new DelegateTaskRegistry();
 		
-		$this->processEngine = new ProcessEngine($engine, self::$pdo);
+		$this->processEngine = new ProcessEngine(self::$pdo, $this->eventDispatcher, $factory, false);
 		$this->processEngine->setDelegateTaskFactory($this->delegateTasks);
 		
 		$this->repositoryService = $this->processEngine->getRepositoryService();

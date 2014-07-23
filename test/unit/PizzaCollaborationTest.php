@@ -2,7 +2,7 @@
 
 namespace KoolKode\BPMN;
 
-use KoolKode\BPMN\Event\MessageThrownEvent;
+use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 
 class PizzaCollaborationTest extends BusinessProcessTestCase
 {

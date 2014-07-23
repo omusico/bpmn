@@ -58,7 +58,7 @@ class BusinessProcessBuilder
 	
 	public function messageStartEvent($id, $messageName)
 	{
-		return $this->builder->node($id)->behavior(new Behavior\MessageStartEventBehavior($messageName));
+		return $this->builder->node($id)->behavior(new Runtime\Behavior\MessageStartEventBehavior($messageName));
 	}
 	
 	public function endEvent($id)
@@ -107,32 +107,32 @@ class BusinessProcessBuilder
 	
 	public function delegateTask($id, $typeName, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Behavior\DelegateTaskBehavior($typeName, $name));
+		return $this->builder->node($id)->behavior(new Delegate\Behavior\DelegateTaskBehavior($typeName, $name));
 	}
 	
 	public function userTaks($id, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Behavior\UserTaskBehavior($this->normalize($name)));
+		return $this->builder->node($id)->behavior(new Task\Behavior\UserTaskBehavior($this->normalize($name)));
 	}
 	
 	public function scriptTask($id, $language, $script, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Behavior\ScriptTaskBehavior($language, $script, $name));
+		return $this->builder->node($id)->behavior(new Task\Behavior\ScriptTaskBehavior($language, $script, $name));
 	}
 	
 	public function intermediateSignalCatchEvent($id, $signal)
 	{
-		return $this->builder->node($id)->behavior(new Behavior\IntermediateSignalCatchBehavior($signal));
+		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateSignalCatchBehavior($signal));
 	}
 	
 	public function intermediateMessageCatchEvent($id, $message)
 	{
-		return $this->builder->node($id)->behavior(new Behavior\IntermediateMessageCatchBehavior($message));
+		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateMessageCatchBehavior($message));
 	}
 	
 	public function intermediateMessageThrowEvent($id, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Behavior\IntermediateMessageThrowBehavior($name));
+		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateMessageThrowBehavior($name));
 	}
 	
 	protected function normalize($input)

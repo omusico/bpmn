@@ -2,6 +2,9 @@
 
 namespace KoolKode\BPMN;
 
+use KoolKode\BPMN\Delegate\DelegateExecutionInterface;
+use KoolKode\BPMN\Delegate\DelegateTaskInterface;
+
 class ComputeBillTask implements DelegateTaskInterface
 {
 	public $result = 0;
