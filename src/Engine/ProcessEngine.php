@@ -21,6 +21,11 @@ use KoolKode\Process\AbstractEngine;
 use KoolKode\Process\Execution;
 use KoolKode\Util\Uuid;
 
+/**
+ * BPMN 2.0 process engine backed by a relational database.
+ * 
+ * @author Martin Schröder
+ */
 class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 {
 	const SUB_FLAG_SIGNAL = 1;

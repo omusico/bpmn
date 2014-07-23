@@ -22,6 +22,11 @@ use KoolKode\Process\ProcessDefinition;
 use KoolKode\Process\ProcessBuilder;
 use KoolKode\Util\UUID;
 
+/**
+ * Convenient builder that aids during creation of BPMN 2.0 process models.
+ * 
+ * @author Martin Schröder
+ */
 class BusinessProcessBuilder
 {
 	protected $key;

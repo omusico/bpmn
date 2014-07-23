@@ -16,6 +16,11 @@ use KoolKode\Process\ProcessDefinition;
 use KoolKode\Process\Transition;
 use KoolKode\Util\Uuid;
 
+/**
+ * PVM execution being used to automate BPMN 2.0 processes.
+ * 
+ * @author Martin Schröder
+ */
 class VirtualExecution extends Execution
 {
 	protected $businessKey;

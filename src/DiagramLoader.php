@@ -13,6 +13,11 @@ namespace KoolKode\BPMN;
 
 use KoolKode\Xml\XmlDocumentBuilder;
 
+/**
+ * Reads process models from BPMN 2.0 process and collaboration diagram files.
+ * 
+ * @author Martin Schröder
+ */
 class DiagramLoader
 {
 	const NS_MODEL = 'http://www.omg.org/spec/BPMN/20100524/MODEL';
