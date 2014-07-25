@@ -30,6 +30,11 @@ class SignalExecutionCommand extends AbstractBusinessCommand
 		$this->variables = $variables;
 	}
 	
+	public function getPriority()
+	{
+		return self::PRIORITY_DEFAULT + 50;
+	}
+	
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$engine->debug('Signaling execution {execution} using signal {signal}', [

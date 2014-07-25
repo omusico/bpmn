@@ -101,8 +101,6 @@ class StartProcessInstanceCommand extends AbstractBusinessCommand
 		$engine->registerExecution($process);
 		$process->execute(array_shift($initial));
 
-		$activityId = ($process->getNode() === NULL) ? NULL : $process->getNode()->getId();
-		
 		return $process->getId();
 	}
 }

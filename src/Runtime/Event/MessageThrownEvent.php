@@ -19,17 +19,16 @@ class MessageThrownEvent
 {
 	public $execution;
 	
-	public $activityId;
-	
-	public $variables;
-	
 	public $engine;
 	
-	public function __construct(ExecutionInterface $execution, $activityId, array $variables, ProcessEngine $engine)
+	public function __construct(ExecutionInterface $execution, ProcessEngine $engine)
 	{
 		$this->execution = $execution;
-		$this->activityId = (string)$activityId;
-		$this->variables = $variables;
 		$this->engine = $engine;
+	}
+	
+	public function getActivityId()
+	{
+		return $this->execution->getActivityId();
 	}
 }

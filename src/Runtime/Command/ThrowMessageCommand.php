@@ -13,22 +13,16 @@ namespace KoolKode\BPMN\Runtime\Command;
 
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
-use KoolKode\Util\Uuid;
 
 class ThrowMessageCommand extends AbstractBusinessCommand
 {
-	protected $executionId;
+	protected $execution;
 	
-	protected $activityId;
-	
-	protected $payload;
-	
-	public function __construct(UUID $executionId, $activityId, array $payload = NULL)
+	public function __construct(VirtualExecution $execution)
 	{
-		$this->executionId = $executionId;
-		$this->activityId = (string)$activityId;
-		$this->payload = $payload;
+		$this->execution = $execution;
 	}
 	
 	public function getPriority()
@@ -40,14 +34,13 @@ class ThrowMessageCommand extends AbstractBusinessCommand
 	{
 		$execution = $engine->getRuntimeService()
 							->createExecutionQuery()
-							->executionId($this->executionId)
+							->executionId($this->execution->getId())
 							->findOne();
 		
-		$engine->notify(new MessageThrownEvent(
-			$execution,
-			$this->activityId,
-			$this->payload,
-			$engine
-		));
+		// Signal execution before event notification, needed to make sure event / message subscriptions
+		// in the throwing process are created in time.
+		$engine->pushCommand(new SignalExecutionCommand($this->execution));
+		
+		$engine->notify(new MessageThrownEvent($execution, $engine));
 	}
 }

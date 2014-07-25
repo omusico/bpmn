@@ -11,20 +11,15 @@
 
 namespace KoolKode\BPMN\Runtime\Behavior;
 
-use KoolKode\BPMN\Engine\AbstractBehavior;
+use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\ThrowMessageCommand;
 
-class IntermediateMessageThrowBehavior extends AbstractBehavior
+class IntermediateMessageThrowBehavior extends AbstractSignalableBehavior
 {
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$id = $execution->getNode()->getId();
-		$parent = $execution->getParentExecution();	
-		$vars = ($parent === NULL) ? $execution->getVariables() : $parent->getVariables();
-		
-		$execution->getEngine()->pushCommand(new ThrowMessageCommand($execution->getId(), $id, $vars));
-		
-		$execution->takeAll(NULL, [$execution]);
+		$execution->waitForSignal();
+		$execution->getEngine()->pushCommand(new ThrowMessageCommand($execution));
 	}
 }

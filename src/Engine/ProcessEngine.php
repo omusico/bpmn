@@ -321,7 +321,17 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		return $execution;
 	}
 	
-	protected function syncExecution(VirtualExecution $execution, ExecutionInfo $info)
+	public function syncExecutionState(VirtualExecution $execution)
+	{
+		$id = (string)$execution->getId();
+		
+		if(isset($this->executions[$id]))
+		{
+			$this->syncExecution($execution, $this->executions[$id], false);
+		}
+	}
+	
+	protected function syncExecution(VirtualExecution $execution, ExecutionInfo $info, $syncChildExecutions = true)
 	{
 		$data = $this->serializeExecution($execution);
 		$state = $info->getState($data);
@@ -391,9 +401,12 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$info->update($data);
 		}
 	
-		foreach($execution->findChildExecutions() as $child)
+		if($syncChildExecutions)
 		{
-			$this->syncExecution($child, $this->executions[(string)$child->getId()]);
+			foreach($execution->findChildExecutions() as $child)
+			{
+				$this->syncExecution($child, $this->executions[(string)$child->getId()]);
+			}
 		}
 	}
 }

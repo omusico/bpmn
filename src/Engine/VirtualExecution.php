@@ -69,4 +69,11 @@ class VirtualExecution extends Execution
 	{
 		$this->transition = $trans;
 	}
+	
+	public function waitForSignal()
+	{
+		parent::waitForSignal();
+		
+		$this->engine->syncExecutionState($this);
+	}
 }
