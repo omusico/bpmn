@@ -29,7 +29,7 @@ class RuntimeService
 	
 	public function createProcessInstanceQuery()
 	{
-		throw new \RuntimeException('N/A');
+		return new ExecutionQuery($this->engine, true);
 	}
 	
 	public function createExecutionQuery()
@@ -66,7 +66,7 @@ class RuntimeService
 		
 		$id = $this->engine->executeCommand(new StartProcessInstanceCommand($def, NULL, $businessKey, $variables));
 		
-		return $this->createExecutionQuery()->executionId($id)->findOne();
+		return $this->createProcessInstanceQuery()->processInstanceId($id)->findOne();
 	}
 	
 	public function startProcessInstanceByMessage($messageName, $businessKey = NULL, array $variables = [])
@@ -75,6 +75,8 @@ class RuntimeService
 		$def = $query->messageEventSubscriptionName($messageName)->latestVersion()->findOne();
 		$type = [StartProcessInstanceCommand::START_TYPE_MESSAGE => $messageName];
 		
-		return $this->engine->executeCommand(new StartProcessInstanceCommand($def, $type, $businessKey, $variables));
+		$id = $this->engine->executeCommand(new StartProcessInstanceCommand($def, $type, $businessKey, $variables));
+		
+		return $this->createProcessInstanceQuery()->processInstanceId($id)->findOne();
 	}
 }

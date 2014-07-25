@@ -11,7 +11,7 @@
 
 namespace KoolKode\BPMN;
 
-use KoolKode\BPMN\Runtime\ProcessInstanceInterface;
+use KoolKode\BPMN\Runtime\ExecutionInterface;
 use KoolKode\BPMN\Task\TaskInterface;
 
 class SimpleProcessTest extends BusinessProcessTestCase
@@ -37,7 +37,8 @@ class SimpleProcessTest extends BusinessProcessTestCase
 		$this->delegateTasks->registerTask($bill);
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('SimpleTestProcess', 'XYZ');
-// 		$this->assertTrue($process instanceof ProcessInstanceInterface);
+		$this->assertTrue($process instanceof ExecutionInterface);
+		$this->assertTrue($process->isProcessInstance());
 		$this->assertEquals('XYZ', $process->getBusinessKey());
 		$this->assertNull($process->getParentId());
 		$this->assertEquals($process->getId(), $process->getProcessInstanceId());

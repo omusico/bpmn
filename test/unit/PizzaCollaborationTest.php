@@ -12,6 +12,7 @@
 namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
+use KoolKode\BPMN\Runtime\ExecutionInterface;
 
 class PizzaCollaborationTest extends BusinessProcessTestCase
 {	
@@ -21,7 +22,10 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 		
 		$this->registerMessageHandler('CustomerOrdersPizza', 'sendPizzaOrder', function(MessageThrownEvent $event) {
 			
-			$this->runtimeService->startProcessInstanceByMessage('pizzaOrderReceived', $event->execution->getBusinessKey());
+			$process = $this->runtimeService->startProcessInstanceByMessage('pizzaOrderReceived', $event->execution->getBusinessKey());
+			$this->assertTrue($process instanceof ExecutionInterface);
+			$this->assertTrue($process->isProcessInstance());
+			$this->assertEquals('PizzaServiceDeliversPizza', $process->getProcessDefinition()->getKey());
 		});
 		
 		$this->registerMessageHandler('PizzaServiceDeliversPizza', 'deliverPizza', function(MessageThrownEvent $event) {
@@ -39,6 +43,8 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 		});
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('CustomerOrdersPizza', 'Pizza Funghi');
+		$this->assertTrue($process instanceof ExecutionInterface);
+		$this->assertTrue($process->isProcessInstance());
 		$this->assertEquals('choosePizzaTask', $process->getActivityId());
 		$this->assertFalse($process->isEnded());
 		
