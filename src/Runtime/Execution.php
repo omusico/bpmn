@@ -11,6 +11,7 @@
 
 namespace KoolKode\BPMN\Runtime;
 
+use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\Util\UUID;
 
 class Execution implements ExecutionInterface
@@ -18,20 +19,25 @@ class Execution implements ExecutionInterface
 	protected $id;
 	protected $parentId;
 	protected $processInstanceId;
-	protected $processDefinitionKey;
+	protected $definition;
 	protected $activityId;
 	protected $ended;
 	protected $businessKey;
 	
-	public function __construct(UUID $id, UUID $processInstanceId, UUID $parentId = NULL, $key, $activityId = NULL, $ended = false, $businessKey = NULL)
+	public function __construct(BusinessProcessDefinition $definition, UUID $id, UUID $processInstanceId, UUID $parentId = NULL, $activityId = NULL, $ended = false, $businessKey = NULL)
 	{
+		$this->definition = $definition;
 		$this->id = $id;
 		$this->parentId = $parentId;
 		$this->processInstanceId = $processInstanceId;
-		$this->processDefinitionKey = (string)$key;
 		$this->activityId = (string)$activityId;
 		$this->ended = $ended ? true : false;
 		$this->businessKey = ($businessKey === NULL) ? NULL : (string)$businessKey; 
+	}
+	
+	public function isProcessInstance()
+	{
+		return $this->id == $this->processInstanceId;
 	}
 	
 	public function getId()
@@ -49,9 +55,9 @@ class Execution implements ExecutionInterface
 		return $this->processInstanceId;
 	}
 	
-	public function getProcessDefinitionKey()
+	public function getProcessDefinition()
 	{
-		return $this->processDefinitionKey;
+		return $this->definition;
 	}
 	
 	public function getActivityId()

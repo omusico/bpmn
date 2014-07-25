@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Runtime;
 
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\UUID;
+use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 
 class ExecutionQuery
 {
@@ -25,9 +26,10 @@ class ExecutionQuery
 	protected $signalEventSubscriptionNames = [];
 	protected $messageEventSubscriptionNames = [];
 	
+	protected $queryProcess;
 	protected $engine;
 	
-	public function __construct(ProcessEngine $engine)
+	public function __construct(ProcessEngine $engine, $queryProcess = false)
 	{
 		$this->engine = $engine;
 	}
@@ -116,11 +118,20 @@ class ExecutionQuery
 	
 	protected function unserializeExecution(array $row)
 	{
+		$def = new BusinessProcessDefinition(
+			new UUID($row['def_id']),
+			$row['def_key'],
+			$row['def_rev'],
+			unserialize(gzuncompress($row['def_data'])),
+			$row['def_name'],
+			new \DateTime('@' . $row['def_deployed'])
+		);
+		
 		return new Execution(
+			$def,
 			new UUID($row['id']),
 			new UUID($row['process_id']),
 			empty($row['pid']) ? NULL : new UUID($row['pid']),
-			$row['process_key'],
 			$row['node'],
 			(int)$row['state'] & \KoolKode\Process\Execution::STATE_TERMINATE,
 			$row['business_key']
@@ -135,7 +146,14 @@ class ExecutionQuery
 		}
 		else
 		{
-			$fields = 'e.*, d.`process_key`, d.`definition`';
+			$fields = '	e.*,
+						d.`id` AS def_id,
+						d.`process_key` AS def_key,
+						d.`revision` AS def_rev,
+						d.`definition` AS def_data,
+						d.`name` AS def_name,
+						d.`deployed_at` AS def_deployed
+			';
 		}
 		
 		$sql = "	SELECT $fields
@@ -147,6 +165,11 @@ class ExecutionQuery
 		$joins = [];
 		$where = [];
 		$params = [];
+		
+		if($this->queryProcess)
+		{
+			$where[] = 'e.`id` = e.`process_id`';
+		}
 		
 		if($this->activityId !== NULL)
 		{

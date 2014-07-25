@@ -11,6 +11,7 @@
 
 namespace KoolKode\BPMN\Runtime;
 
+use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\Util\UUID;
 
 /**
@@ -21,6 +22,13 @@ use KoolKode\Util\UUID;
  */
 interface ExecutionInterface
 {
+	/**
+	 * Check if the execution is a root execution = process instance.
+	 * 
+	 * @return boolean
+	 */
+	public function isProcessInstance();
+	
 	/**
 	 * Get the unique identifier of this execution.
 	 * 
@@ -42,7 +50,12 @@ interface ExecutionInterface
 	 */
 	public function getProcessInstanceId();
 	
-	public function getProcessDefinitionKey();
+	/**
+	 * Get the process definition.
+	 * 
+	 * @return BusinessProcessDefinition
+	 */
+	public function getProcessDefinition();
 	
 	/**
 	 * Get the identifier (as defined by the "id" attribute in a BPMN 2.0 process diagram) of the
@@ -59,5 +72,10 @@ interface ExecutionInterface
 	 */
 	public function isEnded();
 	
+	/**
+	 * Get the business key of the process instance.
+	 * 
+	 * @return string
+	 */
 	public function getBusinessKey();
 }

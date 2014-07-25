@@ -110,7 +110,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$this->eventDispatcher = new EventDispatcher();
 		$this->eventDispatcher->connect(function(MessageThrownEvent $event) {
 			
-			$key = $event->execution->getProcessDefinitionKey();
+			$key = $event->execution->getProcessDefinition()->getKey();
 			$id = $event->activityId;
 			
 			if(isset($this->messageHandlers[$key][$id]))
