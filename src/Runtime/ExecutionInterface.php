@@ -42,6 +42,8 @@ interface ExecutionInterface
 	 */
 	public function getProcessInstanceId();
 	
+	public function getProcessDefinitionKey();
+	
 	/**
 	 * Get the identifier (as defined by the "id" attribute in a BPMN 2.0 process diagram) of the
 	 * activity that is currently being executed by this execution.
@@ -56,4 +58,6 @@ interface ExecutionInterface
 	 * @return boolean
 	 */
 	public function isEnded();
+	
+	public function getBusinessKey();
 }

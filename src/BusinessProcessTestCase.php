@@ -15,6 +15,7 @@ use KoolKode\BPMN\Delegate\DelegateTaskRegistry;
 use KoolKode\BPMN\Engine\ExtendedPDO;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\RepositoryService;
+use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
 use KoolKode\Event\EventDispatcher;
@@ -63,6 +64,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	 */
 	protected $taskService;
 	
+	protected $messageHandlers;
+	
 	public static function setUpBeforeClass()
 	{
 		parent::setUpBeforeClass();
@@ -102,7 +105,19 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			fwrite(STDERR, sprintf("TEST CASE: %s\n", $this->getName()));
 		}
 		
+		$this->messageHandlers = [];
+		
 		$this->eventDispatcher = new EventDispatcher();
+		$this->eventDispatcher->connect(function(MessageThrownEvent $event) {
+			
+			$key = $event->execution->getProcessDefinitionKey();
+			$id = $event->activityId;
+			
+			if(isset($this->messageHandlers[$key][$id]))
+			{
+				return $this->messageHandlers[$key][$id]($event);
+			}
+		});
 		
 		$factory = new ExpressionContextFactory();
 		$factory->getResolvers()->registerResolver(new ExecutionExpressionResolver());
@@ -146,5 +161,14 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		}
 		
 		return $this->repositoryService->deployDiagram($file);
+	}
+	
+	protected function registerMessageHandler($processDefinitionKey, $nodeId, callable $handler)
+	{
+		$args = array_slice(func_get_args(), 3);
+		
+		$this->messageHandlers[(string)$processDefinitionKey][(string)$nodeId] = function($event) use($handler, $args) {
+			return call_user_func_array($handler, array_merge([$event], $args));
+		};
 	}
 }

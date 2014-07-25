@@ -14,48 +14,32 @@ namespace KoolKode\BPMN;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 
 class PizzaCollaborationTest extends BusinessProcessTestCase
-{
+{	
 	public function testPizzaProcess()
 	{
 		$this->deployFile('PizzaCollaboration.bpmn');
 		
-		$businessKey = 'Pizza Funghi';
-		
-		$this->eventDispatcher->connect(function(MessageThrownEvent $event) use($businessKey) {
+		$this->registerMessageHandler('CustomerOrdersPizza', 'sendPizzaOrder', function(MessageThrownEvent $event) {
 			
-			switch($event->activityId)
-			{
-				case 'sendPizzaOrder':
-					$this->runtimeService->startProcessInstanceByMessage('pizzaOrderReceived', $businessKey, [
-						'csustomerProcessId' => $event->execution->getProcessInstanceId()
-					]);
-					break;
-				case 'deliverPizza':
-					$id = $event->variables['csustomerProcessId'];
-					$target = $this->runtimeService->createExecutionQuery()
-								   ->processInstanceId($id)
-								   ->messageEventSubscriptionName('pizzaReceived')
-								   ->findOne();
-					
-					$this->runtimeService->messageEventReceived('pizzaReceived', $target->getId(), [
-						'pizzaServiceProcessId' => $event->execution->getProcessInstanceId()
-					]);
-					break;
-				case 'payForPizza':
-					$id = $event->variables['pizzaServiceProcessId'];
-					$target = $this->runtimeService->createExecutionQuery()
-								   ->processInstanceId($id)
-								   ->messageEventSubscriptionName('pizzaPaymentReceived')
-								   ->findOne();
-					
-					$this->runtimeService->messageEventReceived('pizzaPaymentReceived', $target->getId());
-					break;
-			}
+			$this->runtimeService->startProcessInstanceByMessage('pizzaOrderReceived', $event->execution->getBusinessKey());
 		});
 		
-		$process = $this->runtimeService->startProcessInstanceByKey('CustomerOrdersPizza', $businessKey);
+		$this->registerMessageHandler('PizzaServiceDeliversPizza', 'deliverPizza', function(MessageThrownEvent $event) {
+			
+			$this->runtimeService->createMessageCorrelation('pizzaReceived')
+								 ->processBusinessKey($event->execution->getBusinessKey())
+								 ->correlate();
+		});
+		
+		$this->registerMessageHandler('CustomerOrdersPizza', 'payForPizza', function(MessageThrownEvent $event) {
+			
+			$this->runtimeService->createMessageCorrelation('pizzaPaymentReceived')
+								 ->processBusinessKey($event->execution->getBusinessKey())
+								 ->correlate();
+		});
+		
+		$process = $this->runtimeService->startProcessInstanceByKey('CustomerOrdersPizza', 'Pizza Funghi');
 		$this->assertEquals('choosePizzaTask', $process->getActivityId());
-		$this->assertEquals($businessKey, $process->getBusinessKey());
 		$this->assertFalse($process->isEnded());
 		
 		$task = $this->taskService->createTaskQuery()->findOne();

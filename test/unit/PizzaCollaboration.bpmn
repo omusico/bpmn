@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://activiti.org/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="_YB6_sJ8eEeOK3Z3kC7yV4w" exporter="camunda modeler" exporterVersion="2.6.0" targetNamespace="http://activiti.org/bpmn">
   <bpmn2:collaboration id="_Collaboration_3">
-    <bpmn2:participant id="_Participant_3" name="Kunde" processRef="CustomerOrdersPizza"/>
+    <bpmn2:participant id="_Participant_3" name="Customer" processRef="CustomerOrdersPizza"/>
     <bpmn2:participant id="Participant_1" name="Pizza-Service" processRef="PizzaServiceDeliversPizza"/>
     <bpmn2:messageFlow id="MessageFlow_1" name="" sourceRef="sendPizzaOrder" targetRef="pizzaOrderReceived"/>
     <bpmn2:messageFlow id="MessageFlow_2" name="" sourceRef="deliverPizza" targetRef="pizzaReceived"/>
     <bpmn2:messageFlow id="MessageFlow_4" name="" sourceRef="payForPizza" targetRef="receivePaymentForPizza"/>
   </bpmn2:collaboration>
   <bpmn2:process id="CustomerOrdersPizza" name="Kunde" isExecutable="true">
-    <bpmn2:startEvent id="StartEvent_1" name="Hunger">
+    <bpmn2:startEvent id="StartEvent_1" name="Hunger&#xD;&#xA;noticed">
       <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
     </bpmn2:startEvent>
-    <bpmn2:userTask id="choosePizzaTask" name="Pizza aussuchen">
+    <bpmn2:userTask id="choosePizzaTask" name="Choose Pizza">
       <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
     </bpmn2:userTask>
     <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="StartEvent_1" targetRef="choosePizzaTask"/>
-    <bpmn2:intermediateThrowEvent id="sendPizzaOrder" name="Bestellung abgeschickt">
+    <bpmn2:intermediateThrowEvent id="sendPizzaOrder" name="Pizza ordered">
       <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
       <bpmn2:messageEventDefinition id="MessageEventDefinition_1"/>
@@ -28,13 +28,13 @@
       <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
     </bpmn2:eventBasedGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_4" name="" sourceRef="sendPizzaOrder" targetRef="EventBasedGateway_1"/>
-    <bpmn2:intermediateCatchEvent id="pizzaReceived" name="Pizza erhalten">
+    <bpmn2:intermediateCatchEvent id="pizzaReceived" name="Pizza received">
       <bpmn2:incoming>SequenceFlow_5</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
       <bpmn2:messageEventDefinition id="MessageEventDefinition_4" messageRef="Message_2"/>
     </bpmn2:intermediateCatchEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_5" name="" sourceRef="EventBasedGateway_1" targetRef="pizzaReceived"/>
-    <bpmn2:intermediateCatchEvent id="IntermediateCatchEvent_3" name="Lieferzeit von 45&#xD;&#xA;Minuten überschritten">
+    <bpmn2:intermediateCatchEvent id="IntermediateCatchEvent_3" name="Delivery time&#xD;&#xA;exceeded 45 minutes">
       <bpmn2:incoming>SequenceFlow_6</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_7</bpmn2:outgoing>
       <bpmn2:timerEventDefinition id="TimerEventDefinition_1">
@@ -42,19 +42,19 @@
       </bpmn2:timerEventDefinition>
     </bpmn2:intermediateCatchEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_6" name="" sourceRef="EventBasedGateway_1" targetRef="IntermediateCatchEvent_3"/>
-    <bpmn2:manualTask id="ManualTask_2" name="Beschwerde einreichen">
+    <bpmn2:manualTask id="ManualTask_2" name="Complain about delay">
       <bpmn2:incoming>SequenceFlow_7</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_8</bpmn2:outgoing>
     </bpmn2:manualTask>
     <bpmn2:sequenceFlow id="SequenceFlow_7" name="" sourceRef="IntermediateCatchEvent_3" targetRef="ManualTask_2"/>
-    <bpmn2:endEvent id="EndEvent_1" name="Anderen Lieferanten&#xD;&#xA;auswählen">
+    <bpmn2:endEvent id="EndEvent_1" name="Cancel order and&#xD;&#xA;eat something else">
       <bpmn2:incoming>SequenceFlow_8</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_8" name="" sourceRef="ManualTask_2" targetRef="EndEvent_1"/>
-    <bpmn2:endEvent id="EndEvent_2" name="Pizza essen">
+    <bpmn2:endEvent id="EndEvent_2" name="Eat pizza">
       <bpmn2:incoming>SequenceFlow_14</bpmn2:incoming>
     </bpmn2:endEvent>
-    <bpmn2:intermediateThrowEvent id="payForPizza" name="Pizza bezahlen">
+    <bpmn2:intermediateThrowEvent id="payForPizza" name="Payed for Pizza">
       <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_14</bpmn2:outgoing>
       <bpmn2:messageEventDefinition id="MessageEventDefinition_6"/>
@@ -63,32 +63,32 @@
     <bpmn2:sequenceFlow id="SequenceFlow_14" name="" sourceRef="payForPizza" targetRef="EndEvent_2"/>
   </bpmn2:process>
   <bpmn2:process id="PizzaServiceDeliversPizza" name="Pizza-Service" isExecutable="true">
-    <bpmn2:startEvent id="pizzaOrderReceived" name="Bestellung erhalten">
+    <bpmn2:startEvent id="pizzaOrderReceived" name="Order&#xD;&#xA;received">
       <bpmn2:outgoing>SequenceFlow_11</bpmn2:outgoing>
       <bpmn2:messageEventDefinition id="MessageEventDefinition_2" messageRef="Message_1"/>
     </bpmn2:startEvent>
-    <bpmn2:manualTask id="ManualTask_4" name="Pizza zubereiten">
+    <bpmn2:manualTask id="ManualTask_4" name="Prepare Pizza">
       <bpmn2:incoming>SequenceFlow_11</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_12</bpmn2:outgoing>
     </bpmn2:manualTask>
     <bpmn2:sequenceFlow id="SequenceFlow_11" name="" sourceRef="pizzaOrderReceived" targetRef="ManualTask_4"/>
-    <bpmn2:userTask id="preparePizzaTask" name="Pizza zur Lieferung vorbereiten&#xD;&#xA;">
+    <bpmn2:userTask id="preparePizzaTask" name="Prepare for delivery">
       <bpmn2:incoming>SequenceFlow_12</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_13</bpmn2:outgoing>
     </bpmn2:userTask>
     <bpmn2:sequenceFlow id="SequenceFlow_12" name="" sourceRef="ManualTask_4" targetRef="preparePizzaTask"/>
-    <bpmn2:intermediateThrowEvent id="deliverPizza" name="Pizza ausliefern">
+    <bpmn2:intermediateThrowEvent id="deliverPizza" name="Delivered pizza">
       <bpmn2:incoming>SequenceFlow_13</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_18</bpmn2:outgoing>
       <bpmn2:messageEventDefinition id="MessageEventDefinition_3"/>
     </bpmn2:intermediateThrowEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_13" name="" sourceRef="preparePizzaTask" targetRef="deliverPizza"/>
-    <bpmn2:intermediateCatchEvent id="receivePaymentForPizza" name="Zahlungseingang">
+    <bpmn2:intermediateCatchEvent id="receivePaymentForPizza" name="Receive payment">
       <bpmn2:incoming>SequenceFlow_18</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_16</bpmn2:outgoing>
       <bpmn2:messageEventDefinition id="MessageEventDefinition_5" messageRef="Message_3"/>
     </bpmn2:intermediateCatchEvent>
-    <bpmn2:userTask id="fileReportTask" name="Umsatz verbuchen">
+    <bpmn2:userTask id="fileReportTask" name="Register payment">
       <bpmn2:incoming>SequenceFlow_16</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_17</bpmn2:outgoing>
     </bpmn2:userTask>
@@ -213,7 +213,7 @@
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_4" bpmnElement="pizzaOrderReceived">
         <dc:Bounds height="36.0" width="36.0" x="84.0" y="397.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds height="22.0" width="117.0" x="60.0" y="440.0"/>
+          <dc:Bounds height="38.0" width="53.0" x="76.0" y="444.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="_BPMNShape_ManualTask_5" bpmnElement="ManualTask_4">

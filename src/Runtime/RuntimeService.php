@@ -37,6 +37,11 @@ class RuntimeService
 		return new ExecutionQuery($this->engine);
 	}
 	
+	public function createMessageCorrelation($messageName)
+	{
+		return new MessageCorrelation($this, $messageName);
+	}
+	
 	public function signal(UUID $executionId, array $variables = [])
 	{
 		$execution = $this->createExecutionQuery()->executionId($executionId)->findOne();

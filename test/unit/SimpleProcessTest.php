@@ -36,9 +36,9 @@ class SimpleProcessTest extends BusinessProcessTestCase
 		$bill = new ComputeBillTask();
 		$this->delegateTasks->registerTask($bill);
 		
-		$process = $this->runtimeService->startProcessInstanceByKey('SimpleTestProcess');
+		$process = $this->runtimeService->startProcessInstanceByKey('SimpleTestProcess', 'XYZ');
 // 		$this->assertTrue($process instanceof ProcessInstanceInterface);
-		$this->assertNull($process->getBusinessKey());
+		$this->assertEquals('XYZ', $process->getBusinessKey());
 		$this->assertNull($process->getParentId());
 		$this->assertEquals($process->getId(), $process->getProcessInstanceId());
 		$this->assertEquals('amountTask', $process->getActivityId());

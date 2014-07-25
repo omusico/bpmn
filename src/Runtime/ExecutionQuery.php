@@ -120,6 +120,7 @@ class ExecutionQuery
 			new UUID($row['id']),
 			new UUID($row['process_id']),
 			empty($row['pid']) ? NULL : new UUID($row['pid']),
+			$row['process_key'],
 			$row['node'],
 			(int)$row['state'] & \KoolKode\Process\Execution::STATE_TERMINATE,
 			$row['business_key']
@@ -134,7 +135,7 @@ class ExecutionQuery
 		}
 		else
 		{
-			$fields = 'e.*, d.`definition`';
+			$fields = 'e.*, d.`process_key`, d.`definition`';
 		}
 		
 		$sql = "	SELECT $fields
