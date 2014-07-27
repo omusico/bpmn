@@ -110,6 +110,10 @@ class DiagramLoader
 						
 						$builder->scriptTask($id, $language, $script, $name);
 						break;
+					case 'sendTask':
+						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
+						$builder->intermediateMessageThrowEvent($id, $name);
+						break;
 					case 'sequenceFlow':
 						
 						$condition = NULL;
