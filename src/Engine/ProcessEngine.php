@@ -127,6 +127,11 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			}
 		}
 		
+		foreach($this->executions as $info)
+		{
+			$this->syncExecution($info->getExecution(), $info);
+		}
+		
 		try
 		{
 			$result = parent::performExecution($callback);
@@ -156,7 +161,10 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		}
 		finally
 		{
-			$this->executions = [];
+			if($trans)
+			{
+				$this->executions = [];
+			}
 		}
 	}
 	
