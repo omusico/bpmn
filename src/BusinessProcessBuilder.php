@@ -135,6 +135,11 @@ class BusinessProcessBuilder
 		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateMessageCatchBehavior($message));
 	}
 	
+	public function intermediateSignalThrowEvent($id, $signal)
+	{
+		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateSignalThrowBehavior($signal));
+	}
+	
 	public function intermediateMessageThrowEvent($id, $name = '')
 	{
 		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateMessageThrowBehavior($name));

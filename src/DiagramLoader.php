@@ -171,6 +171,14 @@ class DiagramLoader
 							break 2;
 						}
 						
+						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
+						{
+							$signal = $signals[$def->getAttribute('signalRef')];
+							$builder->intermediateSignalThrowEvent($id, $signal);
+								
+							break 2;
+						}
+						
 						// TODO: Better fallback behavior for unimplemented nodes?
 						$builder->serviceTask($id, 'N/A');
 						

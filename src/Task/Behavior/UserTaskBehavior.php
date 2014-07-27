@@ -25,18 +25,8 @@ class UserTaskBehavior extends AbstractSignalableBehavior
 	}
 	
 	public function executeBehavior(VirtualExecution $execution)
-	{ 
+	{
 		$execution->waitForSignal();
 		$execution->getEngine()->pushCommand(new CreateUserTaskCommand($this->name, $execution));
-	}
-	
-	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
-	{
-		foreach($variables as $k => $v)
-		{
-			$execution->setVariable($k, $v);
-		}
-		
-		return $execution->takeAll(NULL, [$execution]);
 	}
 }

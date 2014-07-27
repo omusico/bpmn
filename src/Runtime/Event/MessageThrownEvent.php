@@ -26,9 +26,4 @@ class MessageThrownEvent
 		$this->execution = $execution;
 		$this->engine = $engine;
 	}
-	
-	public function getActivityId()
-	{
-		return $this->execution->getActivityId();
-	}
 }

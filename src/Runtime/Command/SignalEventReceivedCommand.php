@@ -13,8 +13,9 @@ namespace KoolKode\BPMN\Runtime\Command;
 
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
-use KoolKode\Util\Uuid;
+use KoolKode\Util\UUID;
 
 class SignalEventReceivedCommand extends AbstractBusinessCommand
 {
@@ -24,11 +25,14 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 	
 	protected $executionId;
 	
-	public function __construct($signal, UUID $executionId = NULL, array $variables = [])
+	protected $sourceExecution;
+	
+	public function __construct($signal, UUID $executionId = NULL, array $variables = [], VirtualExecution $sourceExecution = NULL)
 	{
 		$this->signal = (string)$signal;
 		$this->variables = $variables;
 		$this->executionId = $executionId;
+		$this->sourceExecution = $sourceExecution;
 	}
 	
 	public function getPriority()
@@ -38,11 +42,8 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
-		$sql = "	SELECT  s.`id` AS sub_id, s.`execution_id` AS sub_eid,
-							e.*, d.`definition`
+		$sql = "	SELECT s.`id`, s.`execution_id`
 					FROM `#__bpm_event_subscription` AS s
-					INNER JOIN `#__bpm_execution` AS e ON (e.`process_id` = s.`process_instance_id`)
-					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
 					WHERE s.`name` = :signal
 					AND s.`flags` = :flags
 		";
@@ -62,34 +63,32 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		}
 			
 		$stmt->execute();
-			
+		
 		$ids = [];
-		$signalMe = [];
-			
+		$executions = [];
+		
 		foreach($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row)
 		{
-			$ids[] = $row['sub_id'];
-			$execution = $engine->unserializeExecution($row);
-		
-			if(new UUID($row['sub_eid']) == $execution->getId())
-			{
-				$signalMe[] = $execution;
-			}
+			$ids[] = $row['id'];
+			$executions[] = $engine->findExecution(new UUID($row['execution_id']));
 		}
-			
+		
 		if(!empty($ids))
 		{
 			$list = implode(', ', array_fill(0, count($ids), '?'));
-			$sql = "	DELETE FROM `#__bpm_event_subscription`
-						WHERE `id` IN ($list)
-			";
+			$sql = "DELETE FROM `#__bpm_event_subscription` WHERE `id` IN ($list)";
 			$stmt = $engine->prepareQuery($sql);
 			$stmt->execute($ids);
 		}
-			
-		foreach($signalMe as $execution)
+		
+		foreach($executions as $execution)
 		{
 			$engine->pushCommand(new SignalExecutionCommand($execution, $this->signal, $this->variables));
+		}
+		
+		if($this->sourceExecution !== NULL)
+		{
+			$engine->pushCommand(new SignalExecutionCommand($this->sourceExecution));
 		}
 	}
 }

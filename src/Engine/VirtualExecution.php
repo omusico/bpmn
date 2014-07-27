@@ -35,6 +35,21 @@ class VirtualExecution extends Execution
 		}
 	}
 	
+	public function setParentExecution(VirtualExecution $parent = NULL)
+	{
+		if($parent === NULL)
+		{
+			$this->setState(self::STATE_SCOPE, true);
+		}
+		else
+		{
+			$this->setState(self::STATE_SCOPE, false);
+			
+			$this->parentExecution = $parent;
+			$parent->registerChildExecution($this);
+		}
+	}
+	
 	/**
 	 * Get the BPMN process engine instance.
 	 * 
@@ -68,6 +83,20 @@ class VirtualExecution extends Execution
 	public function setTransition(Transition $trans = NULL)
 	{
 		$this->transition = $trans;
+	}
+	
+	public function terminate()
+	{
+		parent::terminate();
+		
+		$this->engine->syncExecutionState($this);
+	}
+	
+	public function setActive($active)
+	{
+		parent::setActive($active);
+		
+		$this->engine->syncExecutionState($this);
 	}
 	
 	public function waitForSignal()

@@ -136,8 +136,6 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				$this->syncExecution($info->getExecution(), $info);
 			}
 			
-			$this->executions = [];
-			
 			if($trans)
 			{
 				$this->debug('COMMIT transaction');
@@ -156,25 +154,88 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			
 			throw $e;
 		}
+		finally
+		{
+			$this->executions = [];
+		}
 	}
 	
 	public function findExecution(UUID $id)
 	{
+		$ref = (string)$id;
+		
+		if(isset($this->executions[$ref]))
+		{
+			return $this->executions[$ref]->getExecution();
+		}
+		
+		$sub = '?';
+		$params = [$id->toBinary()];
+		
 		$sql = "	SELECT e.*, d.`definition`
 					FROM `#__bpm_execution` AS e
 					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
-					WHERE e.`id` = :eid
+					WHERE e.`process_id` IN (
+						SELECT `process_id` 
+						FROM `#__bpm_execution`
+						WHERE `id` IN ($sub)
+					)
 		";
-		$stmt = $this->prepareQuery($sql);
-		$stmt->bindValue('eid', $id->toBinary());
-		$stmt->execute();
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->execute($params);
 		
-		if(false === ($row = $stmt->fetch(\PDO::FETCH_ASSOC)))
+		$executions = [];
+		$parents = [];
+		$defs = [];
+		
+		while($row = $stmt->fetch(\PDO::FETCH_ASSOC))
 		{
-			throw new \OutOfBoundsException(sprintf('Execution not found: %s', $id));
+			$id = new UUID($row['id']);
+			$pid = ($row['pid'] === NULL) ? NULL : new UUID($row['pid']);
+			$processId = new UUID($row['process_id']);
+			$defId = (string)new UUID($row['definition_id']);
+			
+			if($pid !== NULL)
+			{
+				$parents[(string)$id] = (string)$pid;
+			}
+			
+			if(isset($defs[$defId]))
+			{
+				$definition = $defs[$defId];
+			}
+			else
+			{
+				$definition = $defs[$defId] = unserialize(gzuncompress($row['definition']));
+			}
+			
+			$state = (int)$row['state'];
+			$active = (float)$row['active'];
+			$node = ($row['node'] === NULL) ? NULL : $definition->findNode($row['node']);
+			$transition = ($row['transition'] === NULL) ? NULL : $definition->findTransition($row['transition']);
+			$businessKey = $row['business_key'];
+			$vars = unserialize(gzuncompress($row['vars']));
+			
+			$exec = $executions[(string)$id] = new VirtualExecution($id, $this, $definition);
+			$exec->setBusinessKey($businessKey);
+			$exec->setExecutionState($state);
+			$exec->setNode($node);
+			$exec->setTransition($transition);
+			$exec->setTimestamp($active);
+			$exec->setVariables($vars);
 		}
 		
-		return $this->unserializeExecution($row);
+		foreach($parents as $id => $pid)
+		{
+			$executions[$id]->setParentExecution($executions[$pid]);
+		}
+		
+		foreach($executions as $execution)
+		{
+			$this->registerExecution($execution, $this->serializeExecution($execution));
+		}
+		
+		return $this->executions[$ref]->getExecution();
 	}
 	
 	public function registerExecution(Execution $execution, array $clean = NULL)
@@ -213,112 +274,6 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			'bkey' => $execution->getBusinessKey(),
 			'vars' => gzcompress(serialize($execution->getVariables()), 1)
 		];
-	}
-	
-	public function unserializeExecution(array $row)
-	{
-		$id = new UUID($row['id']);
-		
-		if(isset($this->executions[(string)$id]))
-		{
-			return $this->executions[(string)$id]->getExecution();
-		}
-		
-		$pid = empty($row['pid']) ? NULL : new UUID($row['pid']);
-		$state = (int)$row['state'];
-		$active = (float)$row['active'];
-		$node = empty($row['node']) ? NULL : $row['node'];
-		$transition = empty($row['transition']) ? NULL : $row['transition'];
-		$bkey = empty($row['business_key']) ? NULL : $row['business_key'];
-		$def = unserialize(gzuncompress($row['definition']));
-		$vars = unserialize(gzuncompress($row['vars']));
-		
-		$process = NULL;
-		
-		if($pid === NULL)
-		{
-			$execution = $process = new VirtualExecution($id, $this, $def);
-			$execution->setBusinessKey($bkey);
-		}
-		else
-		{
-			$sql = "	SELECT e.*
-						FROM `#__bpm_execution` AS e
-						WHERE e.`process_id` = :pid
-						AND e.`id` <> :eid
-						ORDER BY e.`pid` IS NOT NULL
-			";
-			$stmt = $this->pdo->prepare($sql);
-			$stmt->bindValue('pid', $pid->toBinary());
-			$stmt->bindValue('eid', $id->toBinary());
-			$stmt->execute();
-			
-			while($inner = $stmt->fetch(\PDO::FETCH_ASSOC))
-			{
-				$in_id = new UUID($inner['id']);
-				
-				if(isset($this->executions[(string)$in_id]))
-				{
-					$exec = $this->executions[(string)$in_id]->getExecution();
-					
-					continue;
-				}
-				
-				$in_pid = empty($inner['pid']) ? NULL : new UUID($inner['pid']);
-				$in_state = (int)$inner['state'];
-				$in_active = (float)$inner['active'];
-				$in_node = empty($inner['node']) ? NULL : $inner['node'];
-				$in_transition = empty($inner['transition']) ? NULL : $inner['transition'];
-				$in_vars = unserialize(gzuncompress($inner['vars']));
-				
-				if($in_pid === NULL)
-				{
-					$exec = $process = new VirtualExecution($in_id, $this, $def);
-					$exec->setBusinessKey($bkey);
-				}
-				else
-				{
-					$exec = new VirtualExecution($id, $this, $def, $process);
-				}
-				
-				$exec->setExecutionState($in_state);
-				$exec->setTimestamp($in_active);
-				$exec->setVariables($in_vars);
-				
-				if($in_node !== NULL)
-				{
-					$exec->setNode($def->findNode($in_node));
-				}
-				
-				if($in_transition !== NULL)
-				{
-					$exec->setTransition($def->findTransition($in_transition));
-				}
-				
-				$this->registerExecution($exec, $this->serializeExecution($exec));
-			}
-			
-			$execution = new VirtualExecution($id, $this, $def, $process);
-		}
-		
-		$execution->setExecutionState($state);
-		$execution->setTimestamp($active);
-			
-		if($node !== NULL)
-		{
-			$execution->setNode($def->findNode($node));
-		}
-		
-		if($transition !== NULL)
-		{
-			$execution->setTransition($def->findTransition($transition));
-		}
-		
-		$execution->setVariables($vars);
-		
-		$this->registerExecution($execution, $this->serializeExecution($execution));
-		
-		return $execution;
 	}
 	
 	public function syncExecutionState(VirtualExecution $execution)
@@ -366,19 +321,25 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			]);
 			
 			$sql = "	UPDATE `#__bpm_execution`
-						SET `state` = :state,
+						SET `pid` = :pid,
+							`process_id` = :process,
+							`state` = :state,
 							`active` = :active,
 							`node` = :node,
 							`transition` = :transition,
+							`business_key` = :bkey,
 							`vars` = :vars
 						WHERE `id` = :id
 			";
 			$stmt = $this->pdo->prepare($sql);
 			$stmt->bindValue('id', $data['id']);
+			$stmt->bindValue('pid', $data['pid']);
+			$stmt->bindValue('process', $data['process']);
 			$stmt->bindValue('state', $data['state']);
 			$stmt->bindValue('active', $data['active']);
 			$stmt->bindValue('node', $data['node']);
 			$stmt->bindValue('transition', $data['transition']);
+			$stmt->bindValue('bkey', $data['bkey']);
 			$stmt->bindValue('vars', $data['vars']);
 			$stmt->execute();
 				

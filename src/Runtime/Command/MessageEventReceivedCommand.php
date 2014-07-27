@@ -36,10 +36,8 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
-		$sql = "	SELECT s.`id` AS sub_id, s.`execution_id` AS sub_eid, e.*, d.`definition`
+		$sql = "	SELECT s.`id`, s.`execution_id`
 					FROM `#__bpm_event_subscription` AS s
-					INNER JOIN `#__bpm_execution` AS e ON (e.`id` = s.`execution_id`)
-					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
 					WHERE s.`name` = :message
 					AND s.`flags` = :flags
 					AND s.`execution_id` = :eid
@@ -51,34 +49,21 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 		$stmt->bindValue('eid', $this->executionId->toBinary());
 		$stmt->execute();
-			
-		$ids = [];
-		$messageMe = [];
 		
-		foreach($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row)
+		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
+		
+		if($row === false)
 		{
-			$ids[] = $row['sub_id'];
-			$execution = $engine->unserializeExecution($row);
-				
-			if(new UUID($row['sub_eid']) == $execution->getId())
-			{
-				$messageMe[] = $execution;
-			}
+			throw new \RuntimeException(sprintf('%s has no subscription to message %s', $this->executionId, $this->messageName));
 		}
 		
-		if(!empty($ids))
-		{
-			$list = implode(', ', array_fill(0, count($ids), '?'));
-			$sql = "	DELETE FROM `#__bpm_event_subscription`
-						WHERE `id` IN ($list)
-			";
-			$stmt = $engine->prepareQuery($sql);
-			$stmt->execute($ids);
-		}
+		$execution = $engine->findExecution($this->executionId);
 		
-		foreach($messageMe as $execution)
-		{
-			$engine->pushCommand(new SignalExecutionCommand($execution, $this->messageName, $this->variables));
-		}
+		$sql = "DELETE FROM `#__bpm_event_subscription` WHERE `id` = :id";
+		$stmt = $engine->prepareQuery($sql);
+		$stmt->bindValue('id', $row['id']);
+		$stmt->execute();
+		
+		$engine->pushCommand(new SignalExecutionCommand($execution, $this->messageName, $this->variables));
 	}
 }
