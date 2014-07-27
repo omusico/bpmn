@@ -44,7 +44,7 @@ class CompleteUserTaskCommand extends AbstractBusinessCommand
 		$stmt->bindValue('id', $this->taskId->toBinary());
 		$stmt->execute();
 		
-		$engine->debug('Completed user task {task} with id {id}', [
+		$engine->debug('Completed user task "{task}" with id {id}', [
 			'task' => $task->getName(),
 			'id' => (string)$task->getId()
 		]);

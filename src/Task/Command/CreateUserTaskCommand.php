@@ -45,7 +45,7 @@ class CreateUserTaskCommand extends AbstractBusinessCommand
 		$stmt->bindValue('created', time());
 		$stmt->execute();
 		
-		$engine->debug('Created user task {task} with id {id}', [
+		$engine->debug('Created user task "{task}" with id {id}', [
 			'task' => $this->name,
 			'id' => (string)$id
 		]);
