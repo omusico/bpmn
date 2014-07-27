@@ -31,7 +31,7 @@ class SimpleProcessTest extends BusinessProcessTestCase
 	 */
 	public function testSimpleTest($amount, $discount, $result)
 	{
-		$this->deployFile('SimpleProcess.bpmn');
+		$this->deployFile('SimpleProcessTest.bpmn');
 		
 		$bill = new ComputeBillTask();
 		$this->delegateTasks->registerTask($bill);

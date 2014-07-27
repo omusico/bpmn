@@ -18,7 +18,7 @@ class PizzaCollaborationTest extends BusinessProcessTestCase
 {	
 	public function testPizzaProcess()
 	{
-		$this->deployFile('PizzaCollaboration.bpmn');
+		$this->deployFile('PizzaCollaborationTest.bpmn');
 		
 		$this->registerMessageHandler('CustomerOrdersPizza', 'sendPizzaOrder', function(MessageThrownEvent $event) {
 			
