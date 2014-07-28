@@ -15,6 +15,11 @@ use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
 
+/**
+ * Implements service task behavior using an expression parsed from a BPMN process definition.
+ * 
+ * @author Martin Schröder
+ */
 class ExpressionTaskBehavior extends AbstractBehavior
 {
 	protected $expression;
@@ -36,7 +41,7 @@ class ExpressionTaskBehavior extends AbstractBehavior
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$execution->getEngine()->debug('Execute delegate expression in "{task}"', [
+		$execution->getEngine()->debug('Execute expression in service task "{task}"', [
 			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
 		]);
 		

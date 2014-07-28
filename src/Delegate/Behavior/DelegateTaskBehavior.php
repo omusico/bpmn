@@ -17,6 +17,11 @@ use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
 
+/**
+ * Connects a custom class implementing DelegateTaskInterface to a node in a BPMN process.
+ * 
+ * @author Martin Schröder
+ */
 class DelegateTaskBehavior extends AbstractBehavior
 {
 	protected $typeName;

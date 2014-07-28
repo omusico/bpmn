@@ -135,7 +135,7 @@ class BusinessProcessBuilder
 	
 	public function scriptTask($id, $language, $script, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Task\Behavior\ScriptTaskBehavior($language, $script, $this->exp($name)));
+		return $this->builder->node($id)->behavior(new Delegate\Behavior\ScriptTaskBehavior($language, $script, $this->exp($name)));
 	}
 	
 	public function intermediateSignalCatchEvent($id, $signal)

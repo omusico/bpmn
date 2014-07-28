@@ -17,6 +17,11 @@ use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
 
+/**
+ * Handles service tasks without specific implementation.
+ * 
+ * @author Martin Schröder
+ */
 class ServiceTaskBehavior extends AbstractBehavior
 {
 	protected $name;

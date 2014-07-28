@@ -15,6 +15,11 @@ use KoolKode\BPMN\Delegate\DelegateExecutionInterface;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\Uuid;
 
+/**
+ * Is triggered whenever a service task without specific implementation is being executed.
+ * 
+ * @author Martin Schröder
+ */
 class ServiceTaskExecutedEvent
 {
 	public $execution;

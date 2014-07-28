@@ -11,6 +11,10 @@
 
 namespace KoolKode\BPMN\Engine;
 
+use KoolKode\BPMN\Repository\RepositoryService;
+use KoolKode\BPMN\Runtime\RuntimeService;
+use KoolKode\BPMN\Task\TaskService;
+
 /**
  * Provides the public API of a BPMN 2.0 process engine.
  * 
@@ -18,9 +22,18 @@ namespace KoolKode\BPMN\Engine;
  */
 interface ProcessEngineInterface
 {
+	/**
+	 * @return RepositoryService
+	 */
 	public function getRepositoryService();
 	
+	/**
+	 * @return RuntimeService
+	 */
 	public function getRuntimeService();
 	
+	/**
+	 * @return TaskService
+	 */
 	public function getTaskService();
 }

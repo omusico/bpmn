@@ -9,23 +9,35 @@
 * file that was distributed with this source code.
 */
 
-namespace KoolKode\BPMN\Task\Behavior;
+namespace KoolKode\BPMN\Delegate\Behavior;
 
 use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
 
+/**
+ * Executes a PHP script defined in a task within a BPMN process.
+ * 
+ * @author Martin Schröder
+ */
 class ScriptTaskBehavior extends AbstractBehavior
 {
 	protected $name;
+	
 	protected $language;
+	
 	protected $script;
 	
 	public function __construct($language, $script, ExpressionInterface $name)
 	{
-		$this->language = (string)$language;
+		$this->language = strtolower($language);
 		$this->script = (string)$script;
 		$this->name = $name;
+		
+		if($this->language !== 'php')
+		{
+			throw new \InvalidArgumentException(sprintf('Only PHP is supported as scripting language, given "%s"', $this->language));
+		}
 	}
 	
 	protected function executeBehavior(VirtualExecution $execution)

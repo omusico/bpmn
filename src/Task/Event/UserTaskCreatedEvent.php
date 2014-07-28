@@ -14,6 +14,11 @@ namespace KoolKode\BPMN\Task\Event;
 use KoolKode\BPMN\Engine\ProcessEngineInterface;
 use KoolKode\BPMN\Task\TaskInterface;
 
+/**
+ * Is triggered whenever a new user task instance is being created.
+ * 
+ * @author Martin Schröder
+ */
 class UserTaskCreatedEvent
 {
 	public $task;

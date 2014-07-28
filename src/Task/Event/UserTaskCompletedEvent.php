@@ -14,6 +14,11 @@ namespace KoolKode\BPMN\Task\Event;
 use KoolKode\BPMN\Engine\ProcessEngineInterface;
 use KoolKode\BPMN\Task\TaskInterface;
 
+/**
+ * Is triggered whenever a user task has been completed successfully.
+ * 
+ * @author Martin Schröder
+ */
 class UserTaskCompletedEvent
 {
 	public $task;

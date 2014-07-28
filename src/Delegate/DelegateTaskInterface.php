@@ -11,7 +11,17 @@
 
 namespace KoolKode\BPMN\Delegate;
 
+/**
+ * Contract for a custom task implementation to be used with a BPMN service task.
+ * 
+ * @author Martin Schröder
+ */
 interface DelegateTaskInterface
 {
+	/**
+	 * Execute business logic related to the given execution.
+	 * 
+	 * @param DelegateExecutionInterface $execution
+	 */
 	public function execute(DelegateExecutionInterface $execution);
 }
