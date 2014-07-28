@@ -24,16 +24,16 @@ class SignalThrowingTest extends BusinessProcessTestCase
 			$this->assertEquals(9, $event->execution->getVariable('counter'));
 		});
 		
-		$process = $this->runtimeService->startProcessInstanceByKey('SignalThrowingTest', NULL, [
-			'counter' => 1
-		]);
+		$process = $this->runtimeService->startProcessInstanceByKey('SignalThrowingTest');
 		$this->assertEquals(4, $this->runtimeService->createExecutionQuery()->count());
 		$this->assertEquals(1, $this->taskService->createTaskQuery()->count());
 		
 		$task = $this->taskService->createTaskQuery()->findOne();
 		$this->assertTrue($task instanceof TaskInterface);
 		
-		$this->taskService->complete($task->getId(), ['outcome' => 'OK :)']);
+		$this->taskService->complete($task->getId(), [
+			'counter' => 1
+		]);
 		
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
 	}

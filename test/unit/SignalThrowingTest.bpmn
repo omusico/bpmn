@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://activiti.org/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="_cah1wBPtEeSw3s6q61uGuw" exporter="camunda modeler" exporterVersion="2.6.0" targetNamespace="http://activiti.org/bpmn">
-  <bpmn2:process id="SignalThrowingTest" name="Test intermediate signal throwing within the same process instance." isExecutable="true">
+  <bpmn2:process id="SignalThrowingTest" name="Test signal throwing with multiple subscriptions" isExecutable="true">
     <bpmn2:startEvent id="StartEvent_1">
       <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
     </bpmn2:startEvent>
@@ -11,7 +11,7 @@
     </bpmn2:parallelGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="StartEvent_1" targetRef="ParallelGateway_1"/>
     <bpmn2:sequenceFlow id="SequenceFlow_4" name="" sourceRef="ParallelGateway_1" targetRef="UserTask_1"/>
-    <bpmn2:userTask id="UserTask_1" name="Enter some data for signal">
+    <bpmn2:userTask id="UserTask_1" name="Set initial value for counter">
       <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_5</bpmn2:outgoing>
     </bpmn2:userTask>
@@ -47,11 +47,10 @@
       <bpmn2:script>$execution->setVariable('counter', (int)$execution->getVariable('counter', 0) + 3);</bpmn2:script>
     </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="SequenceFlow_13" name="" sourceRef="IntermediateCatchEvent_2" targetRef="ScriptTask_2"/>
-    <bpmn2:scriptTask id="ScriptTask_2" name="Increment counter by 5" scriptFormat="php">
+    <bpmn2:serviceTask id="ScriptTask_2" camunda:expression="#{ counter + 5 }" camunda:resultVariable="counter" name="Increment counter by 5">
       <bpmn2:incoming>SequenceFlow_13</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_16</bpmn2:outgoing>
-      <bpmn2:script>$execution->setVariable('counter', (int)$execution->getVariable('counter', 0) + 5);</bpmn2:script>
-    </bpmn2:scriptTask>
+    </bpmn2:serviceTask>
     <bpmn2:parallelGateway id="ParallelGateway_2">
       <bpmn2:incoming>SequenceFlow_6</bpmn2:incoming>
       <bpmn2:incoming>SequenceFlow_15</bpmn2:incoming>

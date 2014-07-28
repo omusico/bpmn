@@ -11,11 +11,11 @@
 
 namespace KoolKode\BPMN\Delegate\Behavior;
 
+use KoolKode\BPMN\Delegate\DelegateExecution;
 use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
 use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
-use KoolKode\BPMN\Delegate\DelegateExecution;
 
 class ServiceTaskBehavior extends AbstractBehavior
 {

@@ -115,11 +115,17 @@ class BusinessProcessBuilder
 		return $this->builder->node($id)->behavior(new Delegate\Behavior\DelegateTaskBehavior($this->exp($typeName), $this->exp($name)));
 	}
 	
-	public function expressionTask($id, $expression, $name = '')
+	public function expressionTask($id, $expression, $name = '', $resultVariable = NULL)
 	{
 		$exp = $this->expressionParser->parse($this->normalize($expression));
+		$behavior = new Delegate\Behavior\ExpressionTaskBehavior($exp, $this->exp($name));
 		
-		return $this->builder->node($id)->behavior(new Delegate\Behavior\ExpressionTaskBehavior($exp, $this->exp($name)));
+		if($resultVariable !== NULL)
+		{
+			$behavior->setResultVariable($resultVariable);
+		}
+		
+		return $this->builder->node($id)->behavior($behavior);
 	}
 	
 	public function userTaks($id, $name = '')

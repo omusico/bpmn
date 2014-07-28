@@ -19,6 +19,8 @@ class ExpressionTaskBehavior extends AbstractBehavior
 {
 	protected $expression;
 	
+	protected $resultVariable;
+	
 	protected $name;
 	
 	public function __construct(ExpressionInterface $expression, ExpressionInterface $name)
@@ -27,13 +29,23 @@ class ExpressionTaskBehavior extends AbstractBehavior
 		$this->name = $name;
 	}
 	
+	public function setResultVariable($var = NULL)
+	{
+		$this->resultVariable = ($var === NULL) ? NULL : (string)$var;
+	}
+	
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->getEngine()->debug('Execute delegate expression in "{task}"', [
 			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
 		]);
 		
-		call_user_func($this->expression, $execution->getExpressionContext());
+		$result = call_user_func($this->expression, $execution->getExpressionContext());
+		
+		if($this->resultVariable !== NULL)
+		{
+			$execution->setVariable($this->resultVariable, $result);
+		}
 		
 		$execution->takeAll(NULL, [$execution]);
 	}

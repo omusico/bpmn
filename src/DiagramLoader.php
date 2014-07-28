@@ -85,13 +85,20 @@ class DiagramLoader
 					case 'serviceTask':
 						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
 						
-						if($el->hasAttributeNS(self::NS_IMPL, 'class'))
+						if($el->hasAttributeNS(self::NS_IMPL, 'class') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'class')))
 						{
 							$builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $name);
 						}
-						elseif($el->hasAttributeNS(self::NS_IMPL, 'expression'))
+						elseif($el->hasAttributeNS(self::NS_IMPL, 'expression') && '' !== $el->getAttributeNS(self::NS_IMPL, 'expression'))
 						{
-							$builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $name);
+							$var = NULL;
+							
+							if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
+							{
+								$var = trim($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
+							}
+							
+							$builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $name, $var);
 						}
 						else
 						{
