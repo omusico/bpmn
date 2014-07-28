@@ -89,6 +89,10 @@ class DiagramLoader
 						{
 							$builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $name);
 						}
+						elseif($el->hasAttributeNS(self::NS_IMPL, 'expression'))
+						{
+							$builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $name);
+						}
 						else
 						{
 							$builder->serviceTask($id, $name);

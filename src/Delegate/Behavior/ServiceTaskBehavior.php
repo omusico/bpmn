@@ -9,33 +9,33 @@
 * file that was distributed with this source code.
 */
 
-namespace KoolKode\BPMN\Task\Behavior;
+namespace KoolKode\BPMN\Delegate\Behavior;
 
+use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
 use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
+use KoolKode\BPMN\Delegate\DelegateExecution;
 
-class ScriptTaskBehavior extends AbstractBehavior
+class ServiceTaskBehavior extends AbstractBehavior
 {
 	protected $name;
-	protected $language;
-	protected $script;
 	
-	public function __construct($language, $script, ExpressionInterface $name)
+	public function __construct(ExpressionInterface $name)
 	{
-		$this->language = (string)$language;
-		$this->script = (string)$script;
 		$this->name = $name;
 	}
 	
-	protected function executeBehavior(VirtualExecution $execution)
+	public function executeBehavior(VirtualExecution $execution)
 	{
-		$execution->getEngine()->debug('Evaluate {language} script task "{task}"', [
-			'language' => $this->language,
+		$execution->getEngine()->debug('Executing service task "{task}"', [
 			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
 		]);
 		
-		eval($this->script);
+		$execution->getEngine()->notify(new ServiceTaskExecutedEvent(
+			new DelegateExecution($execution),
+			$execution->getEngine()
+		));
 		
 		$execution->takeAll(NULL, [$execution]);
 	}

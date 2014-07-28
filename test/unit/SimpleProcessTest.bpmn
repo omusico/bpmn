@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://activiti.org/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="_q5miQJ8cEeOK3Z3kC7yV4w" targetNamespace="http://activiti.org/bpmn">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://activiti.org/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="_q5miQJ8cEeOK3Z3kC7yV4w" exporter="camunda modeler" exporterVersion="2.6.0" targetNamespace="http://activiti.org/bpmn">
   <bpmn2:collaboration id="SimpleTestProcessCollaboration">
     <bpmn2:participant id="SimpleTestProcessCol" name="Simple Test Process" processRef="SimpleTestProcess"/>
   </bpmn2:collaboration>
   <bpmn2:process id="SimpleTestProcess" name="Simple Test Process" isExecutable="true">
-    <bpmn2:startEvent id="StartEvent_1" name="start">
+    <bpmn2:startEvent id="StartEvent_1" name="Start">
       <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
     </bpmn2:startEvent>
     <bpmn2:userTask id="amountTask" name="Enter amount">
@@ -12,7 +12,7 @@
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
     </bpmn2:userTask>
     <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="StartEvent_1" targetRef="amountTask"/>
-    <bpmn2:exclusiveGateway id="ExclusiveGateway_1" default="SequenceFlow_3">
+    <bpmn2:exclusiveGateway id="ExclusiveGateway_1" name="Amount > 100" default="SequenceFlow_3">
       <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
       <bpmn2:outgoing>enableDiscountFlow</bpmn2:outgoing>
       <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
@@ -22,7 +22,7 @@
       <bpmn2:incoming>enableDiscountFlow</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
     </bpmn2:userTask>
-    <bpmn2:sequenceFlow id="enableDiscountFlow" name="" sourceRef="ExclusiveGateway_1" targetRef="discountTask">
+    <bpmn2:sequenceFlow id="enableDiscountFlow" name="yes" sourceRef="ExclusiveGateway_1" targetRef="discountTask">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">#{amount gt 100}</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:exclusiveGateway id="ExclusiveGateway_2">
@@ -32,12 +32,12 @@
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_4" name="" sourceRef="discountTask" targetRef="ExclusiveGateway_2"/>
     <bpmn2:sequenceFlow id="SequenceFlow_6" name="" sourceRef="ExclusiveGateway_2" targetRef="IntermediateCatchEvent_1"/>
-    <bpmn2:endEvent id="EndEvent_1">
+    <bpmn2:endEvent id="EndEvent_1" name="Done">
       <bpmn2:incoming>SequenceFlow_9</bpmn2:incoming>
     </bpmn2:endEvent>
-    <bpmn2:sequenceFlow id="SequenceFlow_3" name="" sourceRef="ExclusiveGateway_1" targetRef="ExclusiveGateway_2"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_3" name="no" sourceRef="ExclusiveGateway_1" targetRef="ExclusiveGateway_2"/>
     <bpmn2:dataObject id="DataObject_1"/>
-    <bpmn2:intermediateCatchEvent id="IntermediateCatchEvent_1">
+    <bpmn2:intermediateCatchEvent id="IntermediateCatchEvent_1" name="Collect pending bills">
       <bpmn2:incoming>SequenceFlow_6</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_8</bpmn2:outgoing>
       <bpmn2:signalEventDefinition id="SignalEventDefinition_1" signalRef="Signal_1"/>
@@ -93,7 +93,7 @@
         <di:waypoint xsi:type="dc:Point" x="343.0" y="88.0"/>
         <di:waypoint xsi:type="dc:Point" x="420.0" y="88.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds height="6.0" width="6.0" x="328.0" y="131.0"/>
+          <dc:Bounds height="22.0" width="27.0" x="348.0" y="122.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_ExclusiveGateway_3" bpmnElement="ExclusiveGateway_2" isMarkerVisible="true">
@@ -128,7 +128,7 @@
         <di:waypoint xsi:type="dc:Point" x="368.0" y="181.0"/>
         <di:waypoint xsi:type="dc:Point" x="576.0" y="181.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds height="6.0" width="6.0" x="469.0" y="181.0"/>
+          <dc:Bounds height="22.0" width="20.0" x="408.0" y="156.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_IntermediateCatchEvent_2" bpmnElement="IntermediateCatchEvent_1">

@@ -9,33 +9,31 @@
 * file that was distributed with this source code.
 */
 
-namespace KoolKode\BPMN\Task\Behavior;
+namespace KoolKode\BPMN\Delegate\Behavior;
 
 use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
 
-class ScriptTaskBehavior extends AbstractBehavior
+class ExpressionTaskBehavior extends AbstractBehavior
 {
-	protected $name;
-	protected $language;
-	protected $script;
+	protected $expression;
 	
-	public function __construct($language, $script, ExpressionInterface $name)
+	protected $name;
+	
+	public function __construct(ExpressionInterface $expression, ExpressionInterface $name)
 	{
-		$this->language = (string)$language;
-		$this->script = (string)$script;
+		$this->expression = $expression;
 		$this->name = $name;
 	}
 	
-	protected function executeBehavior(VirtualExecution $execution)
+	public function executeBehavior(VirtualExecution $execution)
 	{
-		$execution->getEngine()->debug('Evaluate {language} script task "{task}"', [
-			'language' => $this->language,
+		$execution->getEngine()->debug('Execute delegate expression in "{task}"', [
 			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
 		]);
 		
-		eval($this->script);
+		call_user_func($this->expression, $execution->getExpressionContext());
 		
 		$execution->takeAll(NULL, [$execution]);
 	}

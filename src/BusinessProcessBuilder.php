@@ -107,12 +107,19 @@ class BusinessProcessBuilder
 	
 	public function serviceTask($id, $name = '')
 	{
-		return $this->builder->node($id);
+		return $this->builder->node($id)->behavior(new Delegate\Behavior\ServiceTaskBehavior($this->exp($name)));
 	}
 	
 	public function delegateTask($id, $typeName, $name = '')
 	{
 		return $this->builder->node($id)->behavior(new Delegate\Behavior\DelegateTaskBehavior($this->exp($typeName), $this->exp($name)));
+	}
+	
+	public function expressionTask($id, $expression, $name = '')
+	{
+		$exp = $this->expressionParser->parse($this->normalize($expression));
+		
+		return $this->builder->node($id)->behavior(new Delegate\Behavior\ExpressionTaskBehavior($exp, $this->exp($name)));
 	}
 	
 	public function userTaks($id, $name = '')
