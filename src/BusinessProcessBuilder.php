@@ -56,6 +56,11 @@ class BusinessProcessBuilder
 		return $this->builder->build();
 	}
 	
+	public function node($id)
+	{
+		return $this->builder->node($id);
+	}
+	
 	public function startEvent($id)
 	{
 		return $this->builder->node($id)->initial();

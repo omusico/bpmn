@@ -171,8 +171,7 @@ class DiagramLoader
 							break 2;
 						}
 						
-						// TODO: Better fallback behavior for unimplemented nodes?
-						$builder->serviceTask($id, 'N/A');
+						$builder->node($id);
 						
 						break;
 					case 'intermediateThrowEvent':
@@ -194,14 +193,12 @@ class DiagramLoader
 							break 2;
 						}
 						
-						// TODO: Better fallback behavior for unimplemented nodes?
-						$builder->serviceTask($id, 'N/A');
+						$builder->node($id);
 						
 						break;
 					default:
 						
-						// TODO: Better fallback behavior for unimplemented nodes?
-						$builder->serviceTask($id, 'N/A');
+						$builder->node($id);
 				}
 			}
 		}
