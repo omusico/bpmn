@@ -12,7 +12,9 @@
 namespace KoolKode\BPMN\Task;
 
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Task\Command\ClaimUserTaskCommand;
 use KoolKode\BPMN\Task\Command\CompleteUserTaskCommand;
+use KoolKode\BPMN\Task\Command\UnclaimUserTaskCommand;
 use KoolKode\Util\Uuid;
 
 class TaskService
@@ -31,16 +33,16 @@ class TaskService
 	
 	public function claim(UUID $taskId, $userId)
 	{
-		
+		$this->engine->pushCommand(new ClaimUserTaskCommand($taskId, $userId));
 	}
 	
 	public function unclaim(UUID $taskId)
 	{
-		
+		$this->engine->pushCommand(new UnclaimUserTaskCommand($taskId));
 	}
 	
 	public function complete(UUID $taskId, array $variables = [])
 	{
-		return $this->engine->executeCommand(new CompleteUserTaskCommand($taskId, $variables));
+		$this->engine->pushCommand(new CompleteUserTaskCommand($taskId, $variables));
 	}
 }
