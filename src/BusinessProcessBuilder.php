@@ -143,6 +143,13 @@ class BusinessProcessBuilder
 		return $this->builder->node($id)->behavior($behavior);
 	}
 	
+	public function callActivity($id, $element, $name = '', array $inputs = [], array $outputs = [])
+	{
+		$behavior = new Runtime\Behavior\CallActivityBehavior($element, $this->exp($name), $inputs, $outputs);
+		
+		return $this->builder->node($id)->behavior($behavior);
+	}
+	
 	public function intermediateSignalCatchEvent($id, $signal)
 	{
 		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateSignalCatchBehavior($signal));

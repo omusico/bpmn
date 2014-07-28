@@ -44,7 +44,7 @@ class RuntimeService
 	
 	public function signal(UUID $executionId, array $variables = [])
 	{
-		$execution = $this->createExecutionQuery()->executionId($executionId)->findOne();
+		$execution = $this->engine->findExecution($executionId);
 		
 		$this->engine->executeCommand(new SignalExecutionCommand($execution, NULL, $variables));
 	}

@@ -12,7 +12,6 @@
 namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
-use KoolKode\BPMN\Task\TaskInterface;
 use KoolKode\Process\Event\EnterNodeEvent;
 
 class FourEyesPrincipleTest extends BusinessProcessTestCase

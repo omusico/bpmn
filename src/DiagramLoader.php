@@ -131,6 +131,25 @@ class DiagramLoader
 						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
 						$builder->intermediateMessageThrowEvent($id, $name);
 						break;
+					case 'callActivity':
+						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
+						$element = trim($el->getAttribute('calledElement'));
+						
+						$inputs = [];
+						$outputs = [];
+						
+						foreach($xpath->query('m:extensionElements/i:in[@source]', $el) as $in)
+						{
+							$inputs[$in->getAttribute('source')] = $in->getAttribute('target');
+						}
+						
+						foreach($xpath->query('m:extensionElements/i:out[@source]', $el) as $out)
+						{
+							$outputs[$out->getAttribute('source')] = $out->getAttribute('target');
+						}
+						
+						$builder->callActivity($id, $element, $name, $inputs, $outputs);
+						break;
 					case 'sequenceFlow':
 						
 						$condition = NULL;

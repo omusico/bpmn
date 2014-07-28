@@ -11,10 +11,11 @@
 
 namespace KoolKode\BPMN\Engine;
 
+use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Process\Execution;
 use KoolKode\Process\ProcessDefinition;
 use KoolKode\Process\Transition;
-use KoolKode\Util\Uuid;
+use KoolKode\Util\UUID;
 
 /**
  * PVM execution being used to automate BPMN 2.0 processes.
@@ -88,6 +89,17 @@ class VirtualExecution extends Execution
 	public function terminate()
 	{
 		parent::terminate();
+		
+		// FIXME: Replace call activities using process variables with execution hierarchy
+		
+		if($this->isRootExecution() && isset($this->variables['__caller__']))
+		{
+			$this->engine->pushCommand(new SignalExecutionCommand(
+					$this->engine->findExecution(new UUID($this->variables['__caller__'])),
+					NULL,
+					$this->variables
+			));
+		}
 		
 		$this->engine->syncExecutionState($this);
 	}
