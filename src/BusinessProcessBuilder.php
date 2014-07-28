@@ -112,17 +112,17 @@ class BusinessProcessBuilder
 	
 	public function delegateTask($id, $typeName, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Delegate\Behavior\DelegateTaskBehavior($typeName, $name));
+		return $this->builder->node($id)->behavior(new Delegate\Behavior\DelegateTaskBehavior($this->exp($typeName), $this->exp($name)));
 	}
 	
 	public function userTaks($id, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Task\Behavior\UserTaskBehavior($this->normalize($name)));
+		return $this->builder->node($id)->behavior(new Task\Behavior\UserTaskBehavior($this->exp($name)));
 	}
 	
 	public function scriptTask($id, $language, $script, $name = '')
 	{
-		return $this->builder->node($id)->behavior(new Task\Behavior\ScriptTaskBehavior($language, $script, $name));
+		return $this->builder->node($id)->behavior(new Task\Behavior\ScriptTaskBehavior($language, $script, $this->exp($name)));
 	}
 	
 	public function intermediateSignalCatchEvent($id, $signal)
@@ -148,5 +148,10 @@ class BusinessProcessBuilder
 	protected function normalize($input)
 	{
 		return trim(preg_replace("'\s+'", ' ', $input));
+	}
+	
+	protected function exp($input)
+	{
+		return $this->expressionParser->parseString($this->normalize($input));
 	}
 }

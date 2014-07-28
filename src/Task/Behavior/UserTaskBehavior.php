@@ -14,19 +14,22 @@ namespace KoolKode\BPMN\Task\Behavior;
 use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Task\Command\CreateUserTaskCommand;
+use KoolKode\Expression\ExpressionInterface;
 
 class UserTaskBehavior extends AbstractSignalableBehavior
 {
 	protected $name;
 	
-	public function __construct($name = '')
+	public function __construct(ExpressionInterface $name)
 	{
-		$this->name = trim($name);
+		$this->name = $name;
 	}
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
+		$name = (string)call_user_func($this->name, $execution->getExpressionContext());
+		
 		$execution->waitForSignal();
-		$execution->getEngine()->pushCommand(new CreateUserTaskCommand($this->name, $execution));
+		$execution->getEngine()->pushCommand(new CreateUserTaskCommand($name, $execution));
 	}
 }

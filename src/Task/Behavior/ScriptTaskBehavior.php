@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Task\Behavior;
 
 use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\Expression\ExpressionInterface;
 
 class ScriptTaskBehavior extends AbstractBehavior
 {
@@ -20,15 +21,20 @@ class ScriptTaskBehavior extends AbstractBehavior
 	protected $language;
 	protected $script;
 	
-	public function __construct($language, $script, $name = '')
+	public function __construct($language, $script, ExpressionInterface $name)
 	{
 		$this->language = (string)$language;
 		$this->script = (string)$script;
-		$this->name = (string)$name;
+		$this->name = $name;
 	}
 	
 	protected function executeBehavior(VirtualExecution $execution)
 	{
+		$execution->getEngine()->debug('Evaluate {language} script task "{task}"', [
+			'language' => $this->language,
+			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
+		]);
+		
 		eval($this->script);
 	}
 }
