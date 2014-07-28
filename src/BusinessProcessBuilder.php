@@ -130,9 +130,16 @@ class BusinessProcessBuilder
 		return $this->builder->node($id)->behavior($behavior);
 	}
 	
-	public function userTaks($id, $name = '')
+	public function userTaks($id, $name = '', $assignee = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Task\Behavior\UserTaskBehavior($this->exp($name)));
+		$behavior = new Task\Behavior\UserTaskBehavior($this->exp($name));
+		
+		if($assignee !== NULL)
+		{
+			$behavior->setAssignee($this->exp($assignee));
+		}
+		
+		return $this->builder->node($id)->behavior($behavior);
 	}
 	
 	public function scriptTask($id, $language, $script, $name = '', $resultVariable = NULL)

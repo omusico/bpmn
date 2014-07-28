@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://activiti.org/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="_BhPhUBZtEeS61tOY76izTw" exporter="camunda modeler" exporterVersion="2.6.0" targetNamespace="http://activiti.org/bpmn">
-  <bpmn2:collaboration id="decisionMakersTask" name="Four Eyes Principle using CallActivity and process variables">
+  <bpmn2:collaboration id="decisionMakersTask" name="Four Eyes Principle using CallActivity and user task assignees">
     <bpmn2:participant id="_Participant_2" name="Approval Process" processRef="main"/>
     <bpmn2:participant id="Participant_1" name="Decision Process" processRef="decision"/>
   </bpmn2:collaboration>
@@ -8,16 +8,18 @@
     <bpmn2:startEvent id="StartEvent_1" name="Approval&#xD;&#xA;requested">
       <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
     </bpmn2:startEvent>
-    <bpmn2:serviceTask id="ScriptTask_1" name="Determine decision makers">
+    <bpmn2:scriptTask id="ScriptTask_1" name="Determine decision makers" scriptFormat="php">
       <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
-    </bpmn2:serviceTask>
+      <bpmn2:script><![CDATA[$execution->setVariable('firstPerson', 'A');
+$execution->setVariable('secondPerson', 'B');
+]]></bpmn2:script>
+    </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="StartEvent_1" targetRef="ScriptTask_1"/>
     <bpmn2:callActivity id="CallActivity_1" name="Get first decision" calledElement="decision">
       <bpmn2:extensionElements>
         <camunda:out source="approved" target="approved"/>
-        <camunda:in businessKey="#{execution.processBusinessKey}"/>
-        <camunda:in source="firstPerson" target="assignee"/>
+        <camunda:in sourceExpression="#{ 'user(' ~ firstPerson ~ ')' }" target="assignee"/>
       </bpmn2:extensionElements>
       <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
@@ -31,9 +33,8 @@
     <bpmn2:sequenceFlow id="SequenceFlow_3" name="" sourceRef="CallActivity_1" targetRef="ExclusiveGateway_1"/>
     <bpmn2:callActivity id="CallActivity_2" name="Get second decision" calledElement="decision">
       <bpmn2:extensionElements>
-        <camunda:in businessKey="#{execution.processBusinessKey}"/>
         <camunda:out source="approved" target="approved"/>
-        <camunda:in source="secondPerson" target="assignee"/>
+        <camunda:in sourceExpression="#{ 'user(' ~ secondPerson ~ ')' }" target="assignee"/>
       </bpmn2:extensionElements>
       <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_5</bpmn2:outgoing>

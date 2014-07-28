@@ -42,18 +42,26 @@ class CallActivityBehavior extends AbstractSignalableBehavior
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
+		$context = $execution->getExpressionContext();
 		$variables = [];
 		
-		foreach($this->inputs as $from => $to)
+		foreach($this->inputs as $target => $source)
 		{
-			$variables[$to] = $execution->getVariable($from, NULL);
+			if($source instanceof ExpressionInterface)
+			{
+				$variables[(string)$target] = $source($context);
+			}
+			elseif($execution->hasVariable($source))
+			{
+				$variables[(string)$target] = $execution->getVariable($source);
+			}
 		}
 		
 		$variables['__caller__'] = (string)$execution->getId();
 		
 		$execution->getEngine()->debug('Starting process {process} from call activity "{task}"', [
 			'process' => $this->processDefinitionKey,
-			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
+			'task' => (string)call_user_func($this->name, $context)
 		]);
 		
 		$definition = $execution->getEngine()->getRepositoryService()->createProcessDefinitionQuery()->processDefinitionKey($this->processDefinitionKey)->findOne();
@@ -68,18 +76,24 @@ class CallActivityBehavior extends AbstractSignalableBehavior
 	
 	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
+		$context = $execution->getEngine()->getExpressionContextFactory()->createContext($variables);
+		
+		foreach($this->outputs as $target => $source)
+		{
+			if($source instanceof ExpressionInterface)
+			{
+				$execution->setVariable($target, $source($context));
+			}
+			elseif(array_key_exists($source, $variables))
+			{
+				$execution->setVariable($target, $variables[$source]);
+			}
+		}
+		
 		$execution->getEngine()->debug('Resuming {execution} at call activity "{task}"', [
 			'execution' => (string)$execution,
 			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
 		]);
-		
-		foreach($this->outputs as $from => $to)
-		{
-			if(array_key_exists($from, $variables))
-			{
-				$execution->setVariable($to, $variables[$from]);
-			}
-		}
 		
 		return $execution->takeAll(NULL, [$execution]);
 	}

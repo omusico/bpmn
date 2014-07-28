@@ -11,6 +11,7 @@
 
 namespace KoolKode\BPMN;
 
+use KoolKode\Expression\Parser\ExpressionParser;
 use KoolKode\Xml\XmlDocumentBuilder;
 
 /**
@@ -25,6 +26,13 @@ class DiagramLoader
 	const NS_DC = 'http://www.omg.org/spec/DD/20100524/DC';
 	const NS_XSI = 'http://www.w3.org/2001/XMLSchema-instance';
 	const NS_IMPL = 'http://activiti.org/bpmn';
+	
+	protected $expressionParser;
+	
+	public function __construct()
+	{
+		$this->expressionParser = new ExpressionParser();
+	}
 	
 	public function parseDiagramFile($file)
 	{
@@ -107,7 +115,14 @@ class DiagramLoader
 						break;
 					case 'userTask':
 						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
-						$builder->userTaks($id, $name);
+						$assignee = NULL;
+						
+						if($el->hasAttributeNS(self::NS_IMPL, 'assignee') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'assignee')))
+						{
+							$assignee = trim($el->getAttributeNS(self::NS_IMPL, 'assignee'));
+						}
+						
+						$builder->userTaks($id, $name, $assignee);
 						break;
 					case 'scriptTask':
 						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
@@ -140,12 +155,22 @@ class DiagramLoader
 						
 						foreach($xpath->query('m:extensionElements/i:in[@source]', $el) as $in)
 						{
-							$inputs[$in->getAttribute('source')] = $in->getAttribute('target');
+							$inputs[$in->getAttribute('target')] = $in->getAttribute('source');
+						}
+						
+						foreach($xpath->query('m:extensionElements/i:in[@sourceExpression]', $el) as $in)
+						{
+							$inputs[$in->getAttribute('target')] = $this->expressionParser->parse($in->getAttribute('sourceExpression'));
 						}
 						
 						foreach($xpath->query('m:extensionElements/i:out[@source]', $el) as $out)
 						{
-							$outputs[$out->getAttribute('source')] = $out->getAttribute('target');
+							$outputs[$out->getAttribute('target')] = $out->getAttribute('source');
+						}
+						
+						foreach($xpath->query('m:extensionElements/i:out[@sourceExpression]', $el) as $out)
+						{
+							$outputs[$out->getAttribute('target')] = $this->expressionParser->parse($out->getAttribute('sourceExpression'));
 						}
 						
 						$builder->callActivity($id, $element, $name, $inputs, $outputs);

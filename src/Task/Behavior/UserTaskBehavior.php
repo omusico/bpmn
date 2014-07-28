@@ -15,14 +15,22 @@ use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Task\Command\CreateUserTaskCommand;
 use KoolKode\Expression\ExpressionInterface;
+use KoolKode\BPMN\Task\Command\ClaimUserTaskCommand;
 
 class UserTaskBehavior extends AbstractSignalableBehavior
 {
 	protected $name;
 	
+	protected $assignee;
+	
 	public function __construct(ExpressionInterface $name)
 	{
 		$this->name = $name;
+	}
+	
+	public function setAssignee(ExpressionInterface $assignee = NULL)
+	{
+		$this->assignee = $assignee;
 	}
 	
 	public function executeBehavior(VirtualExecution $execution)
@@ -30,6 +38,14 @@ class UserTaskBehavior extends AbstractSignalableBehavior
 		$name = (string)call_user_func($this->name, $execution->getExpressionContext());
 		
 		$execution->waitForSignal();
-		$execution->getEngine()->pushCommand(new CreateUserTaskCommand($name, $execution));
+		$task = $execution->getEngine()->executeCommand(new CreateUserTaskCommand($name, $execution));
+		
+		if($this->assignee !== NULL)
+		{
+			$execution->getEngine()->pushCommand(new ClaimUserTaskCommand(
+				$task->getId(),
+				call_user_func($this->assignee, $execution->getExpressionContext())
+			));
+		}
 	}
 }

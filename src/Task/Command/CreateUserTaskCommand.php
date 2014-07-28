@@ -56,5 +56,7 @@ class CreateUserTaskCommand extends AbstractBusinessCommand
 					   ->findOne();
 		
 		$engine->notify(new UserTaskCreatedEvent($task, $engine));
+		
+		return $task;
 	}
 }

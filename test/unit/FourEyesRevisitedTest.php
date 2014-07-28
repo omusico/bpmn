@@ -11,6 +11,7 @@
 
 namespace KoolKode\BPMN;
 
+use KoolKode\BPMN\Task\TaskInterface;
 use KoolKode\Process\Event\EnterNodeEvent;
 
 class FourEyesRevisitedTest extends BusinessProcessTestCase
@@ -45,6 +46,9 @@ class FourEyesRevisitedTest extends BusinessProcessTestCase
 		});
 		
 		$task = $this->taskService->createTaskQuery()->findOne();
+		$this->assertTrue($task instanceof TaskInterface);
+		$this->assertEquals('user(A)', $task->getAssignee());
+		
 		$this->taskService->complete($task->getId(), [
 			'approved' => $a1 ? true : false
 		]);
@@ -54,6 +58,9 @@ class FourEyesRevisitedTest extends BusinessProcessTestCase
 			$this->assertEquals(2, $this->runtimeService->createExecutionQuery()->count());
 		
 			$task = $this->taskService->createTaskQuery()->findOne();
+			$this->assertTrue($task instanceof TaskInterface);
+			$this->assertEquals('user(B)', $task->getAssignee());
+			
 			$this->taskService->complete($task->getId(), [
 				'approved' => $a2 ? true : false
 			]);
