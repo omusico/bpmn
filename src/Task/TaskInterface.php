@@ -57,6 +57,13 @@ interface TaskInterface
 	public function getCreated();
 	
 	/**
+	 * Check if the task has been claimed.
+	 * 
+	 * @return boolean
+	 */
+	public function isClaimed();
+	
+	/**
 	 * Get the assignment date of this task.
 	 * 
 	 * @return \DateTime or NULL when the task instance has not been claimed yet.

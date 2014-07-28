@@ -59,6 +59,11 @@ class Task implements TaskInterface
 		return clone $this->created;
 	}
 	
+	public function isClaimed()
+	{
+		return $this->claimDate !== NULL;
+	}
+	
 	public function getClaimDate()
 	{
 		return ($this->claimDate === NULL) ? NULL : clone $this->claimDate;
