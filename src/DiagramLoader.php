@@ -113,13 +113,19 @@ class DiagramLoader
 						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
 						$language = strtolower(trim($el->getAttribute('scriptFormat')));
 						$script = '';
+						$var = NULL;
 						
 						foreach($xpath->query('m:script', $el) as $scriptElement)
 						{
 							$script .= $scriptElement->textContent;
 						}
 						
-						$builder->scriptTask($id, $language, $script, $name);
+						if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
+						{
+							$var = trim($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
+						}
+						
+						$builder->scriptTask($id, $language, $script, $name, $var);
 						break;
 					case 'sendTask':
 						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';

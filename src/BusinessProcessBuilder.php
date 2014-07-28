@@ -123,12 +123,9 @@ class BusinessProcessBuilder
 	public function expressionTask($id, $expression, $name = '', $resultVariable = NULL)
 	{
 		$exp = $this->expressionParser->parse($this->normalize($expression));
-		$behavior = new Delegate\Behavior\ExpressionTaskBehavior($exp, $this->exp($name));
 		
-		if($resultVariable !== NULL)
-		{
-			$behavior->setResultVariable($resultVariable);
-		}
+		$behavior = new Delegate\Behavior\ExpressionTaskBehavior($exp, $this->exp($name));
+		$behavior->setResultVariable($resultVariable);
 		
 		return $this->builder->node($id)->behavior($behavior);
 	}
@@ -138,9 +135,12 @@ class BusinessProcessBuilder
 		return $this->builder->node($id)->behavior(new Task\Behavior\UserTaskBehavior($this->exp($name)));
 	}
 	
-	public function scriptTask($id, $language, $script, $name = '')
+	public function scriptTask($id, $language, $script, $name = '', $resultVariable = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Delegate\Behavior\ScriptTaskBehavior($language, $script, $this->exp($name)));
+		$behavior = new Delegate\Behavior\ScriptTaskBehavior($language, $script, $this->exp($name));
+		$behavior->setResultVariable($resultVariable);
+		
+		return $this->builder->node($id)->behavior($behavior);
 	}
 	
 	public function intermediateSignalCatchEvent($id, $signal)

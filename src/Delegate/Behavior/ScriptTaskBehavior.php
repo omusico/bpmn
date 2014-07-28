@@ -26,6 +26,8 @@ class ScriptTaskBehavior extends AbstractBehavior
 	
 	protected $language;
 	
+	protected $resultVariable;
+	
 	protected $script;
 	
 	public function __construct($language, $script, ExpressionInterface $name)
@@ -40,6 +42,11 @@ class ScriptTaskBehavior extends AbstractBehavior
 		}
 	}
 	
+	public function setResultVariable($var = NULL)
+	{
+		$this->resultVariable = ($var === NULL) ? NULL : (string)$var;
+	}
+	
 	protected function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->getEngine()->debug('Evaluate {language} script task "{task}"', [
@@ -47,7 +54,12 @@ class ScriptTaskBehavior extends AbstractBehavior
 			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
 		]);
 		
-		eval($this->script);
+		$result = eval($this->script);
+		
+		if($this->resultVariable !== NULL)
+		{
+			$execution->setVariable($this->resultVariable, $result);
+		}
 		
 		$execution->takeAll(NULL, [$execution]);
 	}
