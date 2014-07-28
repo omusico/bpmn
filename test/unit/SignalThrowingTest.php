@@ -11,7 +11,7 @@
 
 namespace KoolKode\BPMN;
 
-use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
+use KoolKode\BPMN\Delegate\DelegateExecutionInterface;
 use KoolKode\BPMN\Task\TaskInterface;
 
 class SignalThrowingTest extends BusinessProcessTestCase
@@ -20,8 +20,8 @@ class SignalThrowingTest extends BusinessProcessTestCase
 	{
 		$this->deployFile('SignalThrowingTest.bpmn');
 		
-		$this->eventDispatcher->connect(function(ServiceTaskExecutedEvent $event) {
-			$this->assertEquals(9, $event->execution->getVariable('counter'));
+		$this->registerServiceTaskHandler('SignalThrowingTest', 'ServiceTask_1', function(DelegateExecutionInterface $execution) {
+			$this->assertEquals(9, $execution->getVariable('counter'));
 		});
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('SignalThrowingTest');

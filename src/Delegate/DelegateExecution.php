@@ -27,6 +27,13 @@ class DelegateExecution implements DelegateExecutionInterface
 		return $this->execution->getId();
 	}
 	
+	public function getActivityId()
+	{
+		$node = $this->execution->getNode();
+		
+		return ($node === NULL) ? NULL : $node->getId();
+	}
+	
 	public function getProcessInstanceId()
 	{
 		return $this->execution->getRootExecution()->getId();

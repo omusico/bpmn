@@ -31,6 +31,13 @@ interface DelegateExecutionInterface
 	public function getExecutionId();
 	
 	/**
+	 * Get the ID of the activity being executed.
+	 * 
+	 * @return string
+	 */
+	public function getActivityId();
+	
+	/**
 	 * Get the unique identifier of the underlying process instance.
 	 * 
 	 * @return UUID

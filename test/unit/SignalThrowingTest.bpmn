@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://activiti.org/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="_cah1wBPtEeSw3s6q61uGuw" exporter="camunda modeler" exporterVersion="2.6.0" targetNamespace="http://activiti.org/bpmn">
-  <bpmn2:process id="SignalThrowingTest" name="Test signal throwing with multiple subscriptions" isExecutable="true">
+  <bpmn2:process id="SignalThrowingTest" name="Test signal broadcast and different delegate tasks" isExecutable="true">
     <bpmn2:startEvent id="StartEvent_1">
       <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
     </bpmn2:startEvent>
@@ -11,17 +11,6 @@
     </bpmn2:parallelGateway>
     <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="StartEvent_1" targetRef="ParallelGateway_1"/>
     <bpmn2:sequenceFlow id="SequenceFlow_4" name="" sourceRef="ParallelGateway_1" targetRef="UserTask_1"/>
-    <bpmn2:userTask id="UserTask_1" name="Set initial value for counter">
-      <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_5</bpmn2:outgoing>
-    </bpmn2:userTask>
-    <bpmn2:sequenceFlow id="SequenceFlow_5" name="" sourceRef="UserTask_1" targetRef="IntermediateThrowEvent_2"/>
-    <bpmn2:intermediateThrowEvent id="IntermediateThrowEvent_2" name="Throw signal&#xD;&#xA;within process instance">
-      <bpmn2:incoming>SequenceFlow_5</bpmn2:incoming>
-      <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
-      <bpmn2:signalEventDefinition id="_SignalEventDefinition_4" signalRef="Signal_1"/>
-    </bpmn2:intermediateThrowEvent>
-    <bpmn2:sequenceFlow id="SequenceFlow_6" name="" sourceRef="IntermediateThrowEvent_2" targetRef="ParallelGateway_2"/>
     <bpmn2:intermediateCatchEvent id="IntermediateCatchEvent_1" name="Catch incoming&#xD;&#xA;signal from branch">
       <bpmn2:incoming>SequenceFlow_10</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_12</bpmn2:outgoing>
@@ -73,6 +62,22 @@
       <bpmn2:incoming>SequenceFlow_18</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_18" name="" sourceRef="ServiceTask_1" targetRef="EndEvent_2"/>
+    <bpmn2:userTask id="UserTask_1" name="Set initial value for counter">
+      <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
+    </bpmn2:userTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_2" name="" sourceRef="UserTask_1" targetRef="ScriptTask_3"/>
+    <bpmn2:serviceTask id="ScriptTask_3" camunda:expression="#{ @test.assertEquals(1, counter) }" name="Assert counter is prepared">
+      <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_3" name="" sourceRef="ScriptTask_3" targetRef="IntermediateThrowEvent_2"/>
+    <bpmn2:intermediateThrowEvent id="IntermediateThrowEvent_2" name="Throw signal&#xD;&#xA;within process&#xD;&#xA;instance">
+      <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="_SignalEventDefinition_4" signalRef="Signal_1"/>
+    </bpmn2:intermediateThrowEvent>
+    <bpmn2:sequenceFlow id="SequenceFlow_6" name="" sourceRef="IntermediateThrowEvent_2" targetRef="ParallelGateway_2"/>
   </bpmn2:process>
   <bpmn2:signal id="Signal_1" name="notifyBranchSignal"/>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -97,28 +102,21 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="_BPMNShape_UserTask_5" bpmnElement="UserTask_1">
-        <dc:Bounds height="80.0" width="100.0" x="240.0" y="93.0"/>
+        <dc:Bounds height="80.0" width="100.0" x="198.0" y="93.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_4" bpmnElement="SequenceFlow_4" sourceElement="_BPMNShape_ParallelGateway_2" targetElement="_BPMNShape_UserTask_5">
         <di:waypoint xsi:type="dc:Point" x="172.0" y="133.0"/>
-        <di:waypoint xsi:type="dc:Point" x="240.0" y="133.0"/>
+        <di:waypoint xsi:type="dc:Point" x="198.0" y="133.0"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="6.0" width="6.0" x="194.0" y="133.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_IntermediateThrowEvent_6" bpmnElement="IntermediateThrowEvent_2">
-        <dc:Bounds height="36.0" width="36.0" x="407.0" y="115.0"/>
+        <dc:Bounds height="36.0" width="36.0" x="474.0" y="115.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds height="38.0" width="142.0" x="354.0" y="72.0"/>
+          <dc:Bounds height="54.0" width="99.0" x="443.0" y="63.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_5" bpmnElement="SequenceFlow_5" sourceElement="_BPMNShape_UserTask_5" targetElement="_BPMNShape_IntermediateThrowEvent_6">
-        <di:waypoint xsi:type="dc:Point" x="340.0" y="133.0"/>
-        <di:waypoint xsi:type="dc:Point" x="407.0" y="133.0"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds height="6.0" width="6.0" x="362.0" y="133.0"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_ParallelGateway_3" bpmnElement="ParallelGateway_2">
         <dc:Bounds height="50.0" width="50.0" x="540.0" y="108.0"/>
         <bpmndi:BPMNLabel>
@@ -126,10 +124,10 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_6" bpmnElement="SequenceFlow_6" sourceElement="_BPMNShape_IntermediateThrowEvent_6" targetElement="_BPMNShape_ParallelGateway_3">
-        <di:waypoint xsi:type="dc:Point" x="443.0" y="133.0"/>
+        <di:waypoint xsi:type="dc:Point" x="510.0" y="133.0"/>
         <di:waypoint xsi:type="dc:Point" x="540.0" y="133.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds height="6.0" width="6.0" x="465.0" y="133.0"/>
+          <dc:Bounds height="6.0" width="6.0" x="532.0" y="133.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_IntermediateCatchEvent_7" bpmnElement="IntermediateCatchEvent_2">
@@ -218,6 +216,23 @@
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_18" bpmnElement="SequenceFlow_18" sourceElement="_BPMNShape_ServiceTask_2" targetElement="_BPMNShape_EndEvent_7">
         <di:waypoint xsi:type="dc:Point" x="740.0" y="133.0"/>
         <di:waypoint xsi:type="dc:Point" x="790.0" y="133.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_ScriptTask_4" bpmnElement="ScriptTask_3">
+        <dc:Bounds height="80.0" width="100.0" x="332.0" y="93.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="SequenceFlow_2" sourceElement="_BPMNShape_UserTask_5" targetElement="_BPMNShape_ScriptTask_4">
+        <di:waypoint xsi:type="dc:Point" x="298.0" y="133.0"/>
+        <di:waypoint xsi:type="dc:Point" x="332.0" y="133.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="312.0" y="133.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_3" bpmnElement="SequenceFlow_3" sourceElement="_BPMNShape_ScriptTask_4" targetElement="_BPMNShape_IntermediateThrowEvent_6">
+        <di:waypoint xsi:type="dc:Point" x="432.0" y="133.0"/>
+        <di:waypoint xsi:type="dc:Point" x="474.0" y="133.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="443.0" y="133.0"/>
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
