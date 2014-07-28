@@ -20,7 +20,7 @@ use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
 use KoolKode\Event\EventDispatcher;
 use KoolKode\Expression\ExpressionContextFactory;
-use KoolKode\Process\ExecutionExpressionResolver;
+use KoolKode\Process\Event\CreateExpressionContextEvent;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
@@ -108,6 +108,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$this->messageHandlers = [];
 		
 		$this->eventDispatcher = new EventDispatcher();
+		
+		// Provide message handler subscriptions.
 		$this->eventDispatcher->connect(function(MessageThrownEvent $event) {
 			
 			$key = $event->execution->getProcessDefinition()->getKey();
@@ -119,12 +121,14 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			}
 		});
 		
-		$factory = new ExpressionContextFactory();
-		$factory->getResolvers()->registerResolver(new ExecutionExpressionResolver());
+		// Allow for assertions in expressions, e.g. #{ @test.assertEquals(2, processVariable) }
+		$this->eventDispatcher->connect(function(CreateExpressionContextEvent $event) {
+			$event->access->setVariable('@test', $this);
+		});
 		
 		$this->delegateTasks = new DelegateTaskRegistry();
 		
-		$this->processEngine = new ProcessEngine(self::$pdo, $this->eventDispatcher, $factory);
+		$this->processEngine = new ProcessEngine(self::$pdo, $this->eventDispatcher, new ExpressionContextFactory());
 		$this->processEngine->setDelegateTaskFactory($this->delegateTasks);
 		$this->processEngine->setLogger($logger);
 		

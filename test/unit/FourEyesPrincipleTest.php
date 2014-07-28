@@ -34,8 +34,6 @@ class FourEyesPrincipleTest extends BusinessProcessTestCase
 	{
 		$this->deployFile('FourEyesPrincipleTest.bpmn');
 		
-		$this->delegateTasks->registerTask(new DetermineDecisionMakersTask());
-		
 		$this->registerMessageHandler('main', 'NotifyFirstApprover', function(MessageThrownEvent $event) {
 			$this->runtimeService->startProcessInstanceByMessage(
 				'FirstApprovalRequested',
