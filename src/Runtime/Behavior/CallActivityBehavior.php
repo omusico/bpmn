@@ -13,7 +13,6 @@ namespace KoolKode\BPMN\Runtime\Behavior;
 
 use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
-use KoolKode\BPMN\Runtime\Command\StartProcessInstanceCommand;
 use KoolKode\Expression\ExpressionInterface;
 
 /**
@@ -43,40 +42,50 @@ class CallActivityBehavior extends AbstractSignalableBehavior
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$context = $execution->getExpressionContext();
-		$variables = [];
-		
-		foreach($this->inputs as $target => $source)
-		{
-			if($source instanceof ExpressionInterface)
-			{
-				$variables[(string)$target] = $source($context);
-			}
-			elseif($execution->hasVariable($source))
-			{
-				$variables[(string)$target] = $execution->getVariable($source);
-			}
-		}
-		
-		$variables['__caller__'] = (string)$execution->getId();
+		$definition = $execution->getEngine()->getRepositoryService()->createProcessDefinitionQuery()->processDefinitionKey($this->processDefinitionKey)->findOne();
+		$businessKey = $execution->getBusinessKey();
 		
 		$execution->getEngine()->debug('Starting process {process} from call activity "{task}"', [
 			'process' => $this->processDefinitionKey,
 			'task' => (string)call_user_func($this->name, $context)
 		]);
 		
-		$definition = $execution->getEngine()->getRepositoryService()->createProcessDefinitionQuery()->processDefinitionKey($this->processDefinitionKey)->findOne();
-		$businessKey = $execution->getBusinessKey();
+		$start = $definition->getModel()->findInitialNodes();
 		
-		$execution->getEngine()->pushCommand(new StartProcessInstanceCommand(
-			$definition, NULL, $businessKey, $variables
-		));
+		if(count($start) !== 1)
+		{
+			throw new \RuntimeException(sprintf('Missing single non start event in process %s', $definition->getKey()));
+		}
+		
+		$sub = $execution->createNestedExecution($definition->getModel(), true);
+		
+		foreach($this->inputs as $target => $source)
+		{
+			if($source instanceof ExpressionInterface)
+			{
+				$sub->setVariable($target, $source($context));
+			}
+			elseif($execution->hasVariable($source))
+			{
+				$sub->setVariable($target, $execution->getVariable($source));
+			}
+		}
 		
 		$execution->waitForSignal();
+		
+		$sub->execute(array_shift($start));
 	}
 	
 	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
-		$context = $execution->getEngine()->getExpressionContextFactory()->createContext($variables);
+		$sub = $variables['@execution'];
+		
+		if(!$sub instanceof VirtualExecution)
+		{
+			throw new \RuntimeException(sprintf('Missing nested execution being signaled'));
+		}
+		
+		$context = $execution->getEngine()->getExpressionContextFactory()->createContext($sub);
 		
 		foreach($this->outputs as $target => $source)
 		{
@@ -84,9 +93,9 @@ class CallActivityBehavior extends AbstractSignalableBehavior
 			{
 				$execution->setVariable($target, $source($context));
 			}
-			elseif(array_key_exists($source, $variables))
+			elseif($sub->hasVariable($source))
 			{
-				$execution->setVariable($target, $variables[$source]);
+				$execution->setVariable($target, $sub->getVariable($source));
 			}
 		}
 		

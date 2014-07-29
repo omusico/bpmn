@@ -38,15 +38,10 @@ class VirtualExecution extends Execution
 	
 	public function setParentExecution(VirtualExecution $parent = NULL)
 	{
-		if($parent === NULL)
-		{
-			$this->setState(self::STATE_SCOPE, true);
-		}
-		else
-		{
-			$this->setState(self::STATE_SCOPE, false);
-			
+		if($parent !== NULL)
+		{		
 			$this->parentExecution = $parent;
+			
 			$parent->registerChildExecution($this);
 		}
 	}
@@ -89,17 +84,6 @@ class VirtualExecution extends Execution
 	public function terminate()
 	{
 		parent::terminate();
-		
-		// FIXME: Replace call activities using process variables with execution hierarchy
-		
-		if($this->isRootExecution() && isset($this->variables['__caller__']))
-		{
-			$this->engine->pushCommand(new SignalExecutionCommand(
-					$this->engine->findExecution(new UUID($this->variables['__caller__'])),
-					NULL,
-					$this->variables
-			));
-		}
 		
 		$this->engine->syncExecutionState($this);
 	}
