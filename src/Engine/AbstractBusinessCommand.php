@@ -14,12 +14,25 @@ namespace KoolKode\BPMN\Engine;
 use KoolKode\Process\Command\AbstractCommand;
 use KoolKode\Process\EngineInterface;
 
+/**
+ * Base class for a BPMN engine command.
+ * 
+ * @author Martin Schröder
+ */
 abstract class AbstractBusinessCommand extends AbstractCommand
 {
+	/**
+	 * {@inheritdoc}
+	 */
 	public final function execute(EngineInterface $engine)
 	{
 		return $this->executeCommand($engine);
 	}
 	
+	/**
+	 * Execute the command logic using the given BPMN process engine.
+	 * 
+	 * @param ProcessEngine $engine
+	 */
 	protected abstract function executeCommand(ProcessEngine $engine);
 }

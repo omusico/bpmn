@@ -14,13 +14,26 @@ namespace KoolKode\BPMN\Engine;
 use KoolKode\Process\Behavior\BehaviorInterface;
 use KoolKode\Process\Execution;
 
+/**
+ * Base class for all BPMN node behaviors.
+ * 
+ * @author Martin Schröder
+ */
 abstract class AbstractBehavior implements BehaviorInterface
 {
+	/**
+	 * {@inheritdoc}
+	 */
 	public function execute(Execution $execution)
 	{
 		return $this->executeBehavior($execution);
 	}
 	
+	/**
+	 * Execute the behavior in the context of the given execution.
+	 * 
+	 * @param VirtualExecution $execution
+	 */
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		return $execution->takeAll(NULL, [$execution]);

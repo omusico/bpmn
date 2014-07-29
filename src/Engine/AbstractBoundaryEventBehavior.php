@@ -48,7 +48,7 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 	 */
 	public abstract function createEventSubscription(VirtualExecution $execution, Node $node);
 	
-	public function executeBehavior(VirtualExecution $execution)
+	public final function executeBehavior(VirtualExecution $execution)
 	{
 		throw new \RuntimeException(sprintf('Boundary events must not be executed directly'));
 	}
