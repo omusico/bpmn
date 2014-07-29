@@ -85,7 +85,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		{
 			$list = implode(', ', array_fill(0, count($ids), '?'));
 			$sql = "	DELETE FROM `#__bpm_event_subscription`
-						WHERE `id` IN ($list)
+						WHERE `execution_id` IN ($list)
 			";
 			$stmt = $engine->prepareQuery($sql);
 			$stmt->execute(array_values($ids));

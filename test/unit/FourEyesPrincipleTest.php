@@ -65,6 +65,7 @@ class FourEyesPrincipleTest extends BusinessProcessTestCase
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('main', $businessKey);
 		$this->assertEquals(2, $this->runtimeService->createExecutionQuery()->count());
+		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('FirstDecisionReceived')->count());
 		
 		$id = $process->getId();
 		$lastNode = NULL;
@@ -77,13 +78,19 @@ class FourEyesPrincipleTest extends BusinessProcessTestCase
 		
 		$task = $this->taskService->createTaskQuery()->findOne();
 		$this->taskService->complete($task->getId());
+		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('FirstDecisionReceived')->count());
 		
 		if($a1)
 		{
 			$this->assertEquals(2, $this->runtimeService->createExecutionQuery()->count());
+			$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('SecondDecisionReceived')->count());
 		
 			$task = $this->taskService->createTaskQuery()->findOne();
 			$this->taskService->complete($task->getId());
+		}
+		else
+		{
+			$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('SecondDecisionReceived')->count());
 		}
 		
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
