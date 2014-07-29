@@ -230,7 +230,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$exec->setNode($node);
 			$exec->setTransition($transition);
 			$exec->setTimestamp($active);
-			$exec->setVariables($vars);
+			$exec->setVariablesLocal($vars);
 		}
 		
 		foreach($parents as $id => $pid)
@@ -280,7 +280,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			'node' => $nid,
 			'transition' => $tid,
 			'bkey' => $execution->getBusinessKey(),
-			'vars' => gzcompress(serialize($execution->getVariables()), 1)
+			'vars' => gzcompress(serialize($execution->getVariablesLocal()), 1)
 		];
 	}
 	
