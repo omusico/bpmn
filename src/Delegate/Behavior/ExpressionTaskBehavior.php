@@ -11,8 +11,9 @@
 
 namespace KoolKode\BPMN\Delegate\Behavior;
 
-use KoolKode\BPMN\Engine\AbstractBehavior;
+use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Expression\ExpressionInterface;
 
 /**
@@ -20,7 +21,7 @@ use KoolKode\Expression\ExpressionInterface;
  * 
  * @author Martin Schröder
  */
-class ExpressionTaskBehavior extends AbstractBehavior
+class ExpressionTaskBehavior extends AbstractScopeBehavior
 {
 	protected $expression;
 	
@@ -52,6 +53,7 @@ class ExpressionTaskBehavior extends AbstractBehavior
 			$execution->setVariable($this->resultVariable, $result);
 		}
 		
-		$execution->takeAll(NULL, [$execution]);
+		$execution->getEngine()->pushCommand(new SignalExecutionCommand($execution));
+		$execution->waitForSignal();
 	}
 }

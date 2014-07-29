@@ -11,8 +11,9 @@
 
 namespace KoolKode\BPMN\Delegate\Behavior;
 
-use KoolKode\BPMN\Engine\AbstractBehavior;
+use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Expression\ExpressionInterface;
 
 /**
@@ -20,7 +21,7 @@ use KoolKode\Expression\ExpressionInterface;
  * 
  * @author Martin Schröder
  */
-class ScriptTaskBehavior extends AbstractBehavior
+class ScriptTaskBehavior extends AbstractScopeBehavior
 {
 	protected $name;
 	
@@ -47,7 +48,7 @@ class ScriptTaskBehavior extends AbstractBehavior
 		$this->resultVariable = ($var === NULL) ? NULL : (string)$var;
 	}
 	
-	protected function executeBehavior(VirtualExecution $execution)
+	public function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->getEngine()->debug('Evaluate {language} script task "{task}"', [
 			'language' => $this->language,
@@ -61,6 +62,7 @@ class ScriptTaskBehavior extends AbstractBehavior
 			$execution->setVariable($this->resultVariable, $result);
 		}
 		
-		$execution->takeAll(NULL, [$execution]);
+		$execution->getEngine()->pushCommand(new SignalExecutionCommand($execution));
+		$execution->waitForSignal();
 	}
 }

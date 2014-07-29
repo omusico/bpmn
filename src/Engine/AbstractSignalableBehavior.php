@@ -11,23 +11,23 @@
 
 namespace KoolKode\BPMN\Engine;
 
-use KoolKode\Process\Execution;
 use KoolKode\Process\Behavior\SignalableBehaviorInterface;
+use KoolKode\Process\Execution;
 
 abstract class AbstractSignalableBehavior extends AbstractBehavior implements SignalableBehaviorInterface
-{
-	protected function executeBehavior(VirtualExecution $execution)
+{	
+	public function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->waitForSignal();
 	}
 		
-	public final function signal(Execution $execution, $signal, array $variables = [])
+	public function signal(Execution $execution, $signal, array $variables = [])
 	{
 		return $this->signalBehavior($execution, $signal, $variables);
 	}
 	
-	protected function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
-	{
+	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
+	{		
 		foreach($variables as $k => $v)
 		{
 			$execution->setVariable($k, $v);

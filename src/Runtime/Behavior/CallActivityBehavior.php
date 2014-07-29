@@ -11,7 +11,7 @@
 
 namespace KoolKode\BPMN\Runtime\Behavior;
 
-use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
+use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
 
@@ -21,7 +21,7 @@ use KoolKode\Expression\ExpressionInterface;
  * 
  * @author Martin Schröder
  */
-class CallActivityBehavior extends AbstractSignalableBehavior
+class CallActivityBehavior extends AbstractScopeBehavior
 {
 	protected $processDefinitionKey;
 	
@@ -105,5 +105,13 @@ class CallActivityBehavior extends AbstractSignalableBehavior
 		]);
 		
 		return $execution->takeAll(NULL, [$execution]);
+	}
+	
+	public function interruptBehavior(VirtualExecution $execution)
+	{
+		foreach($execution->findChildExecutions() as $sub)
+		{
+			$sub->terminate();
+		}
 	}
 }

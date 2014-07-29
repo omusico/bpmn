@@ -250,6 +250,20 @@ class DiagramLoader
 						$builder->node($id);
 						
 						break;
+					case 'boundaryEvent':
+						
+						$attachedTo = $el->getAttribute('attachedToRef');
+						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
+						
+						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
+						{
+							$signal = $signals[$def->getAttribute('signalRef')];
+							$builder->signalBoundaryEvent($id, $attachedTo, $signal);
+						
+							break 2;
+						}
+						
+						break;
 					default:
 						
 						$builder->node($id);

@@ -13,8 +13,9 @@ namespace KoolKode\BPMN\Delegate\Behavior;
 
 use KoolKode\BPMN\Delegate\DelegateExecution;
 use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
-use KoolKode\BPMN\Engine\AbstractBehavior;
+use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Expression\ExpressionInterface;
 
 /**
@@ -22,7 +23,7 @@ use KoolKode\Expression\ExpressionInterface;
  * 
  * @author Martin Schröder
  */
-class ServiceTaskBehavior extends AbstractBehavior
+class ServiceTaskBehavior extends AbstractScopeBehavior
 {
 	protected $name;
 	
@@ -42,6 +43,7 @@ class ServiceTaskBehavior extends AbstractBehavior
 			$execution->getEngine()
 		));
 		
-		$execution->takeAll(NULL, [$execution]);
+		$execution->getEngine()->pushCommand(new SignalExecutionCommand($execution));
+		$execution->waitForSignal();
 	}
 }

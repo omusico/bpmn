@@ -16,12 +16,12 @@ use KoolKode\Process\Execution;
 
 abstract class AbstractBehavior implements BehaviorInterface
 {
-	public final function execute(Execution $execution)
+	public function execute(Execution $execution)
 	{
 		return $this->executeBehavior($execution);
 	}
 	
-	protected function executeBehavior(VirtualExecution $execution)
+	public function executeBehavior(VirtualExecution $execution)
 	{
 		return $execution->takeAll(NULL, [$execution]);
 	}

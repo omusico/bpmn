@@ -11,13 +11,14 @@
 
 namespace KoolKode\BPMN\Task\Behavior;
 
-use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
+use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
-use KoolKode\BPMN\Task\Command\CreateUserTaskCommand;
-use KoolKode\Expression\ExpressionInterface;
 use KoolKode\BPMN\Task\Command\ClaimUserTaskCommand;
+use KoolKode\BPMN\Task\Command\CreateUserTaskCommand;
+use KoolKode\BPMN\Task\Command\RemoveUserTaskCommand;
+use KoolKode\Expression\ExpressionInterface;
 
-class UserTaskBehavior extends AbstractSignalableBehavior
+class UserTaskBehavior extends AbstractScopeBehavior
 {
 	protected $name;
 	
@@ -37,7 +38,6 @@ class UserTaskBehavior extends AbstractSignalableBehavior
 	{
 		$name = (string)call_user_func($this->name, $execution->getExpressionContext());
 		
-		$execution->waitForSignal();
 		$task = $execution->getEngine()->executeCommand(new CreateUserTaskCommand($name, $execution));
 		
 		if($this->assignee !== NULL)
@@ -47,5 +47,12 @@ class UserTaskBehavior extends AbstractSignalableBehavior
 				call_user_func($this->assignee, $execution->getExpressionContext())
 			));
 		}
+		
+		$execution->waitForSignal();
+	}
+	
+	public function interruptBehavior(VirtualExecution $execution)
+	{
+		$execution->getEngine()->executeCommand(new RemoveUserTaskCommand($execution));
 	}
 }

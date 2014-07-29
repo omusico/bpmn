@@ -13,8 +13,9 @@ namespace KoolKode\BPMN\Delegate\Behavior;
 
 use KoolKode\BPMN\Delegate\DelegateExecution;
 use KoolKode\BPMN\Delegate\DelegateTaskInterface;
-use KoolKode\BPMN\Engine\AbstractBehavior;
+use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Expression\ExpressionInterface;
 
 /**
@@ -22,7 +23,7 @@ use KoolKode\Expression\ExpressionInterface;
  * 
  * @author Martin Schröder
  */
-class DelegateTaskBehavior extends AbstractBehavior
+class DelegateTaskBehavior extends AbstractScopeBehavior
 {
 	protected $typeName;
 	
@@ -39,18 +40,19 @@ class DelegateTaskBehavior extends AbstractBehavior
 		$typeName = (string)call_user_func($this->typeName, $execution->getExpressionContext());
 		$task = $execution->getEngine()->createDelegateTask($typeName);
 		
-		if($task instanceof DelegateTaskInterface)
+		if(!$task instanceof DelegateTaskInterface)
 		{
-			$execution->getEngine()->debug('Execute delegate task "{task}" implemented by {class}', [
-				'task' => (string)call_user_func($this->name, $execution->getExpressionContext()),
-				'class' => get_class($task)
-			]);
-			
-			$task->execute(new DelegateExecution($execution));
-			
-			return $execution->takeAll(NULL, [$execution]);
+			throw new \RuntimeException('Invalid service task implementation: ' . get_class($task));
 		}
 		
-		throw new \RuntimeException('Invalid service task implementation: ' . get_class($task));
+		$execution->getEngine()->debug('Execute delegate task "{task}" implemented by {class}', [
+			'task' => (string)call_user_func($this->name, $execution->getExpressionContext()),
+			'class' => get_class($task)
+		]);
+		
+		$task->execute(new DelegateExecution($execution));
+		
+		$execution->getEngine()->pushCommand(new SignalExecutionCommand($execution));
+		$execution->waitForSignal();
 	}
 }
