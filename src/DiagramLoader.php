@@ -203,6 +203,10 @@ class DiagramLoader
 					case 'parallelGateway':
 						$builder->parallelGateway($id);
 						break;
+					case 'eventBasedGateway':
+						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
+						$builder->eventBasedGateway($id, $name);
+						break;
 					case 'intermediateCatchEvent':
 						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)

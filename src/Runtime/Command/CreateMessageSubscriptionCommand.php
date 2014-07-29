@@ -14,6 +14,7 @@ namespace KoolKode\BPMN\Runtime\Command;
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\Process\Node;
 use KoolKode\Util\Uuid;
 
 class CreateMessageSubscriptionCommand extends AbstractBusinessCommand
@@ -22,22 +23,26 @@ class CreateMessageSubscriptionCommand extends AbstractBusinessCommand
 	
 	protected $execution;
 	
-	public function __construct($message, VirtualExecution $execution)
+	protected $node;
+	
+	public function __construct($message, VirtualExecution $execution, Node $node = NULL)
 	{
 		$this->message = (string)$message;
 		$this->execution = $execution;
+		$this->node = $node;
 	}
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$sql = "	INSERT INTO `#__bpm_event_subscription`
-						(`id`, `execution_id`, `process_instance_id`, `flags`, `name`, `created_at`)
+						(`id`, `execution_id`, `node`, `process_instance_id`, `flags`, `name`, `created_at`)
 					VALUES
-						(:id, :eid, :pid, :flags, :message, :created)
+						(:id, :eid, :node, :pid, :flags, :message, :created)
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('id', UUID::createRandom()->toBinary());
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
+		$stmt->bindValue('node', ($this->node === NULL) ? NULL : $this->node->getId());
 		$stmt->bindValue('pid', $this->execution->getRootExecution()->getId()->toBinary());
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 		$stmt->bindValue('message', $this->message);

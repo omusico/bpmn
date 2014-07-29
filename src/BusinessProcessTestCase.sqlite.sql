@@ -49,6 +49,7 @@ CREATE INDEX bpm_execution_node ON bpm_execution(node);
 CREATE TABLE bpm_event_subscription (
 	id BINARY(16) NOT NULL,
 	execution_id BINARY(16) NOT NULL,
+	node VARCHAR(250) NULL,
 	process_instance_id BINARY(16) NOT NULL,
 	flags INT UNSIGNED NOT NULL,
 	name VARCHAR(250) NOT NULL,

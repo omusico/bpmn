@@ -110,6 +110,11 @@ class BusinessProcessBuilder
 		return $this->builder->node($id)->behavior(new SyncBehavior());
 	}
 	
+	public function eventBasedGateway($id)
+	{
+		return $this->builder->node($id)->behavior(new Runtime\Behavior\EventBasedGatewayBehavior());
+	}
+	
 	public function serviceTask($id, $name = '')
 	{
 		return $this->builder->node($id)->behavior(new Delegate\Behavior\ServiceTaskBehavior($this->exp($name)));

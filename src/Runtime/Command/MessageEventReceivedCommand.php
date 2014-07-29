@@ -36,7 +36,7 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
-		$sql = "	SELECT s.`id`, s.`execution_id`
+		$sql = "	SELECT s.`id`, s.`execution_id`, s.`node`
 					FROM `#__bpm_event_subscription` AS s
 					WHERE s.`name` = :message
 					AND s.`flags` = :flags
@@ -59,9 +59,19 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 		
 		$execution = $engine->findExecution($this->executionId);
 		
-		$sql = "DELETE FROM `#__bpm_event_subscription` WHERE `id` = :id";
+		if($row['node'] !== NULL)
+		{
+			$execution->setNode($execution->getProcessDefinition()->findNode($row['node']));
+			$execution->setTransition(NULL);
+			
+			$engine->syncExecutionState($execution);
+		}
+		
+		$sql = "	DELETE FROM `#__bpm_event_subscription`
+					WHERE `execution_id` = :eid
+		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('id', $row['id']);
+		$stmt->bindValue('eid', $execution->getId()->toBinary());
 		$stmt->execute();
 		
 		$engine->pushCommand(new SignalExecutionCommand($execution, $this->messageName, $this->variables));
