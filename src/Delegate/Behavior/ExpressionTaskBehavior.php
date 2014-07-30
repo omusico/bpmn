@@ -27,12 +27,9 @@ class ExpressionTaskBehavior extends AbstractScopeBehavior
 	
 	protected $resultVariable;
 	
-	protected $name;
-	
-	public function __construct(ExpressionInterface $expression, ExpressionInterface $name)
+	public function __construct(ExpressionInterface $expression)
 	{
 		$this->expression = $expression;
-		$this->name = $name;
 	}
 	
 	public function setResultVariable($var = NULL)
@@ -43,10 +40,10 @@ class ExpressionTaskBehavior extends AbstractScopeBehavior
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->getEngine()->debug('Execute expression in service task "{task}"', [
-			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
+			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);
 		
-		$result = call_user_func($this->expression, $execution->getExpressionContext());
+		$result = $this->getValue($this->expression, $execution->getExpressionContext());
 		
 		if($this->resultVariable !== NULL)
 		{

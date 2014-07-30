@@ -16,7 +16,6 @@ use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
 use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
-use KoolKode\Expression\ExpressionInterface;
 
 /**
  * Handles service tasks without specific implementation.
@@ -25,17 +24,10 @@ use KoolKode\Expression\ExpressionInterface;
  */
 class ServiceTaskBehavior extends AbstractScopeBehavior
 {
-	protected $name;
-	
-	public function __construct(ExpressionInterface $name)
-	{
-		$this->name = $name;
-	}
-	
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->getEngine()->debug('Executing service task "{task}"', [
-			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
+			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);
 		
 		$execution->getEngine()->notify(new ServiceTaskExecutedEvent(

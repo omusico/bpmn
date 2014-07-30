@@ -16,6 +16,11 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\CreateMessageSubscriptionCommand;
 use KoolKode\Process\Node;
 
+/**
+ * Message catch event bound to an event scope.
+ * 
+ * @author Martin Schröder
+ */
 class MessageBoundaryEventBehavior extends AbstractBoundaryEventBehavior
 {
 	protected $message;

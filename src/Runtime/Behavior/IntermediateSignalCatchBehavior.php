@@ -16,6 +16,11 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\CreateSignalSubscriptionCommand;
 use KoolKode\Process\Node;
 
+/**
+ * Subscribes to a signal event and waits for the signals arrival.
+ * 
+ * @author Martin Schröder
+ */
 class IntermediateSignalCatchBehavior extends AbstractSignalableBehavior implements IntermediateCatchEventInterface
 {
 	protected $signal;

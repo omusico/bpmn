@@ -24,19 +24,38 @@ use KoolKode\Expression\ExpressionInterface;
 class CallActivityBehavior extends AbstractScopeBehavior
 {
 	protected $processDefinitionKey;
+		
+	protected $inputs = [];
 	
-	protected $name;
+	protected $outputs = [];
 	
-	protected $inputs;
-	
-	protected $outputs;
-	
-	public function __construct($processDefinitionKey, ExpressionInterface $name, array $inputs = [], array $outputs = [])
+	public function __construct($processDefinitionKey)
 	{
 		$this->processDefinitionKey = (string)$processDefinitionKey;
-		$this->name = $name;
-		$this->inputs = $inputs;
-		$this->outputs = $outputs;
+	}
+	
+	public function addInput($target, $source)
+	{
+		if($source instanceof ExpressionInterface)
+		{
+			$this->inputs[(string)$target] = $source;
+		}
+		else
+		{
+			$this->inputs[(string)$target] = (string)$source;
+		}
+	}
+	
+	public function addOutput($target, $source)
+	{
+		if($source instanceof ExpressionInterface)
+		{
+			$this->outputs[(string)$target] = $source;
+		}
+		else
+		{
+			$this->outputs[(string)$target] = (string)$source;
+		}
 	}
 	
 	public function executeBehavior(VirtualExecution $execution)
@@ -47,7 +66,7 @@ class CallActivityBehavior extends AbstractScopeBehavior
 		
 		$execution->getEngine()->debug('Starting process {process} from call activity "{task}"', [
 			'process' => $this->processDefinitionKey,
-			'task' => (string)call_user_func($this->name, $context)
+			'task' => $this->getStringValue($this->name, $context)
 		]);
 		
 		$start = $definition->getModel()->findInitialNodes();
@@ -101,7 +120,7 @@ class CallActivityBehavior extends AbstractScopeBehavior
 		
 		$execution->getEngine()->debug('Resuming {execution} at call activity "{task}"', [
 			'execution' => (string)$execution,
-			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
+			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);
 		
 		return $execution->takeAll(NULL, [$execution]);

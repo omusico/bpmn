@@ -11,16 +11,29 @@
 
 namespace KoolKode\BPMN;
 
+use KoolKode\BPMN\Delegate\Behavior\DelegateTaskBehavior;
+use KoolKode\BPMN\Delegate\Behavior\ExpressionTaskBehavior;
+use KoolKode\BPMN\Delegate\Behavior\ScriptTaskBehavior;
+use KoolKode\BPMN\Delegate\Behavior\ServiceTaskBehavior;
+use KoolKode\BPMN\Runtime\Behavior\CallActivityBehavior;
+use KoolKode\BPMN\Runtime\Behavior\EventBasedGatewayBehavior;
+use KoolKode\BPMN\Runtime\Behavior\ExclusiveGatewayBehavior;
+use KoolKode\BPMN\Runtime\Behavior\InclusiveGatewayBehavior;
+use KoolKode\BPMN\Runtime\Behavior\ParallelGatewayBehavior;
+use KoolKode\BPMN\Runtime\Behavior\IntermediateMessageCatchBehavior;
+use KoolKode\BPMN\Runtime\Behavior\IntermediateMessageThrowBehavior;
+use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalCatchBehavior;
+use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalThrowBehavior;
+use KoolKode\BPMN\Runtime\Behavior\MessageBoundaryEventBehavior;
+use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
+use KoolKode\BPMN\Runtime\Behavior\SignalBoundaryEventBehavior;
+use KoolKode\BPMN\Task\Behavior\UserTaskBehavior;
 use KoolKode\Expression\ExpressionInterface;
 use KoolKode\Expression\Parser\ExpressionLexer;
 use KoolKode\Expression\Parser\ExpressionParser;
-use KoolKode\Process\Behavior\ExclusiveChoiceBehavior;
-use KoolKode\Process\Behavior\InlusiveChoiceBehavior;
-use KoolKode\Process\Behavior\SyncBehavior;
 use KoolKode\Process\ExpressionTrigger;
 use KoolKode\Process\ProcessDefinition;
 use KoolKode\Process\ProcessBuilder;
-use KoolKode\Util\UUID;
 
 /**
  * Convenient builder that aids during creation of BPMN 2.0 process models.
@@ -35,15 +48,20 @@ class BusinessProcessBuilder
 	
 	protected $expressionParser;
 	
-	public function __construct($key, $title = '')
+	public function __construct($key, $title = '', ExpressionParser $parser = NULL)
 	{
 		$this->key = $key;
-		
-		$lexer = new ExpressionLexer();
-		$lexer->setDelimiters('#{', '}');
-		
 		$this->builder = new ProcessBuilder($title);
-		$this->expressionParser = new ExpressionParser($lexer);
+		
+		if($parser === NULL)
+		{
+			$lexer = new ExpressionLexer();
+			$lexer->setDelimiters('#{', '}');
+		
+			$parser = new ExpressionParser($lexer);
+		}
+		
+		$this->expressionParser = $parser;
 	}
 	
 	public function getKey()
@@ -61,14 +79,19 @@ class BusinessProcessBuilder
 		return $this->builder->node($id);
 	}
 	
-	public function startEvent($id)
+	public function startEvent($id, $name = NULL)
 	{
 		return $this->builder->node($id)->initial();
 	}
 	
-	public function messageStartEvent($id, $messageName)
+	public function messageStartEvent($id, $messageName, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\MessageStartEventBehavior($messageName));
+		$behavior = new MessageStartEventBehavior($messageName);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
 	public function endEvent($id)
@@ -82,123 +105,184 @@ class BusinessProcessBuilder
 		
 		if($condition !== NULL)
 		{
-			if($condition instanceof ExpressionInterface)
-			{
-				$transition->trigger(new ExpressionTrigger($condition));
-			}
-			else
-			{
-				$transition->trigger(new ExpressionTrigger($this->expressionParser->parse($condition)));
-			}
+			$transition->trigger(new ExpressionTrigger($this->exp($condition)));
 		}
 		
 		return $transition;
 	}
 	
-	public function exclusiveGateway($id, $defaultFlow = NULL)
+	public function exclusiveGateway($id, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new ExclusiveChoiceBehavior($defaultFlow));
-	}
-	
-	public function inclusiveGateway($id, $defaultFlow = NULL)
-	{
-		return $this->builder->node($id)->behavior(new InclusiveChoiceBehavior($defaultFlow));
-	}
-	
-	public function parallelGateway($id)
-	{
-		return $this->builder->node($id)->behavior(new SyncBehavior());
-	}
-	
-	public function eventBasedGateway($id)
-	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\EventBasedGatewayBehavior());
-	}
-	
-	public function serviceTask($id, $name = '')
-	{
-		return $this->builder->node($id)->behavior(new Delegate\Behavior\ServiceTaskBehavior($this->exp($name)));
-	}
-	
-	public function delegateTask($id, $typeName, $name = '')
-	{
-		return $this->builder->node($id)->behavior(new Delegate\Behavior\DelegateTaskBehavior($this->exp($typeName), $this->exp($name)));
-	}
-	
-	public function expressionTask($id, $expression, $name = '', $resultVariable = NULL)
-	{
-		$exp = $this->expressionParser->parse($this->normalize($expression));
+		$behavior = new ExclusiveGatewayBehavior();
+		$behavior->setName($this->stringExp($name));
 		
-		$behavior = new Delegate\Behavior\ExpressionTaskBehavior($exp, $this->exp($name));
-		$behavior->setResultVariable($resultVariable);
+		$this->builder->node($id)->behavior($behavior);
 		
-		return $this->builder->node($id)->behavior($behavior);
+		return $behavior;
 	}
 	
-	public function userTaks($id, $name = '', $assignee = NULL)
+	public function inclusiveGateway($id, $name = NULL)
 	{
-		$behavior = new Task\Behavior\UserTaskBehavior($this->exp($name));
+		$behavior = new InclusiveGatewayBehavior();
+		$behavior->setName($this->stringExp($name));
 		
-		if($assignee !== NULL)
-		{
-			$behavior->setAssignee($this->exp($assignee));
-		}
+		$this->builder->node($id)->behavior($behavior);
 		
-		return $this->builder->node($id)->behavior($behavior);
+		return $behavior;
 	}
 	
-	public function scriptTask($id, $language, $script, $name = '', $resultVariable = NULL)
+	public function parallelGateway($id, $name = NULL)
 	{
-		$behavior = new Delegate\Behavior\ScriptTaskBehavior($language, $script, $this->exp($name));
-		$behavior->setResultVariable($resultVariable);
+		$behavior = new ParallelGatewayBehavior();
+		$behavior->setName($this->stringExp($name));
 		
-		return $this->builder->node($id)->behavior($behavior);
-	}
-	
-	public function callActivity($id, $element, $name = '', array $inputs = [], array $outputs = [])
-	{
-		$behavior = new Runtime\Behavior\CallActivityBehavior($element, $this->exp($name), $inputs, $outputs);
+		$this->builder->node($id)->behavior($behavior);
 		
-		return $this->builder->node($id)->behavior($behavior);
+		return $behavior;
 	}
 	
-	public function intermediateSignalCatchEvent($id, $signal)
+	public function eventBasedGateway($id, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateSignalCatchBehavior($signal));
+		$behavior = new EventBasedGatewayBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
-	public function intermediateMessageCatchEvent($id, $message)
+	public function serviceTask($id, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateMessageCatchBehavior($message));
+		$behavior = new ServiceTaskBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
-	public function intermediateSignalThrowEvent($id, $signal)
+	public function delegateTask($id, $typeName, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateSignalThrowBehavior($signal));
+		$behavior = new DelegateTaskBehavior($this->stringExp($typeName));
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
-	public function intermediateMessageThrowEvent($id, $name = '')
+	public function expressionTask($id, $expression, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\IntermediateMessageThrowBehavior($name));
+		$behavior = new ExpressionTaskBehavior($this->exp($expression));
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
-	public function signalBoundaryEvent($id, $attachedTo, $signal)
+	public function userTask($id, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\SignalBoundaryEventBehavior($attachedTo, $signal));
+		$behavior = new UserTaskBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
-	public function messageBoundaryEvent($id, $attachedTo, $message)
+	public function scriptTask($id, $language, $script, $name = NULL)
 	{
-		return $this->builder->node($id)->behavior(new Runtime\Behavior\MessageBoundaryEventBehavior($attachedTo, $message));
+		$behavior = new ScriptTaskBehavior(strtolower($language), $script);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
-	protected function normalize($input)
+	public function callActivity($id, $element, $name = NULL)
+	{
+		$behavior = new CallActivityBehavior($element);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function intermediateSignalCatchEvent($id, $signal, $name = NULL)
+	{
+		$behavior = new IntermediateSignalCatchBehavior($signal);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function intermediateMessageCatchEvent($id, $message, $name = NULL)
+	{
+		$behavior = new IntermediateMessageCatchBehavior($message);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function intermediateSignalThrowEvent($id, $signal, $name = NULL)
+	{
+		$behavior = new IntermediateSignalThrowBehavior($signal);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function intermediateMessageThrowEvent($id, $name = NULL)
+	{
+		$behavior = new IntermediateMessageThrowBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function signalBoundaryEvent($id, $attachedTo, $signal, $name = NULL)
+	{
+		$behavior = new SignalBoundaryEventBehavior($attachedTo, $signal);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function messageBoundaryEvent($id, $attachedTo, $message, $name = NULL)
+	{
+		$behavior = new MessageBoundaryEventBehavior($attachedTo, $message);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function normalize($input)
 	{
 		return trim(preg_replace("'\s+'", ' ', $input));
 	}
 	
-	protected function exp($input)
+	public function exp($input)
 	{
-		return $this->expressionParser->parseString($this->normalize($input));
+		return ($input === NULL) ? NULL : $this->expressionParser->parse($this->normalize($input));
+	}
+	
+	public function stringExp($input)
+	{
+		return ($input === NULL) ? NULL : $this->expressionParser->parseString($this->normalize($input));
 	}
 }

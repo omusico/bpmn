@@ -16,6 +16,11 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\CreateMessageSubscriptionCommand;
 use KoolKode\Process\Node;
 
+/**
+ * Subscribes to a message event and waits for message arrival.
+ * 
+ * @author Martin Schröder
+ */
 class IntermediateMessageCatchBehavior extends AbstractSignalableBehavior implements IntermediateCatchEventInterface
 {
 	protected $message;

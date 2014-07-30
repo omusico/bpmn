@@ -15,6 +15,11 @@ use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\SignalEventReceivedCommand;
 
+/**
+ * Throws a signal event to all subscribed executions.
+ * 
+ * @author Martin Schröder
+ */
 class IntermediateSignalThrowBehavior extends AbstractSignalableBehavior
 {
 	protected $signalName;

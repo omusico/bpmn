@@ -27,17 +27,14 @@ class DelegateTaskBehavior extends AbstractScopeBehavior
 {
 	protected $typeName;
 	
-	protected $name;
-	
-	public function __construct(ExpressionInterface $typeName, ExpressionInterface $name)
+	public function __construct(ExpressionInterface $typeName)
 	{
 		$this->typeName = $typeName;
-		$this->name = $name;
 	}
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$typeName = (string)call_user_func($this->typeName, $execution->getExpressionContext());
+		$typeName = $this->getStringValue($this->typeName, $execution->getExpressionContext());
 		$task = $execution->getEngine()->createDelegateTask($typeName);
 		
 		if(!$task instanceof DelegateTaskInterface)
@@ -46,7 +43,7 @@ class DelegateTaskBehavior extends AbstractScopeBehavior
 		}
 		
 		$execution->getEngine()->debug('Execute delegate task "{task}" implemented by {class}', [
-			'task' => (string)call_user_func($this->name, $execution->getExpressionContext()),
+			'task' => $this->getStringValue($this->name, $execution->getExpressionContext()),
 			'class' => get_class($task)
 		]);
 		

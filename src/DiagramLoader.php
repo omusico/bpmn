@@ -11,7 +11,6 @@
 
 namespace KoolKode\BPMN;
 
-use KoolKode\Expression\Parser\ExpressionParser;
 use KoolKode\Xml\XmlDocumentBuilder;
 
 /**
@@ -22,17 +21,14 @@ use KoolKode\Xml\XmlDocumentBuilder;
 class DiagramLoader
 {
 	const NS_MODEL = 'http://www.omg.org/spec/BPMN/20100524/MODEL';
+	
 	const NS_DI = 'http://www.omg.org/spec/BPMN/20100524/DI';
+	
 	const NS_DC = 'http://www.omg.org/spec/DD/20100524/DC';
+	
 	const NS_XSI = 'http://www.w3.org/2001/XMLSchema-instance';
+	
 	const NS_IMPL = 'http://activiti.org/bpmn';
-	
-	protected $expressionParser;
-	
-	public function __construct()
-	{
-		$this->expressionParser = new ExpressionParser();
-	}
 	
 	public function parseDiagramFile($file)
 	{
@@ -71,113 +67,111 @@ class DiagramLoader
 				{
 					case 'startEvent':
 						
-						// TODO: Support different event types...
+						// TODO: Support start events other than non-start and message-start.
 						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
 						{
 							$message = $messages[$messageElement->getAttribute('messageRef')];
-							$builder->messageStartEvent($id, $message);
+							$builder->messageStartEvent($id, $message, $el->getAttribute('name'));
 							
 							break 2;
 						}
 						
-						$builder->startEvent($id);
+						$builder->startEvent($id, $el->getAttribute('name'));
 						
 						break;
 					case 'endEvent':
-						$builder->endEvent($id);
 						
-						// TODO: Support different event types...
+						$builder->endEvent($id, $el->getAttribute('name'));
+						
+						// TODO: Support end events other then non-end.
 						
 						break;
 					case 'serviceTask':
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
 						
 						if($el->hasAttributeNS(self::NS_IMPL, 'class') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'class')))
 						{
-							$builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $name);
+							$builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $el->getAttribute('name'));
+							
+							break;
 						}
-						elseif($el->hasAttributeNS(self::NS_IMPL, 'expression') && '' !== $el->getAttributeNS(self::NS_IMPL, 'expression'))
+						
+						if($el->hasAttributeNS(self::NS_IMPL, 'expression') && '' !== $el->getAttributeNS(self::NS_IMPL, 'expression'))
 						{
-							$var = NULL;
+							$expressionTask = $builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $el->getAttribute('name'));
 							
 							if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
 							{
-								$var = trim($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
+								$expressionTask->setResultVariable($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
 							}
 							
-							$builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $name, $var);
+							break;
 						}
-						else
-						{
-							$builder->serviceTask($id, $name);
-						}
+												
+						$builder->serviceTask($id, $el->getAttribute('name'));
+						
 						break;
 					case 'userTask':
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
-						$assignee = NULL;
+						
+						$userTask = $builder->userTask($id, $el->getAttribute('name'));
 						
 						if($el->hasAttributeNS(self::NS_IMPL, 'assignee') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'assignee')))
 						{
-							$assignee = trim($el->getAttributeNS(self::NS_IMPL, 'assignee'));
+							$userTask->setAssignee($builder->stringExp($el->getAttributeNS(self::NS_IMPL, 'assignee')));
 						}
 						
-						$builder->userTaks($id, $name, $assignee);
 						break;
 					case 'scriptTask':
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
-						$language = strtolower(trim($el->getAttribute('scriptFormat')));
+						
 						$script = '';
-						$var = NULL;
 						
 						foreach($xpath->query('m:script', $el) as $scriptElement)
 						{
 							$script .= $scriptElement->textContent;
 						}
 						
+						$scriptTask = $builder->scriptTask($id, $el->getAttribute('scriptFormat'), $script, $el->getAttribute('name'));
+						
 						if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
 						{
-							$var = trim($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
+							$scriptTask->setResultVariable($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
 						}
 						
-						$builder->scriptTask($id, $language, $script, $name, $var);
 						break;
 					case 'sendTask':
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
-						$builder->intermediateMessageThrowEvent($id, $name);
+						
+						$builder->intermediateMessageThrowEvent($id, $el->getAttribute('name'));
 						break;
 					case 'callActivity':
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
-						$element = trim($el->getAttribute('calledElement'));
 						
-						$inputs = [];
-						$outputs = [];
+						$call = $builder->callActivity($id, $el->getAttribute('calledElement'), $el->getAttribute('name'));
+						$call->setDescription($el->hasAttribute('description') ? $builder->exp($el->getAttribute('description')) : NULL);
 						
 						foreach($xpath->query('m:extensionElements/i:in[@source]', $el) as $in)
 						{
-							$inputs[$in->getAttribute('target')] = $in->getAttribute('source');
+							$call->addInput($in->getAttribute('target'), $in->getAttribute('source'));
 						}
 						
 						foreach($xpath->query('m:extensionElements/i:in[@sourceExpression]', $el) as $in)
 						{
-							$inputs[$in->getAttribute('target')] = $this->expressionParser->parse($in->getAttribute('sourceExpression'));
+							$call->addInput($in->getAttribute('target'), $builder->exp($in->getAttribute('sourceExpression')));
 						}
 						
 						foreach($xpath->query('m:extensionElements/i:out[@source]', $el) as $out)
 						{
-							$outputs[$out->getAttribute('target')] = $out->getAttribute('source');
+							$call->addOutput($out->getAttribute('target'), $out->getAttribute('source'));
 						}
 						
 						foreach($xpath->query('m:extensionElements/i:out[@sourceExpression]', $el) as $out)
 						{
-							$outputs[$out->getAttribute('target')] = $this->expressionParser->parse($out->getAttribute('sourceExpression'));
+							$call->addOutput($out->getAttribute('target'), $builder->exp($out->getAttribute('sourceExpression')));
 						}
 						
-						$builder->callActivity($id, $element, $name, $inputs, $outputs);
 						break;
 					case 'sequenceFlow':
 						
 						$condition = NULL;
+						
 						foreach($xpath->query('m:conditionExpression', $el) as $conditionElement)
 						{
 							$type = (string)$conditionElement->getAttributeNS(self::NS_XSI, 'type');
@@ -197,22 +191,31 @@ class DiagramLoader
 						$builder->sequenceFlow($id, $el->getAttribute('sourceRef'), $el->getAttribute('targetRef'), $condition);
 						break;
 					case 'exclusiveGateway':
-						$defaultFlow = $el->hasAttribute('default') ? $el->getAttribute('default') : NULL;
-						$builder->exclusiveGateway($id, $defaultFlow);
+						
+						$gateway = $builder->exclusiveGateway($id, $el->getAttribute('name'));
+						$gateway->setDefaultFlow($el->getAttribute('default'));
+						
+						break;
+					case 'inclusiveGateway':
+					
+						$gateway = $builder->inclusiveGateway($id, $el->getAttribute('name'));
+						$gateway->setDefaultFlow($el->getAttribute('default'));
+					
 						break;
 					case 'parallelGateway':
-						$builder->parallelGateway($id);
+						
+						$builder->parallelGateway($id, $el->getAttribute('name'));
 						break;
 					case 'eventBasedGateway':
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
-						$builder->eventBasedGateway($id, $name);
+						
+						$builder->eventBasedGateway($id, $el->getAttribute('name'));
 						break;
 					case 'intermediateCatchEvent':
 						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
 						{
 							$message = $messages[$messageElement->getAttribute('messageRef')];
-							$builder->intermediateMessageCatchEvent($id, $message);
+							$builder->intermediateMessageCatchEvent($id, $message, $el->getAttribute('name'));
 							
 							break 2;
 						}
@@ -220,7 +223,7 @@ class DiagramLoader
 						foreach($xpath->query('m:signalEventDefinition', $el) as $signalElement)
 						{
 							$signal = $signals[$signalElement->getAttribute('signalRef')];
-							$builder->intermediateSignalCatchEvent($id, $signal);
+							$builder->intermediateSignalCatchEvent($id, $signal, $el->getAttribute('name'));
 							
 							break 2;
 						}
@@ -230,11 +233,9 @@ class DiagramLoader
 						break;
 					case 'intermediateThrowEvent':
 						
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
-						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $def)
 						{
-							$builder->intermediateMessageThrowEvent($id, $name);
+							$builder->intermediateMessageThrowEvent($id, $el->getAttribute('name'));
 							
 							break 2;
 						}
@@ -242,7 +243,7 @@ class DiagramLoader
 						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
 						{
 							$signal = $signals[$def->getAttribute('signalRef')];
-							$builder->intermediateSignalThrowEvent($id, $signal);
+							$builder->intermediateSignalThrowEvent($id, $signal, $el->getAttribute('name'));
 								
 							break 2;
 						}
@@ -253,12 +254,11 @@ class DiagramLoader
 					case 'boundaryEvent':
 						
 						$attachedTo = $el->getAttribute('attachedToRef');
-						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
 						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
 						{
 							$message = $messages[$messageElement->getAttribute('messageRef')];
-							$builder->messageBoundaryEvent($id, $attachedTo, $message);
+							$builder->messageBoundaryEvent($id, $attachedTo, $message, $el->getAttribute('name'));
 								
 							break 2;
 						}
@@ -266,7 +266,7 @@ class DiagramLoader
 						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
 						{
 							$signal = $signals[$def->getAttribute('signalRef')];
-							$builder->signalBoundaryEvent($id, $attachedTo, $signal);
+							$builder->signalBoundaryEvent($id, $attachedTo, $signal, $el->getAttribute('name'));
 						
 							break 2;
 						}

@@ -14,6 +14,11 @@ namespace KoolKode\BPMN\Runtime\Behavior;
 use KoolKode\BPMN\Engine\AbstractBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 
+/**
+ * Similar to basic start event, message subscriptions are handled by repository services.
+ * 
+ * @author Martin Schröder
+ */
 class MessageStartEventBehavior extends AbstractBehavior
 {
 	protected $messageName;

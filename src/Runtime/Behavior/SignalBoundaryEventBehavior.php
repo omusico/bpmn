@@ -16,6 +16,11 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\CreateSignalSubscriptionCommand;
 use KoolKode\Process\Node;
 
+/**
+ * Signal catch event bound to an event scope.
+ * 
+ * @author Martin Schröder
+ */
 class SignalBoundaryEventBehavior extends AbstractBoundaryEventBehavior
 {
 	protected $signal;

@@ -15,11 +15,17 @@ use KoolKode\BPMN\Engine\AbstractSignalableBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\ThrowMessageCommand;
 
+/**
+ * Triggers a ThrowMessageEvent that must be handled in application code.
+ * 
+ * @author Martin Schröder
+ */
 class IntermediateMessageThrowBehavior extends AbstractSignalableBehavior
 {
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$execution->waitForSignal();
 		$execution->getEngine()->pushCommand(new ThrowMessageCommand($execution));
+		
+		$execution->waitForSignal();
 	}
 }

@@ -11,7 +11,6 @@
 
 namespace KoolKode\BPMN\Engine;
 
-use KoolKode\Expression\ExpressionInterface;
 use KoolKode\Process\Node;
 
 /**
@@ -23,8 +22,6 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 {
 	protected $attachedTo;
 	
-	protected $name;
-	
 	public function __construct($attachedTo)
 	{
 		$this->attachedTo = (string)$attachedTo;
@@ -33,11 +30,6 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 	public function getAttachedTo()
 	{
 		return $this->attachedTo;
-	}
-	
-	public function setName(ExpressionInterface $name = NULL)
-	{
-		$this->name = $name;
 	}
 		
 	/**

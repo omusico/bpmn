@@ -14,7 +14,6 @@ namespace KoolKode\BPMN\Delegate\Behavior;
 use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
-use KoolKode\Expression\ExpressionInterface;
 
 /**
  * Executes a PHP script defined in a task within a BPMN process.
@@ -23,20 +22,17 @@ use KoolKode\Expression\ExpressionInterface;
  */
 class ScriptTaskBehavior extends AbstractScopeBehavior
 {
-	protected $name;
-	
 	protected $language;
 	
 	protected $resultVariable;
 	
 	protected $script;
 	
-	public function __construct($language, $script, ExpressionInterface $name)
+	public function __construct($language, $script)
 	{
 		$this->language = strtolower($language);
 		$this->script = (string)$script;
-		$this->name = $name;
-		
+				
 		if($this->language !== 'php')
 		{
 			throw new \InvalidArgumentException(sprintf('Only PHP is supported as scripting language, given "%s"', $this->language));
@@ -52,7 +48,7 @@ class ScriptTaskBehavior extends AbstractScopeBehavior
 	{
 		$execution->getEngine()->debug('Evaluate {language} script task "{task}"', [
 			'language' => $this->language,
-			'task' => (string)call_user_func($this->name, $execution->getExpressionContext())
+			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);
 		
 		$result = eval($this->script);

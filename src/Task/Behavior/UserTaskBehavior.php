@@ -18,16 +18,14 @@ use KoolKode\BPMN\Task\Command\CreateUserTaskCommand;
 use KoolKode\BPMN\Task\Command\RemoveUserTaskCommand;
 use KoolKode\Expression\ExpressionInterface;
 
+/**
+ * Creates user tasks and waits for their completion.
+ * 
+ * @author Martin Schröder
+ */
 class UserTaskBehavior extends AbstractScopeBehavior
 {
-	protected $name;
-	
 	protected $assignee;
-	
-	public function __construct(ExpressionInterface $name)
-	{
-		$this->name = $name;
-	}
 	
 	public function setAssignee(ExpressionInterface $assignee = NULL)
 	{
@@ -36,7 +34,7 @@ class UserTaskBehavior extends AbstractScopeBehavior
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$name = (string)call_user_func($this->name, $execution->getExpressionContext());
+		$name = $this->getStringValue($this->name, $execution->getExpressionContext());
 		
 		$task = $execution->getEngine()->executeCommand(new CreateUserTaskCommand($name, $execution));
 		
@@ -44,7 +42,7 @@ class UserTaskBehavior extends AbstractScopeBehavior
 		{
 			$execution->getEngine()->pushCommand(new ClaimUserTaskCommand(
 				$task->getId(),
-				call_user_func($this->assignee, $execution->getExpressionContext())
+				$this->getStringValue($this->assignee, $execution->getExpressionContext())
 			));
 		}
 		

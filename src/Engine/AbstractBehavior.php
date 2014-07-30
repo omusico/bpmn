@@ -21,6 +21,8 @@ use KoolKode\Process\Execution;
  */
 abstract class AbstractBehavior implements BehaviorInterface
 {
+	use BasicAttributesTrait;
+	
 	/**
 	 * {@inheritdoc}
 	 */
