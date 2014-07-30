@@ -12,6 +12,7 @@
 namespace KoolKode\BPMN\Engine;
 
 use KoolKode\Process\Node;
+use KoolKode\Util\UUID;
 
 /**
  * Base class for BPMN boundary events that can be attached to tasks and sub processes.
@@ -22,6 +23,8 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 {
 	protected $attachedTo;
 	
+	protected $interrupting= true;
+	
 	public function __construct($attachedTo)
 	{
 		$this->attachedTo = (string)$attachedTo;
@@ -30,6 +33,16 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 	public function getAttachedTo()
 	{
 		return $this->attachedTo;
+	}
+	
+	public function isInterrupting()
+	{
+		return $this->interrupting;
+	}
+	
+	public function setInterrupting($interrupting)
+	{
+		$this->interrupting = $interrupting ? true : false;
 	}
 		
 	/**
@@ -48,10 +61,35 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
 		$definition = $execution->getProcessDefinition();
+		$event = $execution->getNode();
 		$activity = $definition->findNode($this->attachedTo);
 		
-		$activity->getBehavior()->interruptBehavior($execution);
+		if($this->interrupting)
+		{
+			$activity->getBehavior()->interruptBehavior($execution);
+			
+			return parent::signalBehavior($execution, $signal, $variables);
+		}
 		
-		return parent::signalBehavior($execution, $signal, $variables);
+		if($execution->isConcurrent())
+		{
+			$root = $execution->getParentExecution();
+		}
+		else
+		{
+			$root = $execution->introduceConcurrentRoot();
+		}
+		
+		$execution->getEngine()->syncExecutionState($root);
+		$fork = $root->createExecution(true);
+		
+		$execution->setNode($activity);
+		$execution->waitForSignal();
+		
+		$fork->setNode($event);
+		
+		$activity->getBehavior()->createScopedEventSubscriptions($execution);
+		
+		return parent::signalBehavior($fork, $signal, $variables);
 	}
 }

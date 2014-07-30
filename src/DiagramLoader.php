@@ -259,11 +259,18 @@ class DiagramLoader
 					case 'boundaryEvent':
 						
 						$attachedTo = $el->getAttribute('attachedToRef');
+						$cancelActivity = true;
+						
+						if($el->hasAttribute('cancelActivity'))
+						{
+							$cancelActivity = (strtolower($el->getAttribute('cancelActivity')) == 'true');
+						}
 						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
 						{
 							$message = $messages[$messageElement->getAttribute('messageRef')];
-							$builder->messageBoundaryEvent($id, $attachedTo, $message, $el->getAttribute('name'));
+							$event = $builder->messageBoundaryEvent($id, $attachedTo, $message, $el->getAttribute('name'));
+							$event->setInterrupting($cancelActivity);
 								
 							break 2;
 						}
@@ -271,8 +278,9 @@ class DiagramLoader
 						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
 						{
 							$signal = $signals[$def->getAttribute('signalRef')];
-							$builder->signalBoundaryEvent($id, $attachedTo, $signal, $el->getAttribute('name'));
-						
+							$event = $builder->signalBoundaryEvent($id, $attachedTo, $signal, $el->getAttribute('name'));
+							$event->setInterrupting($cancelActivity);
+							
 							break 2;
 						}
 						

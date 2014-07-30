@@ -30,10 +30,7 @@ abstract class AbstractScopeBehavior extends AbstractSignalableBehavior
 	 */
 	public function execute(Execution $execution)
 	{
-		foreach($this->findAttachedBoundaryEvents($execution) as $event)
-		{
-			$event->getBehavior()->createEventSubscription($execution, $event);
-		}
+		$this->createScopedEventSubscriptions($execution);
 		
 		return parent::execute($execution);
 	}
@@ -64,13 +61,21 @@ abstract class AbstractScopeBehavior extends AbstractSignalableBehavior
 	 */
 	public function interruptBehavior(VirtualExecution $execution) { }
 	
+	public function createScopedEventSubscriptions(Execution $execution)
+	{
+		foreach($this->findAttachedBoundaryEvents($execution) as $event)
+		{
+			$event->getBehavior()->createEventSubscription($execution, $event);
+		}
+	}
+	
 	/**
 	 * Collect all boundary events connected to the activity / node of the given execution.
 	 * 
 	 * @param VirtualExecution $execution
 	 * @return array<Node>
 	 */
-	protected function findAttachedBoundaryEvents(VirtualExecution $execution)
+	public function findAttachedBoundaryEvents(VirtualExecution $execution)
 	{
 		$definition = $execution->getProcessDefinition();
 		$ref = ($execution->getNode() === NULL) ? NULL : $execution->getNode()->getId();
