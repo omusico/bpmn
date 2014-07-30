@@ -13,11 +13,11 @@ namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Task\TaskInterface;
 
-class SignalBoundaryEventTest extends BusinessProcessTestCase
+class MessageBoundaryEventTest extends BusinessProcessTestCase
 {
-	public function testWithoutSignal()
+	public function testWithoutMessage()
 	{
-		$this->deployFile('SignalBoundaryEventTest.bpmn');
+		$this->deployFile('MessageBoundaryEventTest.bpmn');
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('main');
 		
@@ -25,11 +25,11 @@ class SignalBoundaryEventTest extends BusinessProcessTestCase
 		$this->assertTrue($task instanceof TaskInterface);
 		$this->assertEquals('dataTask', $task->getActivityId());
 		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->count());
-		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->signalEventSubscriptionName('TimeoutSignal')->count());
+		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('TimeoutMessage')->count());
 		
 		$this->taskService->complete($task->getId());
 		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->count());
-		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->signalEventSubscriptionName('TimeoutSignal')->count());
+		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('TimeoutMessage')->count());
 		
 		$task = $this->taskService->createTaskQuery()->findOne();
 		$this->assertTrue($task instanceof TaskInterface);
@@ -39,9 +39,9 @@ class SignalBoundaryEventTest extends BusinessProcessTestCase
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
 	}
 	
-	public function testWithSignal()
+	public function testWithMessage()
 	{
-		$this->deployFile('SignalBoundaryEventTest.bpmn');
+		$this->deployFile('MessageBoundaryEventTest.bpmn');
 	
 		$process = $this->runtimeService->startProcessInstanceByKey('main');
 	
@@ -49,11 +49,11 @@ class SignalBoundaryEventTest extends BusinessProcessTestCase
 		$this->assertTrue($task instanceof TaskInterface);
 		$this->assertEquals('dataTask', $task->getActivityId());
 		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->count());
-		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->signalEventSubscriptionName('TimeoutSignal')->count());
+		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('TimeoutMessage')->count());
 	
-		$this->runtimeService->signalEventReceived('TimeoutSignal');
+		$this->runtimeService->messageEventReceived('TimeoutMessage', $process->getId());
 		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->count());
-		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->signalEventSubscriptionName('TimeoutSignal')->count());
+		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->messageEventSubscriptionName('TimeoutMessage')->count());
 		$this->assertEquals(1, $this->taskService->createTaskQuery()->count());
 		
 		$task = $this->taskService->createTaskQuery()->findOne();

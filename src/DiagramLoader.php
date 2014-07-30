@@ -255,6 +255,14 @@ class DiagramLoader
 						$attachedTo = $el->getAttribute('attachedToRef');
 						$name = $el->hasAttribute('name') ? trim($el->getAttribute('name')) : '';
 						
+						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
+						{
+							$message = $messages[$messageElement->getAttribute('messageRef')];
+							$builder->messageBoundaryEvent($id, $attachedTo, $message);
+								
+							break 2;
+						}
+						
 						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
 						{
 							$signal = $signals[$def->getAttribute('signalRef')];

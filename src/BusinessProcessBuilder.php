@@ -187,6 +187,11 @@ class BusinessProcessBuilder
 		return $this->builder->node($id)->behavior(new Runtime\Behavior\SignalBoundaryEventBehavior($attachedTo, $signal));
 	}
 	
+	public function messageBoundaryEvent($id, $attachedTo, $message)
+	{
+		return $this->builder->node($id)->behavior(new Runtime\Behavior\MessageBoundaryEventBehavior($attachedTo, $message));
+	}
+	
 	protected function normalize($input)
 	{
 		return trim(preg_replace("'\s+'", ' ', $input));

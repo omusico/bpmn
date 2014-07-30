@@ -24,6 +24,11 @@ class ClearEventSubscriptionsCommand extends AbstractBusinessCommand
 		$this->execution = $execution;
 	}
 	
+	public function getPriority()
+	{
+		return self::PRIORITY_DEFAULT * 10;
+	}
+	
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$sql = "	DELETE FROM `#__bpm_event_subscription`

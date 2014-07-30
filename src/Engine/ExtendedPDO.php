@@ -20,11 +20,6 @@ class ExtendedPDO extends \PDO
 		$sql = trim(preg_replace("'\s+'", ' ', $statement));
 		$sql = str_replace('#__', $this->prefix, $sql);
 		
-		if($options === NULL)
-		{
-			return parent::prepare($sql);
-		}
-		
-		return parent::prepare($sql, $options);
+		return ($options === NULL) ? parent::prepare($sql) : parent::prepare($sql, $options);
 	}
 }
