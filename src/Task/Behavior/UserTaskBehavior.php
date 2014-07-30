@@ -34,9 +34,11 @@ class UserTaskBehavior extends AbstractScopeBehavior
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$name = $this->getStringValue($this->name, $execution->getExpressionContext());
-		
-		$task = $execution->getEngine()->executeCommand(new CreateUserTaskCommand($name, $execution));
+		$task = $execution->getEngine()->executeCommand(new CreateUserTaskCommand(
+			$this->getStringValue($this->name, $execution->getExpressionContext()),
+			$execution,
+			$this->getStringValue($this->documentation, $execution->getExpressionContext())
+		));
 		
 		if($this->assignee !== NULL)
 		{
