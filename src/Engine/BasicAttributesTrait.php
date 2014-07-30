@@ -18,16 +18,16 @@ trait BasicAttributesTrait
 {
 	protected $name;
 	
-	protected $description;
+	protected $documentation;
 	
 	public function setName(ExpressionInterface $name = NULL)
 	{
 		$this->name = $name;
 	}
 	
-	public function setDescription(ExpressionInterface $description = NULL)
+	public function setDocumentation(ExpressionInterface $documentation = NULL)
 	{
-		$this->description = $description;
+		$this->documentation = $documentation;
 	}
 	
 	public function getValue(ExpressionInterface $exp = NULL, ExpressionContextInterface $context = NULL)

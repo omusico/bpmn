@@ -42,6 +42,13 @@ interface TaskInterface
 	public function getName();
 	
 	/**
+	 * Get the documentation of the task (will contain text-only).
+	 * 
+	 * @return string
+	 */
+	public function getDocumentation();
+	
+	/**
 	 * Get the identifier (as defined by the "id" attribute in a BPMN 2.0 diagram) of the
 	 * activity to be performed.
 	 * 

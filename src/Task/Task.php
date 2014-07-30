@@ -23,6 +23,8 @@ class Task implements TaskInterface
 	protected $claimDate;
 	protected $assignee;
 	
+	protected $documentation = '';
+	
 	public function __construct(UUID $id, UUID $executionId, $name, $activityId, \DateTime $created, \DateTime $claimDate = NULL, $assignee = NULL)
 	{
 		$this->id = $id;
@@ -47,6 +49,16 @@ class Task implements TaskInterface
 	public function getName()
 	{
 		return $this->name;
+	}
+	
+	public function getDocumentation()
+	{
+		return $this->documentation;
+	}
+	
+	public function setDocumentation($documentation = NULL)
+	{
+		$this->documentation = trim($documentation);
 	}
 	
 	public function getActivityId()

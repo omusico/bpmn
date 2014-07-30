@@ -91,7 +91,8 @@ class DiagramLoader
 						
 						if($el->hasAttributeNS(self::NS_IMPL, 'class') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'class')))
 						{
-							$builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $el->getAttribute('name'));
+							$delegateTask = $builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $el->getAttribute('name'));
+							$delegateTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
 							
 							break;
 						}
@@ -99,6 +100,7 @@ class DiagramLoader
 						if($el->hasAttributeNS(self::NS_IMPL, 'expression') && '' !== $el->getAttributeNS(self::NS_IMPL, 'expression'))
 						{
 							$expressionTask = $builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $el->getAttribute('name'));
+							$expressionTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
 							
 							if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
 							{
@@ -108,12 +110,14 @@ class DiagramLoader
 							break;
 						}
 												
-						$builder->serviceTask($id, $el->getAttribute('name'));
+						$serviceTask = $builder->serviceTask($id, $el->getAttribute('name'));
+						$serviceTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
 						
 						break;
 					case 'userTask':
 						
 						$userTask = $builder->userTask($id, $el->getAttribute('name'));
+						$userTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
 						
 						if($el->hasAttributeNS(self::NS_IMPL, 'assignee') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'assignee')))
 						{
@@ -131,6 +135,7 @@ class DiagramLoader
 						}
 						
 						$scriptTask = $builder->scriptTask($id, $el->getAttribute('scriptFormat'), $script, $el->getAttribute('name'));
+						$scriptTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
 						
 						if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
 						{
@@ -145,7 +150,7 @@ class DiagramLoader
 					case 'callActivity':
 						
 						$call = $builder->callActivity($id, $el->getAttribute('calledElement'), $el->getAttribute('name'));
-						$call->setDescription($el->hasAttribute('description') ? $builder->exp($el->getAttribute('description')) : NULL);
+						$call->setDocumentation($builder->stringExp($this->getDocumentation($el)));
 						
 						foreach($xpath->query('m:extensionElements/i:in[@source]', $el) as $in)
 						{
@@ -285,6 +290,19 @@ class DiagramLoader
 		}
 		
 		return $result;
+	}
+	
+	protected function getDocumentation(\DOMElement $el)
+	{
+		$docs = [];
+		$xpath = $this->createXPath($el->ownerDocument);
+		
+		foreach($xpath->query('m:documentation', $el) as $doc)
+		{
+			$docs[] = $doc->textContent;
+		}
+		
+		return empty($docs) ? NULL : implode(' ', $docs);
 	}
 	
 	protected function createXPath(\DOMDocument $xml)

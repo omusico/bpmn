@@ -115,7 +115,7 @@ class TaskQuery
 	
 	protected function unserializeTask(array $row)
 	{
-		return new Task(
+		$task = new Task(
 			new UUID($row['id']),
 			new UUID($row['execution_id']),
 			$row['name'],
@@ -124,6 +124,9 @@ class TaskQuery
 			empty($row['claimed_at']) ? NULL : new \DateTime('@' . $row['claimed_at']),
 			$row['claimed_by']
 		);
+		$task->setDocumentation($row['documentation']);
+		
+		return $task;
 	}
 	
 	protected function executeSql($count = false, $limit = 0, $offset = 0)

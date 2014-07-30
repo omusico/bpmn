@@ -23,24 +23,28 @@ class CreateUserTaskCommand extends AbstractBusinessCommand
 	
 	protected $execution;
 	
-	public function __construct($name, VirtualExecution $execution)
+	protected $documentation;
+	
+	public function __construct($name, VirtualExecution $execution, $documentation = NULL)
 	{
 		$this->name = (string)$name;
 		$this->execution = $execution;
+		$this->documentation = ($documentation === NULL) ? NULL : (string)$documentation;
 	}
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$id = UUID::createRandom();
 		$sql = "	INSERT INTO `#__bpm_user_task`
-						(`id`, `execution_id`, `name`, `activity`, `created_at`)
+						(`id`, `execution_id`, `name`, `documentation`, `activity`, `created_at`)
 					VALUES
-						(:id, :eid, :name, :activity, :created)
+						(:id, :eid, :name, :doc, :activity, :created)
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('id', $id->toBinary());
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
 		$stmt->bindValue('name', $this->name);
+		$stmt->bindValue('doc', $this->documentation);
 		$stmt->bindValue('activity', $this->execution->getNode()->getId());
 		$stmt->bindValue('created', time());
 		$stmt->execute();

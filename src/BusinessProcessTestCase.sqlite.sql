@@ -67,6 +67,7 @@ CREATE TABLE bpm_user_task (
 	id BINARY(16) NOT NULL,
 	execution_id BINARY(16) NOT NULL,
 	name VARCHAR(250) NOT NULL,
+	documentation TEXT NULL,
 	activity VARCHAR(250) NOT NULL,
 	created_at INT UNSIGNED NOT NULL,
 	claimed_at INT UNSIGNED NULL,
