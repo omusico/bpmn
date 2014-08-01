@@ -20,7 +20,7 @@ CREATE TABLE bpm_process_subscription (
 	FOREIGN KEY (definition_id) REFERENCES bpm_process_definition(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX bpm_process_subscription_integrity ON bpm_process_subscription(name);
+CREATE UNIQUE INDEX bpm_process_subscription_integrity ON bpm_process_subscription(definition_id, name);
 
 CREATE TABLE bpm_execution (
 	id BINARY(16) NOT NULL,

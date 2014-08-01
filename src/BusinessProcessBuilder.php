@@ -106,7 +106,7 @@ class BusinessProcessBuilder
 		$behavior = new SignalStartEventBehavior($signalName);
 		$behavior->setName($this->stringExp($name));
 		
-		$this->builder->node($id);
+		$this->builder->node($id)->behavior($behavior);
 		
 		return $behavior;
 	}
