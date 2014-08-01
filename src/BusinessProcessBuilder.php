@@ -26,6 +26,7 @@ use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalCatchBehavior;
 use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalThrowBehavior;
 use KoolKode\BPMN\Runtime\Behavior\MessageBoundaryEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
+use KoolKode\BPMN\Runtime\Behavior\NoneStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalBoundaryEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\BPMN\Task\Behavior\UserTaskBehavior;
@@ -35,7 +36,6 @@ use KoolKode\Expression\Parser\ExpressionParser;
 use KoolKode\Process\ExpressionTrigger;
 use KoolKode\Process\ProcessDefinition;
 use KoolKode\Process\ProcessBuilder;
-use KoolKode\BPMN\Runtime\Behavior\NoneStartEventBehavior;
 
 /**
  * Convenient builder that aids during creation of BPMN 2.0 process models.

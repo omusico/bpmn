@@ -66,7 +66,12 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 		
 		if($this->interrupting)
 		{
-			$activity->getBehavior()->interruptBehavior($execution);
+			$behavior = $activity->getBehavior();
+			
+			if($behavior instanceof AbstractScopeBehavior)
+			{
+				$behavior->interruptBehavior($execution);
+			}
 			
 			return parent::signalBehavior($execution, $signal, $variables);
 		}
@@ -88,7 +93,12 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 		
 		$fork->setNode($event);
 		
-		$activity->getBehavior()->createScopedEventSubscriptions($execution);
+		$behavior = $activity->getBehavior();
+		
+		if($behavior instanceof AbstractScopeBehavior)
+		{
+			$behavior->createScopedEventSubscriptions($execution);
+		}
 		
 		return parent::signalBehavior($fork, $signal, $variables);
 	}
