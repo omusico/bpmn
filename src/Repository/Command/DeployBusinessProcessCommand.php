@@ -16,6 +16,7 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
+use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\Util\Uuid;
 
 class DeployBusinessProcessCommand extends AbstractBusinessCommand
@@ -63,7 +64,22 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$stmt->bindValue('deployed', $time);
 		$stmt->execute();
 		
-		// TODO: Subscribe to signal start events...
+		$sql = "	DELETE FROM `#__bpm_process_subscription`
+					WHERE `definition_id` IN (
+						SELECT `id`
+						FROM `#__bpm_process_definition`
+						WHERE `process_key` = :key
+					)
+		";
+		$stmt = $engine->prepareQuery($sql);
+		$stmt->bindValue('key', $this->builder->getKey());
+		$stmt->execute();
+		
+		$engine->debug('Deployed business process {key} revision {revision} using id {id}', [
+			'key' => $this->builder->getKey(),
+			'revision' => $revision + 1,
+			'id' => (string)$id
+		]);
 		
 		foreach($model->findStartNodes() as $node)
 		{
@@ -71,17 +87,6 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 			
 			if($behavior instanceof MessageStartEventBehavior)
 			{
-				$sql = "	DELETE FROM `#__bpm_process_subscription`
-							WHERE `definition_id` IN (
-								SELECT `id`
-								FROM `#__bpm_process_definition`
-								WHERE `process_key` = :key
-							)
-				";
-				$stmt = $engine->prepareQuery($sql);
-				$stmt->bindValue('key', $this->builder->getKey());
-				$stmt->execute();
-				
 				$sql = "	INSERT INTO `#__bpm_process_subscription`
 								(`id`, `definition_id`, `flags`, `name`)
 							VALUES
@@ -93,14 +98,33 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 				$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 				$stmt->bindValue('message', $behavior->getMessageName());
 				$stmt->execute();
+				
+				$engine->debug('Process {process} subscribed to message {message}', [
+					'process' => $this->builder->getKey(),
+					'message' => $behavior->getMessageName()
+				]);
+			}
+			
+			if($behavior instanceof SignalStartEventBehavior)
+			{
+				$sql = "	INSERT INTO `#__bpm_process_subscription`
+								(`id`, `definition_id`, `flags`, `name`)
+							VALUES
+								(:id, :def, :flags, :message)
+				";
+				$stmt = $engine->prepareQuery($sql);
+				$stmt->bindValue('id', UUID::createRandom()->toBinary());
+				$stmt->bindValue('def', $id->toBinary());
+				$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_SIGNAL);
+				$stmt->bindValue('message', $behavior->getSignalName());
+				$stmt->execute();
+				
+				$engine->debug('Process {process} subscribed to signal {signal}', [
+					'process' => $this->builder->getKey(),
+					'signal' => $behavior->getSignalName()
+				]);
 			}
 		}
-		
-		$engine->debug('Deployed business process {key} revision {revision} using id {id}', [
-			'key' => $this->builder->getKey(),
-			'revision' => $revision + 1,
-			'id' => (string)$id
-		]);
 		
 		return new BusinessProcessDefinition(
 			$id,
