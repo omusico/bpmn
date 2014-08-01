@@ -67,8 +67,6 @@ class DiagramLoader
 				{
 					case 'startEvent':
 						
-						// TODO: Support start events other than non-start and message-start.
-						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
 						{
 							$message = $messages[$messageElement->getAttribute('messageRef')];
@@ -77,14 +75,35 @@ class DiagramLoader
 							break 2;
 						}
 						
+						foreach($xpath->query('m:signalEventDefinition', $el) as $signalElement)
+						{
+							$signal = $signals[$signalElement->getAttribute('signalRef')];
+							$builder->signalStartEvent($id, $signal, $el->getAttribute('name'));
+								
+							break 2;
+						}
+						
 						$builder->startEvent($id, $el->getAttribute('name'));
 						
 						break;
 					case 'endEvent':
 						
-						$builder->endEvent($id, $el->getAttribute('name'));
+						foreach($xpath->query('m:messageEventDefinition', $el) as $def)
+						{
+							$builder->messageEndEvent($id, $el->getAttribute('name'));
+								
+							break 2;
+						}
 						
-						// TODO: Support end events other then non-end.
+						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
+						{
+							$signal = $signals[$def->getAttribute('signalRef')];
+							$builder->signalEndEvent($id, $signal, $el->getAttribute('name'));
+						
+							break 2;
+						}
+						
+						$builder->endEvent($id, $el->getAttribute('name'));
 						
 						break;
 					case 'serviceTask':

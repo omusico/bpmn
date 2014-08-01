@@ -27,6 +27,7 @@ use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalThrowBehavior;
 use KoolKode\BPMN\Runtime\Behavior\MessageBoundaryEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalBoundaryEventBehavior;
+use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\BPMN\Task\Behavior\UserTaskBehavior;
 use KoolKode\Expression\ExpressionInterface;
 use KoolKode\Expression\Parser\ExpressionLexer;
@@ -34,6 +35,7 @@ use KoolKode\Expression\Parser\ExpressionParser;
 use KoolKode\Process\ExpressionTrigger;
 use KoolKode\Process\ProcessDefinition;
 use KoolKode\Process\ProcessBuilder;
+use KoolKode\BPMN\Runtime\Behavior\NoneStartEventBehavior;
 
 /**
  * Convenient builder that aids during creation of BPMN 2.0 process models.
@@ -81,7 +83,12 @@ class BusinessProcessBuilder
 	
 	public function startEvent($id, $name = NULL)
 	{
-		return $this->builder->node($id)->initial();
+		$behavior = new NoneStartEventBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior)->initial();
+		
+		return $behavior;
 	}
 	
 	public function messageStartEvent($id, $messageName, $name = NULL)
@@ -94,9 +101,39 @@ class BusinessProcessBuilder
 		return $behavior;
 	}
 	
+	public function signalStartEvent($id, $signalName, $name = NULL)
+	{
+		$behavior = new SignalStartEventBehavior($signalName);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id);
+		
+		return $behavior;
+	}
+	
 	public function endEvent($id)
 	{
 		return $this->builder->node($id);
+	}
+	
+	public function messageEndEvent($id, $name = NULL)
+	{
+		$behavior = new IntermediateMessageThrowBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function signalEndEvent($id, $signalName, $name = NULL)
+	{
+		$behavior = new IntermediateSignalThrowBehavior($signalName);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
 	public function sequenceFlow($id, $from, $to, $condition = NULL)

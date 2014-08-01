@@ -64,8 +64,9 @@ class RuntimeService
 	{
 		$query = $this->engine->getRepositoryService()->createProcessDefinitionQuery();
 		$def = $query->processDefinitionKey($processDefinitionKey)->latestVersion()->findOne();
+		$startNode = $def->findNoneStartEvent();
 		
-		$id = $this->engine->executeCommand(new StartProcessInstanceCommand($def, NULL, $businessKey, $variables));
+		$id = $this->engine->executeCommand(new StartProcessInstanceCommand($def, $startNode, $businessKey, $variables));
 		
 		return $this->createProcessInstanceQuery()->processInstanceId($id)->findOne();
 	}
@@ -74,9 +75,9 @@ class RuntimeService
 	{
 		$query = $this->engine->getRepositoryService()->createProcessDefinitionQuery();
 		$def = $query->messageEventSubscriptionName($messageName)->latestVersion()->findOne();
-		$type = [StartProcessInstanceCommand::START_TYPE_MESSAGE => $messageName];
+		$startNode = $def->findMessageStartEvent($messageName);
 		
-		$id = $this->engine->executeCommand(new StartProcessInstanceCommand($def, $type, $businessKey, $variables));
+		$id = $this->engine->executeCommand(new StartProcessInstanceCommand($def, $startNode, $businessKey, $variables));
 		
 		return $this->createProcessInstanceQuery()->processInstanceId($id)->findOne();
 	}

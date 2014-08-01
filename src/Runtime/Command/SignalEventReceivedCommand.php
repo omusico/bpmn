@@ -14,6 +14,7 @@ namespace KoolKode\BPMN\Runtime\Command;
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Util\UUID;
 
@@ -96,6 +97,37 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 			$engine->pushCommand(new SignalExecutionCommand($execution, $this->signal, $this->variables));
 		}
 		
+		// Include signal start events subscriptions.
+		$sql = "	SELECT s.`name` AS signal, d.* 
+					FROM `#__bpm_process_subscription` AS s
+					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = s.`definition_id`)
+					WHERE s.`flags` = :flags
+					AND s.`name` = :name
+		";
+		$stmt = $engine->prepareQuery($sql);
+		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_SIGNAL);
+		$stmt->bindValue('name', $this->signal);
+		$stmt->execute();
+		
+		while($row = $stmt->fetch(\PDO::FETCH_ASSOC))
+		{
+			$definition = new BusinessProcessDefinition(
+				new UUID($row['id']),
+				$row['process_key'],
+				$row['revision'],
+				unserialize(gzuncompress($row['definition'])),
+				$row['name'],
+				new \DateTime('@' . $row['deployed_at'])
+			);
+			
+			$engine->pushCommand(new StartProcessInstanceCommand(
+				$definition,
+				$definition->findSignalStartEvent($row['signal']),
+				($this->sourceExecution === NULL) ? NULL : $this->sourceExecution->getBusinessKey(),
+				$this->variables
+			));
+		}
+				
 		if($this->sourceExecution !== NULL)
 		{
 			$engine->pushCommand(new SignalExecutionCommand($this->sourceExecution));

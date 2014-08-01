@@ -25,7 +25,6 @@ class IntermediateMessageThrowBehavior extends AbstractSignalableBehavior
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->getEngine()->pushCommand(new ThrowMessageCommand($execution));
-		
 		$execution->waitForSignal();
 	}
 }

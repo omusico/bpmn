@@ -15,7 +15,7 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
-use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
+use KoolKode\Process\Node;
 use KoolKode\Util\Uuid;
 
 class StartProcessInstanceCommand extends AbstractBusinessCommand
@@ -31,10 +31,10 @@ class StartProcessInstanceCommand extends AbstractBusinessCommand
 	
 	protected $variables;
 	
-	public function __construct(BusinessProcessDefinition $definition, array $startNode = NULL, $businessKey = NULL, array $variables = [])
+	public function __construct(BusinessProcessDefinition $definition, Node $startNode, $businessKey = NULL, array $variables = [])
 	{
 		$this->definition = $definition;
-		$this->startNode = $startNode;
+		$this->startNode = $startNode->getId();
 		$this->businessKey = ($businessKey === NULL) ? NULL : (string)$businessKey;
 		$this->variables = $variables;
 	}
@@ -42,52 +42,7 @@ class StartProcessInstanceCommand extends AbstractBusinessCommand
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$definition = $this->definition->getModel();
-		$initial = [];
-		
-		if($this->startNode === NULL)
-		{
-			$initial = $definition->findInitialNodes();
-			
-			if(count($initial) != 1)
-			{
-				throw new \RuntimeException(sprintf('Process "%s" does not declare a non-start event', $this->definition->getKey()));
-			}
-		}
-		else
-		{
-			foreach($this->startNode as $key => $value)
-			{
-				switch($key)
-				{
-					case self::START_TYPE_MESSAGE:
-						foreach($definition->findNodes() as $node)
-						{
-							$behavior = $node->getBehavior();
-						
-							if($behavior instanceof MessageStartEventBehavior)
-							{
-								if($behavior->getMessageName() == $value)
-								{
-									$initial = [$node];
-						
-									break 2;
-								}
-							}
-						}
-						break;
-					default:
-						throw new \OutOfBoundsException(sprintf('No such start event found: "%s" in process "%s"', $key, $this->definition->getKey()));
-				}
-				
-				break;
-			}
-			
-			if(count($initial) != 1)
-			{
-				throw new \RuntimeException(sprintf('Cannot use more than 1 start event in process "%s"', $this->definition->getKey()));
-			}
-		}
-		
+
 		$process = new VirtualExecution(UUID::createRandom(), $engine, $definition);
 		$process->setBusinessKey($this->businessKey);
 		
@@ -99,7 +54,7 @@ class StartProcessInstanceCommand extends AbstractBusinessCommand
 		}
 		
 		$engine->registerExecution($process);
-		$process->execute(array_shift($initial));
+		$process->execute($definition->findNode($this->startNode));
 
 		return $process->getId();
 	}
