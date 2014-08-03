@@ -26,10 +26,12 @@ use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalCatchBehavior;
 use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalThrowBehavior;
 use KoolKode\BPMN\Runtime\Behavior\MessageBoundaryEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
+use KoolKode\BPMN\Runtime\Behavior\NoneEndEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\NoneStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalBoundaryEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SubProcessBehavior;
+use KoolKode\BPMN\Runtime\Behavior\TerminateEndEventBehavior;
 use KoolKode\BPMN\Task\Behavior\UserTaskBehavior;
 use KoolKode\Expression\ExpressionInterface;
 use KoolKode\Expression\Parser\ExpressionLexer;
@@ -112,9 +114,24 @@ class BusinessProcessBuilder
 		return $behavior;
 	}
 	
-	public function endEvent($id)
+	public function endEvent($id, $name = NULL)
 	{
-		return $this->builder->node($id);
+		$behavior = new NoneEndEventBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function terminateEndEvent($id, $name = NULL)
+	{
+		$behavior = new TerminateEndEventBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
 	}
 	
 	public function messageEndEvent($id, $name = NULL)

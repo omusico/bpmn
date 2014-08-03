@@ -88,6 +88,13 @@ class DiagramLoader
 						break;
 					case 'endEvent':
 						
+						foreach($xpath->query('m:terminateEventDefinition', $el) as $def)
+						{
+							$builder->terminateEndEvent($id, $el->getAttribute('name'));
+							
+							break 2;
+						}
+						
 						foreach($xpath->query('m:messageEventDefinition', $el) as $def)
 						{
 							$builder->messageEndEvent($id, $el->getAttribute('name'));
@@ -194,6 +201,9 @@ class DiagramLoader
 						break;
 					case 'subProcess':
 						
+						// TODO: Find a way to transform event sub process to boundary events or event subscribers.
+						
+						$triggeredByEvent = ('true' === strtolower($el->getAttribute('triggeredByEvent')));
 						$startNodeId = NULL;
 						
 						foreach($xpath->query('m:startEvent', $el) as $node)

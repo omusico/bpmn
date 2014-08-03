@@ -14,8 +14,8 @@ namespace KoolKode\BPMN\Runtime\Behavior;
 use KoolKode\BPMN\Engine\AbstractBehavior;
 
 /**
- * Basic start event without any triggers or conditions.
+ * Basic end event without special actions.
  * 
  * @author Martin Schröder
  */
-class NoneStartEventBehavior extends AbstractBehavior { }
+class NoneEndEventBehavior extends AbstractBehavior { }
