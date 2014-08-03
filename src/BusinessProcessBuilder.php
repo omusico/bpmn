@@ -79,6 +79,13 @@ class BusinessProcessBuilder
 		return $this->builder->build();
 	}
 	
+	public function append(BusinessProcessBuilder $builder)
+	{
+		$this->builder->append($builder->builder);
+		
+		return $this;
+	}
+	
 	public function node($id)
 	{
 		return $this->builder->node($id);

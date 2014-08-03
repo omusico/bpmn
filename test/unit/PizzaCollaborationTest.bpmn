@@ -40,10 +40,10 @@
       <bpmn2:signalEventDefinition id="TimerEventDefinition_1" signalRef="Signal_1"/>
     </bpmn2:intermediateCatchEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_6" name="" sourceRef="EventBasedGateway_1" targetRef="IntermediateCatchEvent_3"/>
-    <bpmn2:manualTask id="ManualTask_2" name="Complain about delay">
+    <bpmn2:serviceTask id="ManualTask_2" name="Complain about delay">
       <bpmn2:incoming>SequenceFlow_7</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_8</bpmn2:outgoing>
-    </bpmn2:manualTask>
+    </bpmn2:serviceTask>
     <bpmn2:sequenceFlow id="SequenceFlow_7" name="" sourceRef="IntermediateCatchEvent_3" targetRef="ManualTask_2"/>
     <bpmn2:endEvent id="EndEvent_1" name="Cancel order and&#xD;&#xA;eat something else">
       <bpmn2:incoming>SequenceFlow_8</bpmn2:incoming>
@@ -65,10 +65,10 @@
       <bpmn2:outgoing>SequenceFlow_11</bpmn2:outgoing>
       <bpmn2:messageEventDefinition id="MessageEventDefinition_2" messageRef="Message_1"/>
     </bpmn2:startEvent>
-    <bpmn2:manualTask id="ManualTask_4" name="Prepare Pizza">
+    <bpmn2:serviceTask id="ManualTask_4" name="Prepare Pizza">
       <bpmn2:incoming>SequenceFlow_11</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_12</bpmn2:outgoing>
-    </bpmn2:manualTask>
+    </bpmn2:serviceTask>
     <bpmn2:sequenceFlow id="SequenceFlow_11" name="" sourceRef="pizzaOrderReceived" targetRef="ManualTask_4"/>
     <bpmn2:userTask id="preparePizzaTask" name="Prepare for delivery">
       <bpmn2:incoming>SequenceFlow_12</bpmn2:incoming>

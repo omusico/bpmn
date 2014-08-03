@@ -30,6 +30,12 @@ class DiagramLoader
 	
 	const NS_IMPL = 'http://activiti.org/bpmn';
 	
+	protected $xpath;
+	
+	protected $signals = [];
+	
+	protected $messages = [];
+	
 	public function parseDiagramFile($file)
 	{
 		return $this->parseDiagram((new XmlDocumentBuilder())->buildDocument(new \SplFileInfo($file)));
@@ -37,307 +43,373 @@ class DiagramLoader
 	
 	public function parseDiagram(\DOMDocument $xml)
 	{
-		$result = [];
-		$xpath = $this->createXPath($xml);
+		$this->xpath = $this->createXPath($xml);
+		$this->signals = [];
+		$this->messages = [];
 		
-		$messages = [];
-		
-		foreach($xpath->query('/m:definitions/m:message[@id][@name]') as $messageElement)
+		try
 		{
-			$messages[trim($messageElement->getAttribute('id'))] = trim($messageElement->getAttribute('name'));
-		}
-		
-		$signals = [];
+			$xpath = $this->createXPath($xml);
 			
-		foreach($xpath->query('/m:definitions/m:signal[@id][@name]') as $signalElement)
-		{
-			$signals[trim($signalElement->getAttribute('id'))] = trim($signalElement->getAttribute('name'));
-		}
-		
-		foreach($xpath->query('/m:definitions/m:process[@id][@isExecutable = "true"]') as $processElement)
-		{
-			$title = $processElement->hasAttribute('name') ? trim($processElement->getAttribute('name')) : '';
-			$result[] = $builder = new BusinessProcessBuilder($processElement->getAttribute('id'), $title);
-			
-			foreach($xpath->query('.//m:*[@id]', $processElement) as $el)
+			foreach($this->xpath->query('/m:definitions/m:message[@id][@name]') as $messageElement)
 			{
-				$id = $el->getAttribute('id');
+				$this->messages[trim($messageElement->getAttribute('id'))] = trim($messageElement->getAttribute('name'));
+			}
+			
+			foreach($this->xpath->query('/m:definitions/m:signal[@id][@name]') as $signalElement)
+			{
+				$this->signals[trim($signalElement->getAttribute('id'))] = trim($signalElement->getAttribute('name'));
+			}
+			
+			$result = [];
+			
+			foreach($this->xpath->query('/m:definitions/m:process[@id][@isExecutable = "true"]') as $processElement)
+			{
+				$result[] = $this->parseProcessDefinition($processElement);
+			}
+			
+			if(empty($result))
+			{
+				throw new \RuntimeException('No executable process definitions found');
+			}
+			
+			return $result;
+		}
+		finally
+		{
+			$this->xpath = NULL;
+			$this->signals = [];
+			$this->messages = [];
+		}
+	}
+	
+	protected function parseProcessDefinition(\DOMElement $process)
+	{
+		$title = $process->hasAttribute('name') ? trim($process->getAttribute('name')) : '';
+		$builder = new BusinessProcessBuilder($process->getAttribute('id'), $title);
+		
+		foreach($this->xpath->query('m:*[@id]', $process) as $element)
+		{
+			$this->parseElement($element, $builder);
+		}
+		
+		return $builder;
+	}
+	
+	protected function parseElement(\DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$id = $el->getAttribute('id');
+		
+		switch($el->localName)
+		{
+			case 'sequenceFlow':
+				return $this->parseSequenceFlow($id, $el, $builder);
+			case 'serviceTask':
+				return $this->parseServiceTask($id, $el, $builder);
+			case 'scriptTask':
+				return $this->parseScriptTask($id, $el, $builder);
+			case 'userTask':
+				return $this->parseUserTask($id, $el, $builder);
+			case 'sendTask':
+				return $this->parseSendTask($id, $el, $builder);
+			case 'callActivity':
+				return $this->parseCallActivity($id, $el, $builder);
+			case 'subProcess':
+				return $this->parseSubProcess($id, $el, $builder);
+			case 'boundaryEvent':
+				return $this->parseBoundaryEvent($id, $el, $builder);
+			case 'startEvent':
+				return $this->parseStartEvent($id, $el, $builder);
+			case 'endEvent':
+				return $this->parseEndEvent($id, $el, $builder);
+			case 'intermediateCatchEvent':
+				return $this->parseIntermediateCatchEvent($id, $el, $builder);
+			case 'intermediateThrowEvent':
+				return $this->parseIntermediateThrowEvent($id, $el, $builder);
+			case 'exclusiveGateway':
+				return $this->parseExclusiveGateway($id, $el, $builder);
+			case 'inclusiveGateway':
+				return $this->parseInclusiveGateway($id, $el, $builder);
+			case 'parallelGateway':
+				return $this->parseParallelGateway($id, $el, $builder);
+			case 'eventBasedGateway':
+				return $this->parseEventBasedGateway($id, $el, $builder);
+		}
+	}
+	
+	protected function parseSequenceFlow($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$condition = NULL;
+		
+		foreach($this->xpath->query('m:conditionExpression', $el) as $conditionElement)
+		{
+			$type = (string)$conditionElement->getAttributeNS(self::NS_XSI, 'type');
+			$type = explode(':', $type, 2);
 				
-				switch($el->localName)
+			if(count($type == 2))
+			{
+				$uri = $conditionElement->lookupNamespaceURI($type[0]);
+		
+				if($uri == self::NS_MODEL && $type[1] == 'tFormalExpression')
 				{
-					case 'startEvent':
-						
-						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
-						{
-							$message = $messages[$messageElement->getAttribute('messageRef')];
-							$builder->messageStartEvent($id, $message, $el->getAttribute('name'));
-							
-							break 2;
-						}
-						
-						foreach($xpath->query('m:signalEventDefinition', $el) as $signalElement)
-						{
-							$signal = $signals[$signalElement->getAttribute('signalRef')];
-							$builder->signalStartEvent($id, $signal, $el->getAttribute('name'));
-								
-							break 2;
-						}
-						
-						$builder->startEvent($id, $el->getAttribute('name'));
-						
-						break;
-					case 'endEvent':
-						
-						foreach($xpath->query('m:terminateEventDefinition', $el) as $def)
-						{
-							$builder->terminateEndEvent($id, $el->getAttribute('name'));
-							
-							break 2;
-						}
-						
-						foreach($xpath->query('m:messageEventDefinition', $el) as $def)
-						{
-							$builder->messageEndEvent($id, $el->getAttribute('name'));
-								
-							break 2;
-						}
-						
-						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
-						{
-							$signal = $signals[$def->getAttribute('signalRef')];
-							$builder->signalEndEvent($id, $signal, $el->getAttribute('name'));
-						
-							break 2;
-						}
-						
-						$builder->endEvent($id, $el->getAttribute('name'));
-						
-						break;
-					case 'serviceTask':
-						
-						if($el->hasAttributeNS(self::NS_IMPL, 'class') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'class')))
-						{
-							$delegateTask = $builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $el->getAttribute('name'));
-							$delegateTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
-							
-							break;
-						}
-						
-						if($el->hasAttributeNS(self::NS_IMPL, 'expression') && '' !== $el->getAttributeNS(self::NS_IMPL, 'expression'))
-						{
-							$expressionTask = $builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $el->getAttribute('name'));
-							$expressionTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
-							
-							if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
-							{
-								$expressionTask->setResultVariable($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
-							}
-							
-							break;
-						}
-												
-						$serviceTask = $builder->serviceTask($id, $el->getAttribute('name'));
-						$serviceTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
-						
-						break;
-					case 'userTask':
-						
-						$userTask = $builder->userTask($id, $el->getAttribute('name'));
-						$userTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
-						
-						if($el->hasAttributeNS(self::NS_IMPL, 'assignee') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'assignee')))
-						{
-							$userTask->setAssignee($builder->stringExp($el->getAttributeNS(self::NS_IMPL, 'assignee')));
-						}
-						
-						break;
-					case 'scriptTask':
-						
-						$script = '';
-						
-						foreach($xpath->query('m:script', $el) as $scriptElement)
-						{
-							$script .= $scriptElement->textContent;
-						}
-						
-						$scriptTask = $builder->scriptTask($id, $el->getAttribute('scriptFormat'), $script, $el->getAttribute('name'));
-						$scriptTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
-						
-						if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
-						{
-							$scriptTask->setResultVariable($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
-						}
-						
-						break;
-					case 'sendTask':
-						
-						$builder->intermediateMessageThrowEvent($id, $el->getAttribute('name'));
-						break;
-					case 'callActivity':
-						
-						$call = $builder->callActivity($id, $el->getAttribute('calledElement'), $el->getAttribute('name'));
-						$call->setDocumentation($builder->stringExp($this->getDocumentation($el)));
-						
-						foreach($xpath->query('m:extensionElements/i:in[@source]', $el) as $in)
-						{
-							$call->addInput($in->getAttribute('target'), $in->getAttribute('source'));
-						}
-						
-						foreach($xpath->query('m:extensionElements/i:in[@sourceExpression]', $el) as $in)
-						{
-							$call->addInput($in->getAttribute('target'), $builder->exp($in->getAttribute('sourceExpression')));
-						}
-						
-						foreach($xpath->query('m:extensionElements/i:out[@source]', $el) as $out)
-						{
-							$call->addOutput($out->getAttribute('target'), $out->getAttribute('source'));
-						}
-						
-						foreach($xpath->query('m:extensionElements/i:out[@sourceExpression]', $el) as $out)
-						{
-							$call->addOutput($out->getAttribute('target'), $builder->exp($out->getAttribute('sourceExpression')));
-						}
-						
-						break;
-					case 'subProcess':
-						
-						// TODO: Find a way to transform event sub process to boundary events or event subscribers.
-						
-						$triggeredByEvent = ('true' === strtolower($el->getAttribute('triggeredByEvent')));
-						$startNodeId = NULL;
-						
-						foreach($xpath->query('m:startEvent', $el) as $node)
-						{
-							$startNodeId = (string)$node->getAttribute('id');
-						}
-						
-						$sub = $builder->subProcess($id, $startNodeId, $el->getAttribute('name'));
-						
-						break;
-					case 'sequenceFlow':
-						
-						$condition = NULL;
-						
-						foreach($xpath->query('m:conditionExpression', $el) as $conditionElement)
-						{
-							$type = (string)$conditionElement->getAttributeNS(self::NS_XSI, 'type');
-							$type = explode(':', $type, 2);
-							
-							if(count($type == 2))
-							{
-								$uri = $conditionElement->lookupNamespaceURI($type[0]);
-								
-								if($uri == self::NS_MODEL && $type[1] == 'tFormalExpression')
-								{
-									$condition = trim($conditionElement->textContent);
-								}
-							}
-						}
-						
-						$builder->sequenceFlow($id, $el->getAttribute('sourceRef'), $el->getAttribute('targetRef'), $condition);
-						break;
-					case 'exclusiveGateway':
-						
-						$gateway = $builder->exclusiveGateway($id, $el->getAttribute('name'));
-						$gateway->setDefaultFlow($el->getAttribute('default'));
-						
-						break;
-					case 'inclusiveGateway':
-					
-						$gateway = $builder->inclusiveGateway($id, $el->getAttribute('name'));
-						$gateway->setDefaultFlow($el->getAttribute('default'));
-					
-						break;
-					case 'parallelGateway':
-						
-						$builder->parallelGateway($id, $el->getAttribute('name'));
-						break;
-					case 'eventBasedGateway':
-						
-						$builder->eventBasedGateway($id, $el->getAttribute('name'));
-						break;
-					case 'intermediateCatchEvent':
-						
-						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
-						{
-							$message = $messages[$messageElement->getAttribute('messageRef')];
-							$builder->intermediateMessageCatchEvent($id, $message, $el->getAttribute('name'));
-							
-							break 2;
-						}
-						
-						foreach($xpath->query('m:signalEventDefinition', $el) as $signalElement)
-						{
-							$signal = $signals[$signalElement->getAttribute('signalRef')];
-							$builder->intermediateSignalCatchEvent($id, $signal, $el->getAttribute('name'));
-							
-							break 2;
-						}
-						
-						$builder->node($id);
-						
-						break;
-					case 'intermediateThrowEvent':
-						
-						foreach($xpath->query('m:messageEventDefinition', $el) as $def)
-						{
-							$builder->intermediateMessageThrowEvent($id, $el->getAttribute('name'));
-							
-							break 2;
-						}
-						
-						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
-						{
-							$signal = $signals[$def->getAttribute('signalRef')];
-							$builder->intermediateSignalThrowEvent($id, $signal, $el->getAttribute('name'));
-								
-							break 2;
-						}
-						
-						$builder->node($id);
-						
-						break;
-					case 'boundaryEvent':
-						
-						$attachedTo = $el->getAttribute('attachedToRef');
-						$cancelActivity = true;
-						
-						if($el->hasAttribute('cancelActivity'))
-						{
-							$cancelActivity = (strtolower($el->getAttribute('cancelActivity')) == 'true');
-						}
-						
-						foreach($xpath->query('m:messageEventDefinition', $el) as $messageElement)
-						{
-							$message = $messages[$messageElement->getAttribute('messageRef')];
-							$event = $builder->messageBoundaryEvent($id, $attachedTo, $message, $el->getAttribute('name'));
-							$event->setInterrupting($cancelActivity);
-								
-							break 2;
-						}
-						
-						foreach($xpath->query('m:signalEventDefinition', $el) as $def)
-						{
-							$signal = $signals[$def->getAttribute('signalRef')];
-							$event = $builder->signalBoundaryEvent($id, $attachedTo, $signal, $el->getAttribute('name'));
-							$event->setInterrupting($cancelActivity);
-							
-							break 2;
-						}
-						
-						break;
-					default:
-						$builder->node($id);
+					$condition = trim($conditionElement->textContent);
 				}
 			}
 		}
 		
-		if(empty($result))
+		return $builder->sequenceFlow($id, $el->getAttribute('sourceRef'), $el->getAttribute('targetRef'), $condition);
+	}
+	
+	protected function parseServiceTask($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		if($el->hasAttributeNS(self::NS_IMPL, 'class') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'class')))
 		{
-			throw new \OutOfBoundsException(sprintf('No process definition(s) found'));
+			$delegateTask = $builder->delegateTask($id, $el->getAttributeNS(self::NS_IMPL, 'class'), $el->getAttribute('name'));
+			$delegateTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
+				
+			return $delegateTask;
 		}
 		
-		return $result;
+		if($el->hasAttributeNS(self::NS_IMPL, 'expression') && '' !== $el->getAttributeNS(self::NS_IMPL, 'expression'))
+		{
+			$expressionTask = $builder->expressionTask($id, $el->getAttributeNS(self::NS_IMPL, 'expression'), $el->getAttribute('name'));
+			$expressionTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
+				
+			if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
+			{
+				$expressionTask->setResultVariable($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
+			}
+				
+			return $expressionTask;
+		}
+		
+		$serviceTask = $builder->serviceTask($id, $el->getAttribute('name'));
+		$serviceTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
+		
+		return $serviceTask;
+	}
+	
+	protected function parseScriptTask($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$script = '';
+		
+		foreach($this->xpath->query('m:script', $el) as $scriptElement)
+		{
+			$script .= $scriptElement->textContent;
+		}
+		
+		$scriptTask = $builder->scriptTask($id, $el->getAttribute('scriptFormat'), $script, $el->getAttribute('name'));
+		$scriptTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
+		
+		if($el->hasAttributeNS(self::NS_IMPL, 'resultVariable'))
+		{
+			$scriptTask->setResultVariable($el->getAttributeNS(self::NS_IMPL, 'resultVariable'));
+		}
+		
+		return $scriptTask;
+	}
+	
+	protected function parseUserTask($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$userTask = $builder->userTask($id, $el->getAttribute('name'));
+		$userTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
+		
+		if($el->hasAttributeNS(self::NS_IMPL, 'assignee') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'assignee')))
+		{
+			$userTask->setAssignee($builder->stringExp($el->getAttributeNS(self::NS_IMPL, 'assignee')));
+		}
+		
+		return $userTask;
+	}
+	
+	protected function parseSendTask($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		return $builder->intermediateMessageThrowEvent($id, $el->getAttribute('name'));
+	}
+	
+	protected function parseCallActivity($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$call = $builder->callActivity($id, $el->getAttribute('calledElement'), $el->getAttribute('name'));
+		$call->setDocumentation($builder->stringExp($this->getDocumentation($el)));
+		
+		foreach($this->xpath->query('m:extensionElements/i:in[@source]', $el) as $in)
+		{
+			$call->addInput($in->getAttribute('target'), $in->getAttribute('source'));
+		}
+		
+		foreach($this->xpath->query('m:extensionElements/i:in[@sourceExpression]', $el) as $in)
+		{
+			$call->addInput($in->getAttribute('target'), $builder->exp($in->getAttribute('sourceExpression')));
+		}
+		
+		foreach($this->xpath->query('m:extensionElements/i:out[@source]', $el) as $out)
+		{
+			$call->addOutput($out->getAttribute('target'), $out->getAttribute('source'));
+		}
+		
+		foreach($this->xpath->query('m:extensionElements/i:out[@sourceExpression]', $el) as $out)
+		{
+			$call->addOutput($out->getAttribute('target'), $builder->exp($out->getAttribute('sourceExpression')));
+		}
+		
+		return $call;
+	}
+	
+	protected function parseSubProcess($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		// TODO: Find a way to transform event sub process to boundary events or event subscribers.
+		
+		$triggeredByEvent = ('true' === strtolower($el->getAttribute('triggeredByEvent')));
+		$startNodeId = NULL;
+		
+		foreach($this->xpath->query('m:startEvent', $el) as $node)
+		{
+			$startNodeId = (string)$node->getAttribute('id');
+		}
+		
+		$sub = $builder->subProcess($id, $startNodeId, $el->getAttribute('name'));
+		
+		$inner = $this->parseProcessDefinition($el);
+		
+		$builder->append($inner);
+		
+		return $sub;
+	}
+	
+	protected function parseStartEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		foreach($this->xpath->query('m:messageEventDefinition', $el) as $messageElement)
+		{
+			$message = $this->messages[$messageElement->getAttribute('messageRef')];
+			
+			return $builder->messageStartEvent($id, $message, $el->getAttribute('name'));
+		}
+		
+		foreach($this->xpath->query('m:signalEventDefinition', $el) as $signalElement)
+		{
+			$signal = $this->signals[$signalElement->getAttribute('signalRef')];
+			
+			return $builder->signalStartEvent($id, $signal, $el->getAttribute('name'));
+		}
+		
+		return $builder->startEvent($id, $el->getAttribute('name'));
+	}
+	
+	protected function parseEndEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		foreach($this->xpath->query('m:terminateEventDefinition', $el) as $def)
+		{
+			return $builder->terminateEndEvent($id, $el->getAttribute('name'));
+		}
+		
+		foreach($this->xpath->query('m:messageEventDefinition', $el) as $def)
+		{
+			return $builder->messageEndEvent($id, $el->getAttribute('name'));
+		}
+		
+		foreach($this->xpath->query('m:signalEventDefinition', $el) as $def)
+		{
+			$signal = $this->signals[$def->getAttribute('signalRef')];
+			
+			return $builder->signalEndEvent($id, $signal, $el->getAttribute('name'));
+		}
+		
+		return $builder->endEvent($id, $el->getAttribute('name'));
+	}
+	
+	protected function parseIntermediateCatchEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		foreach($this->xpath->query('m:messageEventDefinition', $el) as $messageElement)
+		{
+			$message = $this->messages[$messageElement->getAttribute('messageRef')];
+			
+			return $builder->intermediateMessageCatchEvent($id, $message, $el->getAttribute('name'));
+		}
+		
+		foreach($this->xpath->query('m:signalEventDefinition', $el) as $signalElement)
+		{
+			$signal = $this->signals[$signalElement->getAttribute('signalRef')];
+			
+			return $builder->intermediateSignalCatchEvent($id, $signal, $el->getAttribute('name'));
+		}
+		
+		return $builder->node($id);
+	}
+	
+	protected function parseIntermediateThrowEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		foreach($this->xpath->query('m:messageEventDefinition', $el) as $def)
+		{
+			return $builder->intermediateMessageThrowEvent($id, $el->getAttribute('name'));
+		}
+		
+		foreach($this->xpath->query('m:signalEventDefinition', $el) as $def)
+		{
+			$signal = $this->signals[$def->getAttribute('signalRef')];
+			
+			return $builder->intermediateSignalThrowEvent($id, $signal, $el->getAttribute('name'));
+		}
+		
+		return $builder->node($id);
+	}
+	
+	protected function parseBoundaryEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$attachedTo = $el->getAttribute('attachedToRef');
+		$cancelActivity = true;
+		
+		if($el->hasAttribute('cancelActivity'))
+		{
+			$cancelActivity = (strtolower($el->getAttribute('cancelActivity')) == 'true');
+		}
+		
+		foreach($this->xpath->query('m:messageEventDefinition', $el) as $messageElement)
+		{
+			$message = $this->messages[$messageElement->getAttribute('messageRef')];
+			
+			$event = $builder->messageBoundaryEvent($id, $attachedTo, $message, $el->getAttribute('name'));
+			$event->setInterrupting($cancelActivity);
+		
+			return $event;
+		}
+		
+		foreach($this->xpath->query('m:signalEventDefinition', $el) as $def)
+		{
+			$signal = $this->signals[$def->getAttribute('signalRef')];
+			
+			$event = $builder->signalBoundaryEvent($id, $attachedTo, $signal, $el->getAttribute('name'));
+			$event->setInterrupting($cancelActivity);
+				
+			return $event;
+		}
+		
+		throw new \RuntimeException('Unsupported boundary event type with id ' . $id);
+	}
+	
+	protected function parseExclusiveGateway($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$gateway = $builder->exclusiveGateway($id, $el->getAttribute('name'));
+		$gateway->setDefaultFlow($el->getAttribute('default'));
+		
+		return $gateway;
+	}
+	
+	protected function parseInclusiveGateway($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{		
+		$gateway = $builder->inclusiveGateway($id, $el->getAttribute('name'));
+		$gateway->setDefaultFlow($el->getAttribute('default'));
+		
+		return $gateway;
+	}
+	
+	protected function parseParallelGateway($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		return $builder->parallelGateway($id, $el->getAttribute('name'));
+	}
+	
+	protected function parseEventBasedGateway($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		return $builder->eventBasedGateway($id, $el->getAttribute('name'));
 	}
 	
 	protected function getDocumentation(\DOMElement $el)
@@ -353,9 +425,9 @@ class DiagramLoader
 		return empty($docs) ? NULL : implode(' ', $docs);
 	}
 	
-	protected function createXPath(\DOMDocument $xml)
+	protected function createXPath(\DOMNode $xml)
 	{
-		$xpath = new \DOMXPath($xml);
+		$xpath = new \DOMXPath(($xml instanceof \DOMDocument) ? $xml : $xml->ownerDocument);
 		$xpath->registerNamespace('m', self::NS_MODEL);
 		$xpath->registerNamespace('di', self::NS_DI);
 		$xpath->registerNamespace('dc', self::NS_DC);
