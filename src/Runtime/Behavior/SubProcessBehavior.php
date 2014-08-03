@@ -15,7 +15,7 @@ use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 
 /**
- * 
+ * Executes an embedded sub process within a child execution with shared variable scope.
  * 
  * @author Martin Schröder
  */
@@ -56,7 +56,7 @@ class SubProcessBehavior extends AbstractScopeBehavior
 	
 	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
-		$sub = $variables['@execution'];
+		$sub = $variables[VirtualExecution::KEY_EXECUTION];
 		
 		if(!$sub instanceof VirtualExecution)
 		{

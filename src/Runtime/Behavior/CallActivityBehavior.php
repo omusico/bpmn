@@ -16,8 +16,7 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Expression\ExpressionInterface;
 
 /**
- * Call activity implementation that uses a special process variable to keep track of
- * the calling execution.
+ * Executes an external process within a child execution with isolated variable scope.
  * 
  * @author Martin Schröder
  */
@@ -97,7 +96,7 @@ class CallActivityBehavior extends AbstractScopeBehavior
 	
 	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
-		$sub = $variables['@execution'];
+		$sub = $variables[VirtualExecution::KEY_EXECUTION];
 		
 		if(!$sub instanceof VirtualExecution)
 		{
