@@ -63,9 +63,15 @@ class DiagramLoader
 			
 			$result = [];
 			
-			foreach($this->xpath->query('/m:definitions/m:process[@id][@isExecutable = "true"]') as $processElement)
+			foreach($this->xpath->query('/m:definitions/m:process[@id]') as $processElement)
 			{
-				$result[] = $this->parseProcessDefinition($processElement);
+				if($processElement->hasAttribute('isExecutable'))
+				{
+					if('true' === strtolower($processElement->getAttribute('isExecutable')))
+					{	
+						$result[] = $this->parseProcessDefinition($processElement);
+					}
+				}
 			}
 			
 			if(empty($result))
