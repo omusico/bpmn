@@ -29,6 +29,7 @@ use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\NoneStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalBoundaryEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
+use KoolKode\BPMN\Runtime\Behavior\SubProcessBehavior;
 use KoolKode\BPMN\Task\Behavior\UserTaskBehavior;
 use KoolKode\Expression\ExpressionInterface;
 use KoolKode\Expression\Parser\ExpressionLexer;
@@ -241,6 +242,16 @@ class BusinessProcessBuilder
 	public function callActivity($id, $element, $name = NULL)
 	{
 		$behavior = new CallActivityBehavior($element);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function subProcess($id, $startNodeId, $name = NULL)
+	{
+		$behavior = new SubProcessBehavior($startNodeId);
 		$behavior->setName($this->stringExp($name));
 		
 		$this->builder->node($id)->behavior($behavior);

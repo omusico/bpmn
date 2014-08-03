@@ -38,8 +38,16 @@ class ClearEventSubscriptionsCommand extends AbstractBusinessCommand
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
 		$stmt->execute();
 		
-		$engine->debug('Cleared event subscriptions of {execution}', [
-			'execution' => (string)$this->execution
-		]);
+		$count = (int)$stmt->rowCount();
+		
+		if($count > 0)
+		{
+			$message = sprintf('Cleared {count} event subscription%s related to {execution}', ($count == 1) ? '' : 's');
+			
+			$engine->debug($message, [
+				'count' => $count,
+				'execution' => (string)$this->execution
+			]);
+		}
 	}
 }

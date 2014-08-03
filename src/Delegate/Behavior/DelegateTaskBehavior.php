@@ -42,7 +42,7 @@ class DelegateTaskBehavior extends AbstractScopeBehavior
 			throw new \RuntimeException('Invalid service task implementation: ' . get_class($task));
 		}
 		
-		$execution->getEngine()->debug('Execute delegate task "{task}" implemented by {class}', [
+		$execution->getEngine()->debug('Execute delegate task "{task}" implemented by <{class}>', [
 			'task' => $this->getStringValue($this->name, $execution->getExpressionContext()),
 			'class' => get_class($task)
 		]);

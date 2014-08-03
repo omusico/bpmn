@@ -99,7 +99,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 				$stmt->bindValue('message', $behavior->getMessageName());
 				$stmt->execute();
 				
-				$engine->debug('Process {process} subscribed to message {message}', [
+				$engine->debug('Process {process} subscribed to message <{message}>', [
 					'process' => $this->builder->getKey(),
 					'message' => $behavior->getMessageName()
 				]);
@@ -119,7 +119,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 				$stmt->bindValue('message', $behavior->getSignalName());
 				$stmt->execute();
 				
-				$engine->debug('Process {process} subscribed to signal {signal}', [
+				$engine->debug('Process {process} subscribed to signal <{signal}>', [
 					'process' => $this->builder->getKey(),
 					'signal' => $behavior->getSignalName()
 				]);

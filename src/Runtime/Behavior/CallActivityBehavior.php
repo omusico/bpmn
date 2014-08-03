@@ -130,7 +130,9 @@ class CallActivityBehavior extends AbstractScopeBehavior
 	{
 		foreach($execution->findChildExecutions() as $sub)
 		{
-			$sub->terminate();
+			$sub->terminate(false);
 		}
+		
+		return parent::interruptBehavior($execution);
 	}
 }

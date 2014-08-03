@@ -53,7 +53,7 @@ abstract class AbstractSignalableBehavior extends AbstractBehavior implements Si
 		{
 			$execution->setVariable($k, $v);
 		}
-				
+		
 		return $execution->takeAll(NULL, [$execution]);
 	}
 }

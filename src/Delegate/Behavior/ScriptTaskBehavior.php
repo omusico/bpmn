@@ -46,7 +46,7 @@ class ScriptTaskBehavior extends AbstractScopeBehavior
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$execution->getEngine()->debug('Evaluate {language} script task "{task}"', [
+		$execution->getEngine()->debug('Evaluate <{language}> script task "{task}"', [
 			'language' => $this->language,
 			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);

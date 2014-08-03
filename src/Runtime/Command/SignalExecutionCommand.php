@@ -37,11 +37,6 @@ class SignalExecutionCommand extends AbstractBusinessCommand
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
-		$engine->debug('Signaling execution {execution} using signal {signal}', [
-			'execution' => (string)$this->execution->getId(),
-			'signal' => $this->signal
-		]);
-		
 		$this->execution->signal($this->signal, $this->variables);
 	}
 }

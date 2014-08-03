@@ -49,7 +49,7 @@ class CreateMessageSubscriptionCommand extends AbstractBusinessCommand
 		$stmt->bindValue('created', time());
 		$stmt->execute();
 		
-		$engine->debug('{execution} subscribed to message {message}', [
+		$engine->debug('{execution} subscribed to message <{message}>', [
 			'execution' => (string)$this->execution,
 			'message' => $this->message
 		]);

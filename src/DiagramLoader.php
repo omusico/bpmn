@@ -59,7 +59,7 @@ class DiagramLoader
 			$title = $processElement->hasAttribute('name') ? trim($processElement->getAttribute('name')) : '';
 			$result[] = $builder = new BusinessProcessBuilder($processElement->getAttribute('id'), $title);
 			
-			foreach($xpath->query('m:*[@id]', $processElement) as $el)
+			foreach($xpath->query('.//m:*[@id]', $processElement) as $el)
 			{
 				$id = $el->getAttribute('id');
 				
@@ -192,6 +192,18 @@ class DiagramLoader
 						}
 						
 						break;
+					case 'subProcess':
+						
+						$startNodeId = NULL;
+						
+						foreach($xpath->query('m:startEvent', $el) as $node)
+						{
+							$startNodeId = (string)$node->getAttribute('id');
+						}
+						
+						$sub = $builder->subProcess($id, $startNodeId, $el->getAttribute('name'));
+						
+						break;
 					case 'sequenceFlow':
 						
 						$condition = NULL;
@@ -305,7 +317,6 @@ class DiagramLoader
 						
 						break;
 					default:
-						
 						$builder->node($id);
 				}
 			}

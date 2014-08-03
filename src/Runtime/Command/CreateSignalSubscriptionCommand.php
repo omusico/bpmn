@@ -49,7 +49,7 @@ class CreateSignalSubscriptionCommand extends AbstractBusinessCommand
 		$stmt->bindValue('created', time());
 		$stmt->execute();
 		
-		$engine->debug('{execution} subscribed to signal {signal}', [
+		$engine->debug('{execution} subscribed to signal <{signal}>', [
 			'execution' => (string)$this->execution,
 			'signal' => $this->signal
 		]);

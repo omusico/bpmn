@@ -81,9 +81,9 @@ class VirtualExecution extends Execution
 		$this->transition = $trans;
 	}
 	
-	public function terminate()
+	public function terminate($triggerExecution = true)
 	{
-		parent::terminate();
+		parent::terminate($triggerExecution);
 		
 		$this->engine->syncExecutionState($this);
 	}
