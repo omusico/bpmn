@@ -15,6 +15,11 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
 
+/**
+ * Clears all event subscriptions related to an execution.
+ * 
+ * @author Martin Schröder
+ */
 class ClearEventSubscriptionsCommand extends AbstractBusinessCommand
 {
 	protected $execution;

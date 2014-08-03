@@ -15,6 +15,11 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
 
+/**
+ * Signals a waiting execution.
+ * 
+ * @author Martin Schröder
+ */
 class SignalExecutionCommand extends AbstractBusinessCommand
 {
 	protected $execution;

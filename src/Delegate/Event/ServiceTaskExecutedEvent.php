@@ -22,8 +22,18 @@ use KoolKode\Util\Uuid;
  */
 class ServiceTaskExecutedEvent
 {
+	/**
+	 * Provides access to the execution that triggered the service task.
+	 * 
+	 * @var DelegateExecutionInterface
+	 */
 	public $execution;
 	
+	/**
+	 * Provides access to the process engine.
+	 * 
+	 * @var ProcessEngine
+	 */
 	public $engine;
 	
 	public function __construct(DelegateExecutionInterface $execution, ProcessEngine $engine)

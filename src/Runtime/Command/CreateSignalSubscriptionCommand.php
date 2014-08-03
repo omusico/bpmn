@@ -17,6 +17,11 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Process\Node;
 use KoolKode\Util\Uuid;
 
+/**
+ * Creates a signal event subscription.
+ * 
+ * @author Martin Schröder
+ */
 class CreateSignalSubscriptionCommand extends AbstractBusinessCommand
 {
 	protected $signal;

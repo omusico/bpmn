@@ -17,6 +17,11 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Task\Event\UserTaskCreatedEvent;
 use KoolKode\Util\UUID;
 
+/**
+ * Creates a new user task instance.
+ * 
+ * @author Martin Schröder
+ */
 class CreateUserTaskCommand extends AbstractBusinessCommand
 {
 	protected $name;

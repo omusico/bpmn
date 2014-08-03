@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Task\Event;
 
 use KoolKode\BPMN\Engine\ProcessEngineInterface;
 use KoolKode\BPMN\Task\TaskInterface;
+use KoolKode\BPMN\Engine\ProcessEngine;
 
 /**
  * Is triggered whenever a user task has been completed successfully.
@@ -21,8 +22,18 @@ use KoolKode\BPMN\Task\TaskInterface;
  */
 class UserTaskCompletedEvent
 {
+	/**
+	 * The task being completed.
+	 * 
+	 * @var TaskInterface
+	 */
 	public $task;
 	
+	/**
+	 * Provides access to the process engine.
+	 * 
+	 * @var ProcessEngine
+	 */
 	public $engine;
 	
 	public function __construct(TaskInterface $task, ProcessEngineInterface $engine)

@@ -16,6 +16,11 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 
+/**
+ * Notifies event listeners when a message throw event has been executed.
+ * 
+ * @author Martin Schröder
+ */
 class ThrowMessageCommand extends AbstractBusinessCommand
 {
 	protected $execution;

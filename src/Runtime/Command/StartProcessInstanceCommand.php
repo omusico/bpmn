@@ -19,11 +19,13 @@ use KoolKode\Process\Command\ExecuteNodeCommand;
 use KoolKode\Process\Node;
 use KoolKode\Util\Uuid;
 
+/**
+ * Starts a new process instance with deferred node execution.
+ * 
+ * @author Martin Schröder
+ */
 class StartProcessInstanceCommand extends AbstractBusinessCommand
 {
-	const START_TYPE_MESSAGE = 'message';
-	const START_TYPE_SIGNAL = 'signal';
-	
 	protected $definition;
 	
 	protected $startNode;

@@ -15,6 +15,11 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\UUID;
 
+/**
+ * Removes the current assignee from a user task.
+ * 
+ * @author Martin Schröder
+ */
 class UnclaimUserTaskCommand extends AbstractBusinessCommand
 {
 	protected $taskId;

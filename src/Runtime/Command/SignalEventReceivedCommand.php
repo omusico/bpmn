@@ -18,6 +18,11 @@ use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Util\UUID;
 
+/**
+ * Notifies all executions that habe subscribed to the received signal.
+ * 
+ * @author Martin Schröder
+ */
 class SignalEventReceivedCommand extends AbstractBusinessCommand
 {
 	protected $signal;

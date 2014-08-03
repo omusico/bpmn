@@ -19,6 +19,11 @@ use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\Util\Uuid;
 
+/**
+ * Deploys a business process and takes care of versioning and start event subscriptions.
+ * 
+ * @author Martin Schröder
+ */
 class DeployBusinessProcessCommand extends AbstractBusinessCommand
 {
 	protected $builder;

@@ -17,6 +17,11 @@ use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\Process\Node;
 use KoolKode\Util\Uuid;
 
+/**
+ * Creates a message event subscription.
+ * 
+ * @author Martin Schröder
+ */
 class CreateMessageSubscriptionCommand extends AbstractBusinessCommand
 {
 	protected $message;

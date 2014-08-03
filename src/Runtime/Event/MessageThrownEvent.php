@@ -15,10 +15,25 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Runtime\ExecutionInterface;
 use KoolKode\Util\Uuid;
 
+/**
+ * Is triggered whenever a message needs to be thrown from an execution.
+ * 
+ * @author Martin Schröder
+ */
 class MessageThrownEvent
 {
+	/**
+	 * The execution throwing the message.
+	 * 
+	 * @var ExecutionInterface
+	 */
 	public $execution;
 	
+	/**
+	 * Provides access to the process engine.
+	 * 
+	 * @var ProcessEngine
+	 */
 	public $engine;
 	
 	public function __construct(ExecutionInterface $execution, ProcessEngine $engine)

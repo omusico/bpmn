@@ -15,6 +15,11 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\UUID;
 
+/**
+ * Claims a user task by setting the assignee.
+ * 
+ * @author Martin Schröder
+ */
 class ClaimUserTaskCommand extends AbstractBusinessCommand
 {
 	protected $taskId;

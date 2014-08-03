@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Task\Event;
 
 use KoolKode\BPMN\Engine\ProcessEngineInterface;
 use KoolKode\BPMN\Task\TaskInterface;
+use KoolKode\BPMN\Engine\ProcessEngine;
 
 /**
  * Is triggered whenever a new user task instance is being created.
@@ -21,8 +22,18 @@ use KoolKode\BPMN\Task\TaskInterface;
  */
 class UserTaskCreatedEvent
 {
+	/**
+	 * The user task that has been created.
+	 * 
+	 * @var TaskInterface
+	 */
 	public $task;
 	
+	/**
+	 * Provides access to the process engine.
+	 * 
+	 * @var ProcessEngine
+	 */
 	public $engine;
 	
 	public function __construct(TaskInterface $task, ProcessEngineInterface $engine)

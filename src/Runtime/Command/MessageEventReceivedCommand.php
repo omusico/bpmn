@@ -16,6 +16,11 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Util\Uuid;
 
+/**
+ * Delivers a message to an execution that has subscribed to the received message.
+ * 
+ * @author Martin Schröder
+ */
 class MessageEventReceivedCommand extends AbstractBusinessCommand
 {
 	protected $messageName;
