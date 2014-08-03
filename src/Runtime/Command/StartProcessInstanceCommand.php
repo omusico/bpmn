@@ -15,6 +15,7 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\Process\Command\ExecuteNodeCommand;
 use KoolKode\Process\Node;
 use KoolKode\Util\Uuid;
 
@@ -52,8 +53,9 @@ class StartProcessInstanceCommand extends AbstractBusinessCommand
 		}
 		
 		$engine->registerExecution($process);
-		$process->execute($definition->findNode($this->startNode));
-
+		
+		$engine->pushDeferredCommand(new ExecuteNodeCommand($process, $definition->findNode($this->startNode)));
+		
 		return $process->getId();
 	}
 }
