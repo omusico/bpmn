@@ -84,6 +84,8 @@ class SubProcessTest extends BusinessProcessTestCase
 		$this->assertEquals('Task B', $task->getName());
 		$this->assertEquals(1, $this->taskService->createTaskQuery()->count());
 		$this->assertEquals(2, $this->runtimeService->createExecutionQuery()->count());
+				
+		$this->runtimeService->messageEventReceived('InfoMessage', $process->getId(), ['code' => 123]);
 		
 		$this->taskService->complete($task->getId());
 		$task = $this->taskService->createTaskQuery()->findOne();
@@ -91,6 +93,10 @@ class SubProcessTest extends BusinessProcessTestCase
 		$this->assertEquals('Task C', $task->getName());
 		$this->assertEquals(1, $this->taskService->createTaskQuery()->count());
 		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->count());
+		
+		// Check variable set by message boundary event.
+		$execution = $this->processEngine->findExecution($task->getExecutionId());
+		$this->assertEquals('Info code: 123', $execution->getVariable('info'));
 		
 		$this->taskService->complete($task->getId());
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());

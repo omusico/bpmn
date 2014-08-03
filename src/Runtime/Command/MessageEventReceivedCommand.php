@@ -54,7 +54,7 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 		
 		if($row === false)
 		{
-			throw new \RuntimeException(sprintf('%s has no subscription to message %s', $this->executionId, $this->messageName));
+			throw new \RuntimeException(sprintf('Execution %s has not subscribed to message %s', $this->executionId, $this->messageName));
 		}
 		
 		$execution = $engine->findExecution($this->executionId);
