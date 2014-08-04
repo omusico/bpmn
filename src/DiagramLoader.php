@@ -109,6 +109,8 @@ class DiagramLoader
 				return $this->parseScriptTask($id, $el, $builder);
 			case 'userTask':
 				return $this->parseUserTask($id, $el, $builder);
+			case 'manualTask':
+				return $this->parseManualTask($id, $el, $builder);
 			case 'sendTask':
 				return $this->parseSendTask($id, $el, $builder);
 			case 'callActivity':
@@ -219,6 +221,14 @@ class DiagramLoader
 		}
 		
 		return $userTask;
+	}
+	
+	protected function parseManualTask($id, \DOMElement $el, BusinessProcessBuilder $builder)
+	{
+		$manualTask = $builder->manualTask($id, $el->getAttribute('name'));
+		$manualTask->setDocumentation($builder->stringExp($this->getDocumentation($el)));
+	
+		return $manualTask;
 	}
 	
 	protected function parseSendTask($id, \DOMElement $el, BusinessProcessBuilder $builder)

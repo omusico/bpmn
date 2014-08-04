@@ -12,27 +12,27 @@
 namespace KoolKode\BPMN\Delegate\Behavior;
 
 use KoolKode\BPMN\Delegate\DelegateExecution;
-use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
+use KoolKode\BPMN\Delegate\Event\ManualTaskExecutedEvent;
 use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 
 /**
- * Handles service tasks without specific implementation.
+ * Handles manual tasks that have no implementation in code.
  * 
  * @author Martin Schröder
  */
-class ServiceTaskBehavior extends AbstractScopeBehavior
+class ManualTaskBehavior extends AbstractScopeBehavior
 {
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$name = $this->getStringValue($this->name, $execution->getExpressionContext());
 		
-		$execution->getEngine()->debug('Executing service task "{task}"', [
+		$execution->getEngine()->debug('Executing manual task "{task}"', [
 			'task' => $name
 		]);
 		
-		$execution->getEngine()->notify(new ServiceTaskExecutedEvent(
+		$execution->getEngine()->notify(new ManualTaskExecutedEvent(
 			$name,
 			new DelegateExecution($execution),
 			$execution->getEngine()

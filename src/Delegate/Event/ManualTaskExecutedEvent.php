@@ -16,11 +16,11 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\Uuid;
 
 /**
- * Is triggered whenever a service task without specific implementation is being executed.
+ * Is triggered whenever a manual task in a process is being executed.
  * 
  * @author Martin Schröder
  */
-class ServiceTaskExecutedEvent
+class ManualTaskExecutedEvent
 {
 	/**
 	 * Name of the task being executed.

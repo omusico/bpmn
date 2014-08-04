@@ -13,6 +13,7 @@ namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Delegate\Behavior\DelegateTaskBehavior;
 use KoolKode\BPMN\Delegate\Behavior\ExpressionTaskBehavior;
+use KoolKode\BPMN\Delegate\Behavior\ManualTaskBehavior;
 use KoolKode\BPMN\Delegate\Behavior\ScriptTaskBehavior;
 use KoolKode\BPMN\Delegate\Behavior\ServiceTaskBehavior;
 use KoolKode\BPMN\Runtime\Behavior\CallActivityBehavior;
@@ -251,6 +252,16 @@ class BusinessProcessBuilder
 		
 		$this->builder->node($id)->behavior($behavior);
 		
+		return $behavior;
+	}
+	
+	public function manualTask($id, $name = NULL)
+	{
+		$behavior = new ManualTaskBehavior();
+		$behavior->setName($this->stringExp($name));
+	
+		$this->builder->node($id)->behavior($behavior);
+	
 		return $behavior;
 	}
 	
