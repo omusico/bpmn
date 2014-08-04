@@ -43,13 +43,9 @@ class DiagramLoader
 	
 	public function parseDiagram(\DOMDocument $xml)
 	{
-		$this->xpath = $this->createXPath($xml);
-		$this->signals = [];
-		$this->messages = [];
-		
 		try
 		{
-			$xpath = $this->createXPath($xml);
+			$this->xpath = $this->createXPath($xml);
 			
 			foreach($this->xpath->query('/m:definitions/m:message[@id][@name]') as $messageElement)
 			{
@@ -65,12 +61,9 @@ class DiagramLoader
 			
 			foreach($this->xpath->query('/m:definitions/m:process[@id]') as $processElement)
 			{
-				if($processElement->hasAttribute('isExecutable'))
-				{
-					if('true' === strtolower($processElement->getAttribute('isExecutable')))
-					{	
-						$result[] = $this->parseProcessDefinition($processElement);
-					}
+				if('true' === strtolower($processElement->getAttribute('isExecutable')))
+				{	
+					$result[] = $this->parseProcessDefinition($processElement);
 				}
 			}
 			
@@ -421,9 +414,8 @@ class DiagramLoader
 	protected function getDocumentation(\DOMElement $el)
 	{
 		$docs = [];
-		$xpath = $this->createXPath($el->ownerDocument);
 		
-		foreach($xpath->query('m:documentation', $el) as $doc)
+		foreach($this->xpath->query('m:documentation', $el) as $doc)
 		{
 			$docs[] = $doc->textContent;
 		}
