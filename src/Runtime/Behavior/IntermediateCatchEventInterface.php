@@ -11,22 +11,11 @@
 
 namespace KoolKode\BPMN\Runtime\Behavior;
 
-use KoolKode\BPMN\Engine\VirtualExecution;
-use KoolKode\Process\Behavior\SignalableBehaviorInterface;
-use KoolKode\Process\Node;
+use KoolKode\BPMN\Engine\EventSubscriptionBehaviorInterface;
 
 /**
  * Contract for BPMN intermediate catch events that can be used with an event based gateway.
  * 
  * @author Martin Schröder
  */
-interface IntermediateCatchEventInterface extends SignalableBehaviorInterface
-{
-	/**
-	 * Create an event subscription for the given execution.
-	 * 
-	 * @param VirtualExecution $execution
-	 * @param Node $node Start node that will be used after an event is triggered.
-	 */
-	public function createEventSubscription(VirtualExecution $execution, Node $node = NULL);
-}
+interface IntermediateCatchEventInterface extends EventSubscriptionBehaviorInterface { }

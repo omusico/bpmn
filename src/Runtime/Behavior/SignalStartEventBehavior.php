@@ -12,14 +12,17 @@
 namespace KoolKode\BPMN\Runtime\Behavior;
 
 use KoolKode\BPMN\Engine\AbstractBehavior;
+use KoolKode\BPMN\Engine\EventSubscriptionBehaviorInterface;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\BPMN\Runtime\Command\CreateSignalSubscriptionCommand;
+use KoolKode\Process\Node;
 
 /**
  * Similar to basic start event, signal subscriptions are handled by repository services.
  * 
  * @author Martin Schröder
  */
-class SignalStartEventBehavior extends AbstractBehavior
+class SignalStartEventBehavior extends AbstractBehavior implements EventSubscriptionBehaviorInterface
 {
 	protected $signalName;
 	
@@ -31,5 +34,14 @@ class SignalStartEventBehavior extends AbstractBehavior
 	public function getSignalName()
 	{
 		return $this->signalName;
+	}
+	
+	public function createEventSubscription(VirtualExecution $execution, Node $node = NULL)
+	{
+		$execution->getEngine()->pushCommand(new CreateSignalSubscriptionCommand(
+			$this->signalName,
+			$execution,
+			($node === NULL) ? $execution->getNode() : $node
+		));
 	}
 }
