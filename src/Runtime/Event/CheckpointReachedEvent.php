@@ -15,12 +15,19 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Runtime\ExecutionInterface;
 
 /**
- * Is triggered whenever a message needs to be thrown from an execution.
+ * Is triggered whenever a specific checkpoint within a process has been reached.
  * 
  * @author Martin Schröder
  */
-class MessageThrownEvent
+class CheckpointReachedEvent
 {
+	/**
+	 * Name of the element that triggered the checkpoint.
+	 * 
+	 * @var string
+	 */
+	public $name;
+	
 	/**
 	 * The execution throwing the message.
 	 * 
@@ -35,8 +42,9 @@ class MessageThrownEvent
 	 */
 	public $engine;
 	
-	public function __construct(ExecutionInterface $execution, ProcessEngine $engine)
+	public function __construct($name, ExecutionInterface $execution, ProcessEngine $engine)
 	{
+		$this->name = (string)$name;
 		$this->execution = $execution;
 		$this->engine = $engine;
 	}

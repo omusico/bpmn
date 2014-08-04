@@ -332,7 +332,7 @@ class DiagramLoader
 			return $builder->intermediateSignalCatchEvent($id, $signal, $el->getAttribute('name'));
 		}
 		
-		return $builder->node($id);
+		return $builder->intermediateNoneEvent($id, $el->getAttribute('name'));
 	}
 	
 	protected function parseIntermediateThrowEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)
@@ -349,7 +349,7 @@ class DiagramLoader
 			return $builder->intermediateSignalThrowEvent($id, $signal, $el->getAttribute('name'));
 		}
 		
-		return $builder->node($id);
+		return $builder->intermediateNoneEvent($id, $el->getAttribute('name'));
 	}
 	
 	protected function parseBoundaryEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)

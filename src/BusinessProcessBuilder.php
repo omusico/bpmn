@@ -22,6 +22,7 @@ use KoolKode\BPMN\Runtime\Behavior\InclusiveGatewayBehavior;
 use KoolKode\BPMN\Runtime\Behavior\ParallelGatewayBehavior;
 use KoolKode\BPMN\Runtime\Behavior\IntermediateMessageCatchBehavior;
 use KoolKode\BPMN\Runtime\Behavior\IntermediateMessageThrowBehavior;
+use KoolKode\BPMN\Runtime\Behavior\IntermediateNoneEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalCatchBehavior;
 use KoolKode\BPMN\Runtime\Behavior\IntermediateSignalThrowBehavior;
 use KoolKode\BPMN\Runtime\Behavior\MessageBoundaryEventBehavior;
@@ -276,6 +277,16 @@ class BusinessProcessBuilder
 	public function subProcess($id, $startNodeId, $name = NULL)
 	{
 		$behavior = new SubProcessBehavior($startNodeId);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function intermediateNoneEvent($id, $name = NULL)
+	{
+		$behavior = new IntermediateNoneEventBehavior();
 		$behavior->setName($this->stringExp($name));
 		
 		$this->builder->node($id)->behavior($behavior);
