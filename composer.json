@@ -23,7 +23,8 @@
 	},
 	"require-dev" : {
 		"phpunit/phpunit" : "4.*",
-		"monolog/monolog" : "~1.0"
+		"monolog/monolog" : "~1.0",
+		"koolkode/meta" : "dev-master"
 	},
 	"autoload" : {
 		"psr-4" : {

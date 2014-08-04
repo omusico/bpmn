@@ -13,6 +13,7 @@ namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Runtime\ExecutionInterface;
 use KoolKode\BPMN\Task\TaskInterface;
+use KoolKode\BPMN\Test\BusinessProcessTestCase;
 
 class SimpleProcessTest extends BusinessProcessTestCase
 {

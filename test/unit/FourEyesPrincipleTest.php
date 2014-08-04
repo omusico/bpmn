@@ -12,6 +12,8 @@
 namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
+use KoolKode\BPMN\Test\BusinessProcessTestCase;
+use KoolKode\BPMN\Test\MessageHandler;
 use KoolKode\Process\Event\EnterNodeEvent;
 
 class FourEyesPrincipleTest extends BusinessProcessTestCase
@@ -33,33 +35,8 @@ class FourEyesPrincipleTest extends BusinessProcessTestCase
 	{
 		$this->deployFile('FourEyesPrincipleTest.bpmn');
 		
-		$this->registerMessageHandler('main', 'NotifyFirstApprover', function(MessageThrownEvent $event) {
-			$this->runtimeService->startProcessInstanceByMessage(
-				'FirstApprovalRequested',
-				$event->execution->getBusinessKey()
-			);
-		});
-		
-		$this->registerMessageHandler('first', 'SendTask_3', function(MessageThrownEvent $event) use($a1) {
-			$this->runtimeService->createMessageCorrelation('FirstDecisionReceived')
-								 ->processBusinessKey($event->execution->getBusinessKey())
-								 ->setVariable('approved', $a1 ? true : false)
-								 ->correlate();
-		});
-		
-		$this->registerMessageHandler('main', 'NotifySecondApprover', function(MessageThrownEvent $event) {
-			$this->runtimeService->startProcessInstanceByMessage(
-				'SecondApprovalRequested',
-				$event->execution->getBusinessKey()
-			);
-		});
-		
-		$this->registerMessageHandler('second', 'SendTask_4', function(MessageThrownEvent $event) use($a2) {
-			$this->runtimeService->createMessageCorrelation('SecondDecisionReceived')
-								 ->processBusinessKey($event->execution->getBusinessKey())
-								 ->setVariable('approved', $a2 ? true : false)
-								 ->correlate();
-		});
+		$this->firstApproval = $a1 ? true : false;
+		$this->secondApproval = $a2 ? true : false;
 		
 		$businessKey = 'Need decision!';
 		
@@ -95,5 +72,61 @@ class FourEyesPrincipleTest extends BusinessProcessTestCase
 		
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
 		$this->assertEquals($result, $lastNode->getId());
+	}
+	
+	/**
+	 * @MessageHandler("NotifyFirstApprover", processKey = "main")
+	 * 
+	 * @param MessageThrownEvent $event
+	 */
+	public function notifyFirstApprover(MessageThrownEvent $event)
+	{
+		$this->runtimeService->startProcessInstanceByMessage(
+			'FirstApprovalRequested',
+			$event->execution->getBusinessKey()
+		);
+	}
+	
+	protected $firstApproval = false;
+	
+	/**
+	 * @MessageHandler("SendTask_3", processKey = "first")
+	 *
+	 * @param MessageThrownEvent $event
+	 */
+	public function decideFirstApproval(MessageThrownEvent $event)
+	{
+		$this->runtimeService->createMessageCorrelation('FirstDecisionReceived')
+							 ->processBusinessKey($event->execution->getBusinessKey())
+							 ->setVariable('approved', $this->firstApproval)
+							 ->correlate();
+	}
+	
+	/**
+	 * @MessageHandler("NotifySecondApprover", processKey = "main")
+	 * 
+	 * @param MessageThrownEvent $event
+	 */
+	public function notifySecondApprover(MessageThrownEvent $event)
+	{
+		$this->runtimeService->startProcessInstanceByMessage(
+			'SecondApprovalRequested',
+			$event->execution->getBusinessKey()
+		);
+	}
+	
+	protected $secondApproval = false;
+	
+	/**
+	 * @MessageHandler("SendTask_4", processKey = "second")
+	 * 
+	 * @param MessageThrownEvent $event
+	 */
+	public function decideSecondApproval(MessageThrownEvent $event)
+	{
+		$this->runtimeService->createMessageCorrelation('SecondDecisionReceived')
+							 ->processBusinessKey($event->execution->getBusinessKey())
+							 ->setVariable('approved', $this->secondApproval)
+							 ->correlate();
 	}
 }

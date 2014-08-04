@@ -12,6 +12,7 @@
 namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Task\TaskInterface;
+use KoolKode\BPMN\Test\BusinessProcessTestCase;
 use KoolKode\Process\Event\EnterNodeEvent;
 
 class FourEyesRevisitedTest extends BusinessProcessTestCase

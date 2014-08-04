@@ -13,6 +13,8 @@ namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Delegate\DelegateExecutionInterface;
 use KoolKode\BPMN\Task\TaskInterface;
+use KoolKode\BPMN\Test\BusinessProcessTestCase;
+use KoolKode\BPMN\Test\ServiceTaskHandler;
 
 class ScriptTaskTest extends BusinessProcessTestCase
 {
@@ -32,9 +34,7 @@ class ScriptTaskTest extends BusinessProcessTestCase
 	{
 		$this->deployFile('ScriptTaskTest.bpmn');
 		
-		$this->registerServiceTaskHandler('main', 'ServiceTask_1', function(DelegateExecutionInterface $execution) use($result) {
-			$this->assertEquals($result, $execution->getVariable('result'));
-		});
+		$this->expectedResult = $result;
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('main');
 		
@@ -47,5 +47,17 @@ class ScriptTaskTest extends BusinessProcessTestCase
 		]);
 		
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
+	}
+	
+	protected $expectedResult = 0;
+	
+	/**
+	 * @ServiceTaskHandler("ServiceTask_1", processKey = "main")
+	 * 
+	 * @param DelegateExecution $execution
+	 */
+	public function verifyNumbersAdded(DelegateExecutionInterface $execution)
+	{
+		$this->assertEquals($this->expectedResult, $execution->getVariable('result'));
 	}
 }

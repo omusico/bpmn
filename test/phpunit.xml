@@ -13,6 +13,7 @@
       <exclude>
         <directory suffix="Interface.php">../src/</directory>
         <directory suffix="Exception.php">../src/</directory>
+        <directory>../src/Test/</directory>
       </exclude>
     </whitelist>
   </filter>

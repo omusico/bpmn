@@ -13,6 +13,8 @@ namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 use KoolKode\BPMN\Task\TaskInterface;
+use KoolKode\BPMN\Test\BusinessProcessTestCase;
+use KoolKode\BPMN\Test\MessageHandler;
 
 class EndEventsTest extends BusinessProcessTestCase
 {
@@ -35,10 +37,6 @@ class EndEventsTest extends BusinessProcessTestCase
 		$this->assertTrue($task instanceof TaskInterface);
 		$this->assertEquals('Task B', $task->getName());
 		
-		$this->registerMessageHandler('test2', 'messageEndEvent1', function(MessageThrownEvent $event) {
-			$this->assertEquals('messageEndEvent1', $event->execution->getActivityId());
-		});
-		
 		$this->taskService->complete($task->getId());
 		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->count());
 		$this->assertEquals(1, $this->taskService->createTaskQuery()->count());
@@ -49,5 +47,15 @@ class EndEventsTest extends BusinessProcessTestCase
 		
 		$this->taskService->complete($task->getId());
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
+	}
+	
+	/**
+	 * @MessageHandler("messageEndEvent1", processKey = "test2")
+	 * 
+	 * @param MessageThrownEvent $event
+	 */
+	public function verifyMessageEndEvent(MessageThrownEvent $event)
+	{
+		$this->assertEquals('messageEndEvent1', $event->execution->getActivityId());
 	}
 }

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace KoolKode\BPMN;
+namespace KoolKode\BPMN\Test;
 
 use KoolKode\BPMN\Delegate\DelegateTaskRegistry;
 use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
@@ -21,6 +21,7 @@ use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
 use KoolKode\Event\EventDispatcher;
 use KoolKode\Expression\ExpressionContextFactory;
+use KoolKode\Meta\Info\ReflectionTypeInfo;
 use KoolKode\Process\Event\CreateExpressionContextEvent;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -68,6 +69,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	protected $messageHandlers;
 	
 	protected $serviceTaskHandlers;
+	
+	private $typeInfo;
 	
 	public static function setUpBeforeClass()
 	{
@@ -154,6 +157,32 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$this->repositoryService = $this->processEngine->getRepositoryService();
 		$this->runtimeService = $this->processEngine->getRuntimeService();
 		$this->taskService = $this->processEngine->getTaskService();
+		
+		if($this->typeInfo === NULL)
+		{
+			$this->typeInfo = new ReflectionTypeInfo(new \ReflectionClass(get_class($this)));
+		}
+		
+		foreach($this->typeInfo->getMethods() as $method)
+		{
+			if(!$method->isPublic() || $method->isStatic())
+			{
+				continue;
+			}
+			
+			foreach($method->getAnnotations() as $anno)
+			{
+				if($anno instanceof MessageHandler)
+				{
+					$this->messageHandlers[$anno->processKey][$anno->value] = [$this, $method->getName()];
+				}
+				
+				if($anno instanceof ServiceTaskHandler)
+				{
+					$this->serviceTaskHandlers[$anno->processKey][$anno->value] = [$this, $method->getName()];
+				}
+			}
+		}
 	}
 	
 	protected function tearDown()

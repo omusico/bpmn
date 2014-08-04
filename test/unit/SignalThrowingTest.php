@@ -13,16 +13,14 @@ namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Delegate\DelegateExecutionInterface;
 use KoolKode\BPMN\Task\TaskInterface;
+use KoolKode\BPMN\Test\BusinessProcessTestCase;
+use KoolKode\BPMN\Test\ServiceTaskHandler;
 
 class SignalThrowingTest extends BusinessProcessTestCase
 {
 	public function testIntermediateSignalThrow()
 	{
 		$this->deployFile('SignalThrowingTest.bpmn');
-		
-		$this->registerServiceTaskHandler('SignalThrowingTest', 'ServiceTask_1', function(DelegateExecutionInterface $execution) {
-			$this->assertEquals(9, $execution->getVariable('counter'));
-		});
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('SignalThrowingTest');
 		$this->assertEquals(4, $this->runtimeService->createExecutionQuery()->count());
@@ -46,5 +44,15 @@ class SignalThrowingTest extends BusinessProcessTestCase
 		]);
 		
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
+	}
+	
+	/**
+	 * @ServiceTaskHandler("ServiceTask_1", processKey = "SignalThrowingTest")
+	 * 
+	 * @param DelegateExecutionInterface $execution
+	 */
+	public function verifyCounter(DelegateExecutionInterface $execution)
+	{
+		$this->assertEquals(9, $execution->getVariable('counter'));
 	}
 }
