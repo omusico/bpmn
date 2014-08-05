@@ -11,6 +11,7 @@
 
 namespace KoolKode\BPMN\Engine;
 
+use KoolKode\BPMN\Runtime\Behavior\EventSubProcessBehavior;
 use KoolKode\BPMN\Runtime\Command\ClearEventSubscriptionsCommand;
 use KoolKode\Process\Execution;
 use KoolKode\Process\Node;
@@ -22,19 +23,7 @@ use KoolKode\Process\Node;
  * @author Martin Schröder
  */
 abstract class AbstractScopeBehavior extends AbstractSignalableBehavior
-{
-	/**
-	 * Hooks into the execution and sets up boundary event subscriptions of boundary events.
-	 * 
-	 * @param Execution $execution
-	 */
-	public function execute(Execution $execution)
-	{
-		$this->createScopedEventSubscriptions($execution);
-		
-		return parent::execute($execution);
-	}
-	
+{	
 	/**
 	 * Will clear all boundary event subscriptions after the signal has been dispatched.
 	 * 
@@ -50,7 +39,10 @@ abstract class AbstractScopeBehavior extends AbstractSignalableBehavior
 		}
 		finally
 		{
-			$execution->getEngine()->executeCommand(new ClearEventSubscriptionsCommand($execution));
+			$execution->getEngine()->executeCommand(new ClearEventSubscriptionsCommand(
+				$execution,
+				$execution->getNode()->getId()
+			));
 		}
 	}
 	
@@ -61,11 +53,23 @@ abstract class AbstractScopeBehavior extends AbstractSignalableBehavior
 	 */
 	public function interruptBehavior(VirtualExecution $execution) { }
 	
-	public function createScopedEventSubscriptions(Execution $execution)
+	/**
+	 * Have boundary events subscribe to events.
+	 * 
+	 * @param Execution $execution
+	 */
+	public function createScopedEventSubscriptions(VirtualExecution $execution)
 	{
+		$activityId = $execution->getNode()->getId();
+		
 		foreach($this->findAttachedBoundaryEvents($execution) as $event)
 		{
-			$event->getBehavior()->createEventSubscription($execution, $event);
+			$behavior = $event->getBehavior();
+			
+			if($behavior instanceof AbstractBoundaryEventBehavior)
+			{
+				$behavior->createEventSubscription($execution, $activityId, $event);
+			}
 		}
 	}
 	

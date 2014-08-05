@@ -26,7 +26,8 @@ interface EventSubscriptionBehaviorInterface extends BehaviorInterface
 	 * or the current node of the execution.
 	 *
 	 * @param VirtualExecution $execution
+	 * @param string $activityId Activity ID that is creating the subscription.
 	 * @param Node $node Context node that will be used after an event is triggered.
 	 */
-	public function createEventSubscription(VirtualExecution $execution, Node $node = NULL);
+	public function createEventSubscription(VirtualExecution $execution, $activityId, Node $node = NULL);
 }

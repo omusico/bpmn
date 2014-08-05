@@ -32,16 +32,17 @@ class IntermediateMessageCatchBehavior extends AbstractSignalableBehavior implem
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$this->createEventSubscription($execution);
+		$this->createEventSubscription($execution, $execution->getNode()->getId());
 		
 		$execution->waitForSignal();
 	}
 	
-	public function createEventSubscription(VirtualExecution $execution, Node $node = NULL)
+	public function createEventSubscription(VirtualExecution $execution, $activityId, Node $node = NULL)
 	{
-		$execution->getEngine()->pushCommand(new CreateMessageSubscriptionCommand(
+		$execution->getEngine()->executeCommand(new CreateMessageSubscriptionCommand(
 			$this->message,
 			$execution,
+			$activityId,
 			($node === NULL) ? $execution->getNode() : $node
 		));
 	}

@@ -27,7 +27,7 @@
       </bpmn2:endEvent>
       <bpmn2:sequenceFlow id="SequenceFlow_8" name="" sourceRef="ServiceTask_2" targetRef="EndEvent_2"/>
       <bpmn2:subProcess id="SubProcess_3" name="Handle item shortage" triggeredByEvent="true">
-        <bpmn2:startEvent id="StartEvent_3" name="Running out&#xD;&#xA;of items&#xD;&#xA;">
+        <bpmn2:startEvent id="StartEvent_3" name="Running out&#xD;&#xA;of items&#xD;&#xA;" isInterrupting="false">
           <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
           <bpmn2:messageEventDefinition id="_MessageEventDefinition_2" messageRef="Message_1"/>
         </bpmn2:startEvent>

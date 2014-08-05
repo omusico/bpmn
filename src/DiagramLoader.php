@@ -11,6 +11,7 @@
 
 namespace KoolKode\BPMN;
 
+use KoolKode\BPMN\Runtime\Behavior\StartEventBehaviorInterface;
 use KoolKode\Xml\XmlDocumentBuilder;
 
 /**
@@ -35,6 +36,8 @@ class DiagramLoader
 	protected $signals = [];
 	
 	protected $messages = [];
+	
+	protected $subProcessId;
 	
 	public function parseDiagramFile($file)
 	{
@@ -79,6 +82,7 @@ class DiagramLoader
 			$this->xpath = NULL;
 			$this->signals = [];
 			$this->messages = [];
+			$this->subProcessId = NULL;
 		}
 	}
 	
@@ -266,23 +270,62 @@ class DiagramLoader
 	
 	protected function parseSubProcess($id, \DOMElement $el, BusinessProcessBuilder $builder)
 	{
-		// TODO: Find a way to transform event sub process to boundary events or event subscribers.
+		$parentSubId = $this->subProcessId;
+		$this->subProcessId = $id;
 		
-		$triggeredByEvent = ('true' === strtolower($el->getAttribute('triggeredByEvent')));
-		$startNodeId = NULL;
-		
-		foreach($this->xpath->query('m:startEvent', $el) as $node)
+		try
 		{
-			$startNodeId = (string)$node->getAttribute('id');
+			$triggeredByEvent = ('true' === strtolower($el->getAttribute('triggeredByEvent')));
+			
+			$inner = $this->parseProcessDefinition($el);
+			$builder->append($inner);
+			
+			$startNodeId = NULL;
+			
+			foreach($inner->build()->findStartNodes() as $candidate)
+			{
+				$behavior = $candidate->getBehavior();
+				
+				if($behavior instanceof StartEventBehaviorInterface)
+				{
+					$startNodeId = $candidate->getId();
+					
+					break;
+				}
+			}
+			
+			if($startNodeId === NULL)
+			{
+				throw new \RuntimeException(sprintf('Missing start node of sub process %s', $id));
+			}
+			
+			// TODO: Pass sub process builder into method and set start node automatically!?
+			
+			if($triggeredByEvent)
+			{
+				$sub = $builder->eventSubProcess($id, $parentSubId, $startNodeId, $el->getAttribute('name'));
+				
+				foreach($inner->build()->findStartNodes() as $startNode)
+				{
+					$sb = $startNode->getBehavior();
+					
+					if($sb instanceof StartEventBehaviorInterface)
+					{
+						$sub->setInterrupting($sb->isInterrupting());
+					}
+				}
+			}
+			else
+			{
+				$sub = $builder->subProcess($id, $startNodeId, $el->getAttribute('name'));
+			}
+			
+			return $sub;
 		}
-		
-		$sub = $builder->subProcess($id, $startNodeId, $el->getAttribute('name'));
-		
-		$inner = $this->parseProcessDefinition($el);
-		
-		$builder->append($inner);
-		
-		return $sub;
+		finally
+		{
+			$this->subProcessId = $parentSubId;
+		}
 	}
 	
 	protected function parseStartEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)
@@ -291,17 +334,23 @@ class DiagramLoader
 		{
 			$message = $this->messages[$messageElement->getAttribute('messageRef')];
 			
-			return $builder->messageStartEvent($id, $message, $el->getAttribute('name'));
+			$messageStart = $builder->messageStartEvent($id, $message, $this->subProcessId !== NULL, $el->getAttribute('name'));
+			$messageStart->setInterrupting('false' !== strtolower($el->getAttribute('isInterrupting')));
+			
+			return $messageStart;
 		}
 		
 		foreach($this->xpath->query('m:signalEventDefinition', $el) as $signalElement)
 		{
 			$signal = $this->signals[$signalElement->getAttribute('signalRef')];
 			
-			return $builder->signalStartEvent($id, $signal, $el->getAttribute('name'));
+			$signalStart = $builder->signalStartEvent($id, $signal, $this->subProcessId !== NULL, $el->getAttribute('name'));
+			$signalStart->setInterrupting('false' != strtolower($el->getAttribute('isInterrupting')));
+			
+			return $signalStart;
 		}
 		
-		return $builder->startEvent($id, $el->getAttribute('name'));
+		return $builder->startEvent($id, $this->subProcessId !== NULL, $el->getAttribute('name'));
 	}
 	
 	protected function parseEndEvent($id, \DOMElement $el, BusinessProcessBuilder $builder)

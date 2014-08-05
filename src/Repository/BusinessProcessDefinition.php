@@ -72,7 +72,7 @@ class BusinessProcessDefinition
 		{
 			$behavior = $node->getBehavior();
 			
-			if($behavior instanceof NoneStartEventBehavior)
+			if($behavior instanceof NoneStartEventBehavior && !$behavior->isSubProcessStart())
 			{
 				return $node;
 			}
@@ -89,7 +89,7 @@ class BusinessProcessDefinition
 		{
 			$behavior = $node->getBehavior();
 			
-			if($behavior instanceof MessageStartEventBehavior)
+			if($behavior instanceof MessageStartEventBehavior && !$behavior->isSubProcessStart())
 			{
 				if($behavior->getMessageName() == $messageName)
 				{
@@ -109,7 +109,7 @@ class BusinessProcessDefinition
 		{
 			$behavior = $node->getBehavior();
 				
-			if($behavior instanceof SignalStartEventBehavior)
+			if($behavior instanceof SignalStartEventBehavior && !$behavior->isSubProcessStart())
 			{
 				if($behavior->getSignalName() == $signalName)
 				{

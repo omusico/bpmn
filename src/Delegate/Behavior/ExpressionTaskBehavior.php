@@ -39,6 +39,8 @@ class ExpressionTaskBehavior extends AbstractScopeBehavior
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
+		$this->createScopedEventSubscriptions($execution);
+		
 		$execution->getEngine()->debug('Execute expression in service task "{task}"', [
 			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);

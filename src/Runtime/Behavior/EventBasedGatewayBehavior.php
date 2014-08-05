@@ -46,7 +46,7 @@ class EventBasedGatewayBehavior extends AbstractSignalableBehavior
 				));
 			}
 			
-			$behavior->createEventSubscription($execution, $eventNode);
+			$behavior->createEventSubscription($execution, $execution->getNode()->getId(), $eventNode);
 		}
 		
 		$execution->waitForSignal();

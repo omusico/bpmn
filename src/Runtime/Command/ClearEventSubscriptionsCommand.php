@@ -24,9 +24,12 @@ class ClearEventSubscriptionsCommand extends AbstractBusinessCommand
 {
 	protected $execution;
 	
-	public function __construct(VirtualExecution $execution)
+	protected $activitId;
+	
+	public function __construct(VirtualExecution $execution, $activityId)
 	{
 		$this->execution = $execution;
+		$this->activitId = (string)$activityId;
 	}
 	
 	public function getPriority()
@@ -38,9 +41,11 @@ class ClearEventSubscriptionsCommand extends AbstractBusinessCommand
 	{
 		$sql = "	DELETE FROM `#__bpm_event_subscription`
 					WHERE `execution_id` = :eid
+					AND `activity_id` = :aid
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
+		$stmt->bindValue('aid', $this->activitId);
 		$stmt->execute();
 		
 		$count = (int)$stmt->rowCount();

@@ -32,11 +32,12 @@ class MessageBoundaryEventBehavior extends AbstractBoundaryEventBehavior
 		$this->message = (string)$message;
 	}
 	
-	public function createEventSubscription(VirtualExecution $execution, Node $node)
+	public function createEventSubscription(VirtualExecution $execution, $activityId, Node $node)
 	{
-		$execution->getEngine()->pushCommand(new CreateMessageSubscriptionCommand(
+		$execution->getEngine()->executeCommand(new CreateMessageSubscriptionCommand(
 			$this->message,
 			$execution,
+			$activityId,
 			$node
 		));
 	}

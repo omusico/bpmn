@@ -18,6 +18,7 @@ use KoolKode\BPMN\Delegate\Behavior\ScriptTaskBehavior;
 use KoolKode\BPMN\Delegate\Behavior\ServiceTaskBehavior;
 use KoolKode\BPMN\Runtime\Behavior\CallActivityBehavior;
 use KoolKode\BPMN\Runtime\Behavior\EventBasedGatewayBehavior;
+use KoolKode\BPMN\Runtime\Behavior\EventSubProcessBehavior;
 use KoolKode\BPMN\Runtime\Behavior\ExclusiveGatewayBehavior;
 use KoolKode\BPMN\Runtime\Behavior\InclusiveGatewayBehavior;
 use KoolKode\BPMN\Runtime\Behavior\ParallelGatewayBehavior;
@@ -93,9 +94,9 @@ class BusinessProcessBuilder
 		return $this->builder->node($id);
 	}
 	
-	public function startEvent($id, $name = NULL)
+	public function startEvent($id, $subProcessStart = false, $name = NULL)
 	{
-		$behavior = new NoneStartEventBehavior();
+		$behavior = new NoneStartEventBehavior($subProcessStart);
 		$behavior->setName($this->stringExp($name));
 		
 		$this->builder->node($id)->behavior($behavior)->initial();
@@ -103,9 +104,9 @@ class BusinessProcessBuilder
 		return $behavior;
 	}
 	
-	public function messageStartEvent($id, $messageName, $name = NULL)
+	public function messageStartEvent($id, $messageName, $subProcessStart = false, $name = NULL)
 	{
-		$behavior = new MessageStartEventBehavior($messageName);
+		$behavior = new MessageStartEventBehavior($messageName, $subProcessStart);
 		$behavior->setName($this->stringExp($name));
 		
 		$this->builder->node($id)->behavior($behavior);
@@ -113,9 +114,9 @@ class BusinessProcessBuilder
 		return $behavior;
 	}
 	
-	public function signalStartEvent($id, $signalName, $name = NULL)
+	public function signalStartEvent($id, $signalName, $subProcessStart = false, $name = NULL)
 	{
-		$behavior = new SignalStartEventBehavior($signalName);
+		$behavior = new SignalStartEventBehavior($signalName, $subProcessStart);
 		$behavior->setName($this->stringExp($name));
 		
 		$this->builder->node($id)->behavior($behavior);
@@ -287,7 +288,17 @@ class BusinessProcessBuilder
 	
 	public function subProcess($id, $startNodeId, $name = NULL)
 	{
-		$behavior = new SubProcessBehavior($startNodeId);
+		$behavior = new SubProcessBehavior($id, $startNodeId);
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
+	public function eventSubProcess($id, $attachedTo, $startNodeId, $name = NULL)
+	{
+		$behavior = new EventSubProcessBehavior($attachedTo, $startNodeId);
 		$behavior->setName($this->stringExp($name));
 		
 		$this->builder->node($id)->behavior($behavior);

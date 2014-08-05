@@ -18,4 +18,22 @@ use KoolKode\BPMN\Engine\AbstractBehavior;
  * 
  * @author Martin Schröder
  */
-class NoneStartEventBehavior extends AbstractBehavior { }
+class NoneStartEventBehavior extends AbstractBehavior implements StartEventBehaviorInterface
+{
+	protected $subProcessStart;
+	
+	public function __construct($subProcessStart = false)
+	{
+		$this->subProcessStart = $subProcessStart ? true : false;
+	}
+	
+	public function isSubProcessStart()
+	{
+		return $this->subProcessStart;
+	}
+	
+	public function isInterrupting()
+	{
+		return false;
+	}
+}

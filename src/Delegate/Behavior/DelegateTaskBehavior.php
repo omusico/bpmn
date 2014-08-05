@@ -34,6 +34,8 @@ class DelegateTaskBehavior extends AbstractScopeBehavior
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
+		$this->createScopedEventSubscriptions($execution);
+		
 		$typeName = $this->getStringValue($this->typeName, $execution->getExpressionContext());
 		$task = $execution->getEngine()->createDelegateTask($typeName);
 		

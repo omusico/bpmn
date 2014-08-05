@@ -32,11 +32,12 @@ class SignalBoundaryEventBehavior extends AbstractBoundaryEventBehavior
 		$this->signal = (string)$signal;
 	}
 	
-	public function createEventSubscription(VirtualExecution $execution, Node $node)
+	public function createEventSubscription(VirtualExecution $execution, $activityId, Node $node)
 	{
-		$execution->getEngine()->pushCommand(new CreateSignalSubscriptionCommand(
+		$execution->getEngine()->executeCommand(new CreateSignalSubscriptionCommand(
 			$this->signal,
 			$execution,
+			$activityId,
 			$node
 		));
 	}

@@ -48,7 +48,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
-		$sql = "	SELECT s.`id`, s.`execution_id`, s.`node`
+		$sql = "	SELECT s.`id`, s.`execution_id`, s.`activity_id`, s.`node`
 					FROM `#__bpm_event_subscription` AS s
 					WHERE s.`name` = :signal
 					AND s.`flags` = :flags
@@ -76,7 +76,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		foreach($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row)
 		{
 			$execution = $executions[] = $engine->findExecution(new UUID($row['execution_id']));
-			$ids[(string)$execution->getId()] = $execution->getId()->toBinary();
+			$ids[(string)$execution->getId()] = [$execution->getId()->toBinary(), $row['activity_id']];
 			
 			if($row['node'] !== NULL)
 			{
@@ -89,12 +89,18 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		
 		if(!empty($ids))
 		{
-			$list = implode(', ', array_fill(0, count($ids), '?'));
 			$sql = "	DELETE FROM `#__bpm_event_subscription`
-						WHERE `execution_id` IN ($list)
+						WHERE `execution_id` = :eid
+						AND `activity_id` = :aid
 			";
 			$stmt = $engine->prepareQuery($sql);
-			$stmt->execute(array_values($ids));
+			
+			foreach($ids as $tmp)
+			{
+				$stmt->bindValue('eid', $tmp[0]);
+				$stmt->bindValue('aid', $tmp[1]);
+				$stmt->execute();
+			}
 		}
 		
 		foreach($executions as $execution)

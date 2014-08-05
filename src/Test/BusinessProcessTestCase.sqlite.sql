@@ -49,6 +49,7 @@ CREATE INDEX bpm_execution_node ON bpm_execution(node);
 CREATE TABLE bpm_event_subscription (
 	id BINARY(16) NOT NULL,
 	execution_id BINARY(16) NOT NULL,
+	activity_id VARCHAR(250) NOT NULL,
 	node VARCHAR(250) NULL,
 	process_instance_id BINARY(16) NOT NULL,
 	flags INT UNSIGNED NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE bpm_event_subscription (
 	FOREIGN KEY (process_instance_id) REFERENCES bpm_execution(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE INDEX bpm_event_subscription_execution_id ON bpm_event_subscription(execution_id);
+CREATE INDEX bpm_event_subscription_execution_id ON bpm_event_subscription(execution_id, activity_id);
 CREATE INDEX bpm_event_subscription_process_instance_id ON bpm_event_subscription(process_instance_id);
 CREATE INDEX bpm_event_subscription_lookup ON bpm_event_subscription(name, flags);
 

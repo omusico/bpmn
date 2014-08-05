@@ -23,7 +23,7 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 {
 	protected $attachedTo;
 	
-	protected $interrupting= true;
+	protected $interrupting = true;
 	
 	public function __construct($attachedTo)
 	{
@@ -49,9 +49,10 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 	 * Create an event subscription for the given execution.
 	 * 
 	 * @param VirtualExecution $execution
+	 * @param string $activityId
 	 * @param Node $node Start node that will be used after an event is triggered.
 	 */
-	public abstract function createEventSubscription(VirtualExecution $execution, Node $node);
+	public abstract function createEventSubscription(VirtualExecution $execution, $activityId, Node $node);
 	
 	public final function executeBehavior(VirtualExecution $execution)
 	{
@@ -73,7 +74,7 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 				$behavior->interruptBehavior($execution);
 			}
 			
-			return parent::signalBehavior($execution, $signal, $variables);
+			return $this->delegateSignalBehavior($execution, $signal, $variables);
 		}
 		
 		if($execution->isConcurrent())
@@ -100,6 +101,11 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 			$behavior->createScopedEventSubscriptions($execution);
 		}
 		
-		return parent::signalBehavior($fork, $signal, $variables);
+		return $this->delegateSignalBehavior($fork, $signal, $variables);
+	}
+	
+	protected function delegateSignalBehavior(VirtualExecution $execution, $signal, array $variables = [])
+	{
+		return parent::signalBehavior($execution, $signal, $variables);
 	}
 }

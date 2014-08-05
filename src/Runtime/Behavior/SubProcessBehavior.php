@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Runtime\Behavior;
 
 use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
+use KoolKode\Process\Node;
 
 /**
  * Executes an embedded sub process within a child execution with shared variable scope.
@@ -21,15 +22,25 @@ use KoolKode\BPMN\Engine\VirtualExecution;
  */
 class SubProcessBehavior extends AbstractScopeBehavior
 {
+	protected $id;
+	
 	protected $startNodeId;
 	
-	public function __construct($startNodeId)
+	public function __construct($id, $startNodeId)
 	{
+		$this->id = (string)$id;
 		$this->startNodeId = (string)$startNodeId;
+	}
+	
+	public function getId()
+	{
+		return $this->id;
 	}
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
+		$this->createScopedEventSubscriptions($execution);
+		
 		$definition = $execution->getProcessDefinition();
 		
 		$execution->getEngine()->debug('Starting sub process "{process}"', [
@@ -56,6 +67,11 @@ class SubProcessBehavior extends AbstractScopeBehavior
 	
 	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
+		if(empty($variables[VirtualExecution::KEY_EXECUTION]))
+		{
+			return $execution->terminate(false);
+		}
+		
 		$sub = $variables[VirtualExecution::KEY_EXECUTION];
 		
 		if(!$sub instanceof VirtualExecution)
@@ -79,5 +95,18 @@ class SubProcessBehavior extends AbstractScopeBehavior
 		}
 		
 		return parent::interruptBehavior($execution);
+	}
+	
+	public function createEventSubProcessSubscriptions(VirtualExecution $execution)
+	{
+		foreach($this->findAttachedBoundaryEvents($execution) as $event)
+		{
+			$behavior = $event->getBehavior();
+				
+			if($behavior instanceof EventSubProcessBehavior)
+			{
+				$behavior->createEventSubscription($execution, $execution->getNode()->getId(), $event);
+			}
+		}
 	}
 }

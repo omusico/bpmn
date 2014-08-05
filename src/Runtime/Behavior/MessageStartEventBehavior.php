@@ -22,13 +22,18 @@ use KoolKode\Process\Node;
  * 
  * @author Martin Schröder
  */
-class MessageStartEventBehavior extends AbstractBehavior implements EventSubscriptionBehaviorInterface
+class MessageStartEventBehavior extends AbstractBehavior implements StartEventBehaviorInterface, EventSubscriptionBehaviorInterface
 {
 	protected $messageName;
 	
-	public function __construct($messageName)
+	protected $subProcessStart;
+	
+	protected $interrupting = true;
+	
+	public function __construct($messageName, $subProcessStart = false)
 	{
 		$this->messageName = (string)$messageName;
+		$this->subProcessStart = $subProcessStart ? true : false;
 	}
 	
 	public function getMessageName()
@@ -36,11 +41,27 @@ class MessageStartEventBehavior extends AbstractBehavior implements EventSubscri
 		return $this->messageName;
 	}
 	
-	public function createEventSubscription(VirtualExecution $execution, Node $node = NULL)
+	public function isSubProcessStart()
 	{
-		$execution->getEngine()->pushCommand(new CreateMessageSubscriptionCommand(
+		return $this->subProcessStart;
+	}
+	
+	public function isInterrupting()
+	{
+		return $this->interrupting;
+	}
+	
+	public function setInterrupting($interrupting)
+	{
+		$this->interrupting = $interrupting ? true : false;
+	}
+	
+	public function createEventSubscription(VirtualExecution $execution, $activityId, Node $node = NULL)
+	{
+		$execution->getEngine()->executeCommand(new CreateMessageSubscriptionCommand(
 			$this->messageName,
 			$execution,
+			$activityId,
 			($node === NULL) ? $execution->getNode() : $node
 		));
 	}

@@ -26,6 +26,8 @@ class ManualTaskBehavior extends AbstractScopeBehavior
 {
 	public function executeBehavior(VirtualExecution $execution)
 	{
+		$this->createScopedEventSubscriptions($execution);
+		
 		$name = $this->getStringValue($this->name, $execution->getExpressionContext());
 		
 		$execution->getEngine()->debug('Executing manual task "{task}"', [

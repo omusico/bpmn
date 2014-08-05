@@ -28,25 +28,29 @@ class CreateSignalSubscriptionCommand extends AbstractBusinessCommand
 	
 	protected $execution;
 	
+	protected $activityId;
+	
 	protected $node;
 	
-	public function __construct($signal, VirtualExecution $execution, Node $node = NULL)
+	public function __construct($signal, VirtualExecution $execution, $activityId, Node $node = NULL)
 	{
 		$this->signal = (string)$signal;
 		$this->execution = $execution;
+		$this->activityId = (string)$activityId;
 		$this->node = $node;
 	}
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$sql = "	INSERT INTO `#__bpm_event_subscription`
-						(`id`, `execution_id`, `node`, `process_instance_id`, `flags`, `name`, `created_at`)
+						(`id`, `execution_id`, `activity_id`, `node`, `process_instance_id`, `flags`, `name`, `created_at`)
 					VALUES
-						(:id, :eid, :node, :pid, :flags, :signal, :created)
+						(:id, :eid, :aid, :node, :pid, :flags, :signal, :created)
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('id', UUID::createRandom()->toBinary());
 		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
+		$stmt->bindValue('aid', $this->activityId);
 		$stmt->bindValue('node', ($this->node === NULL) ? NULL : $this->node->getId());
 		$stmt->bindValue('pid', $this->execution->getRootExecution()->getId()->toBinary());
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_SIGNAL);

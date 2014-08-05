@@ -22,13 +22,18 @@ use KoolKode\Process\Node;
  * 
  * @author Martin Schröder
  */
-class SignalStartEventBehavior extends AbstractBehavior implements EventSubscriptionBehaviorInterface
+class SignalStartEventBehavior extends AbstractBehavior implements StartEventBehaviorInterface, EventSubscriptionBehaviorInterface
 {
 	protected $signalName;
 	
-	public function __construct($signalName)
+	protected $subProcessStart;
+	
+	protected $interrupting = true;
+	
+	public function __construct($signalName, $subProcessStart = false)
 	{
 		$this->signalName = (string)$signalName;
+		$this->subProcessStart = $subProcessStart ? true : false;
 	}
 	
 	public function getSignalName()
@@ -36,11 +41,27 @@ class SignalStartEventBehavior extends AbstractBehavior implements EventSubscrip
 		return $this->signalName;
 	}
 	
-	public function createEventSubscription(VirtualExecution $execution, Node $node = NULL)
+	public function isSubProcessStart()
 	{
-		$execution->getEngine()->pushCommand(new CreateSignalSubscriptionCommand(
+		return $this->subProcessStart;
+	}
+	
+	public function isInterrupting()
+	{
+		return $this->interrupting;
+	}
+	
+	public function setInterrupting($interrupting)
+	{
+		$this->interrupting = $interrupting ? true : false;
+	}
+	
+	public function createEventSubscription(VirtualExecution $execution, $activityId, Node $node = NULL)
+	{
+		$execution->getEngine()->executeCommand(new CreateSignalSubscriptionCommand(
 			$this->signalName,
 			$execution,
+			$activityId,
 			($node === NULL) ? $execution->getNode() : $node
 		));
 	}

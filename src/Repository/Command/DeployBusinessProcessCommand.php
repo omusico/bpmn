@@ -90,7 +90,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		{
 			$behavior = $node->getBehavior();
 			
-			if($behavior instanceof MessageStartEventBehavior)
+			if($behavior instanceof MessageStartEventBehavior && !$behavior->isSubProcessStart())
 			{
 				$sql = "	INSERT INTO `#__bpm_process_subscription`
 								(`id`, `definition_id`, `flags`, `name`)
@@ -110,7 +110,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 				]);
 			}
 			
-			if($behavior instanceof SignalStartEventBehavior)
+			if($behavior instanceof SignalStartEventBehavior && !$behavior->isSubProcessStart())
 			{
 				$sql = "	INSERT INTO `#__bpm_process_subscription`
 								(`id`, `definition_id`, `flags`, `name`)

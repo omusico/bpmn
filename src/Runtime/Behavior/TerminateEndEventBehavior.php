@@ -24,7 +24,7 @@ class TerminateEndEventBehavior extends AbstractBehavior
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$execution->getEngine()->debug('Reached terminate end event "{name}"', [
-			$this->getStringValue($this->name, $execution->getExpressionContext())
+			'name' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);
 		
 		$root = $execution->getScopeRoot();
