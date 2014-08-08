@@ -43,10 +43,11 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 	{
 		$sql = "	SELECT s.`id`, s.`execution_id`, s.`activity_id`, s.`node`
 					FROM `#__bpm_event_subscription` AS s
+					INNER JOIN `#__bpm_execution` AS e ON (e.`id` = s.`execution_id`)
 					WHERE s.`name` = :message
 					AND s.`flags` = :flags
 					AND s.`execution_id` = :eid
-					ORDER BY s.`created_at`
+					ORDER BY e.`depth` DESC, s.`created_at`
 					LIMIT 1
 		";
 		$stmt = $engine->prepareQuery($sql);

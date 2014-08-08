@@ -279,6 +279,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			'active' => $execution->getTimestamp(),
 			'node' => $nid,
 			'transition' => $tid,
+			'depth' => $execution->getExecutionDepth(),
 			'bkey' => $execution->getBusinessKey(),
 			'vars' => gzcompress(serialize($execution->getVariablesLocal()), 1)
 		];
@@ -334,6 +335,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 							`state` = :state,
 							`active` = :active,
 							`node` = :node,
+							`depth` = :depth,
 							`transition` = :transition,
 							`business_key` = :bkey,
 							`vars` = :vars
@@ -347,6 +349,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$stmt->bindValue('active', $data['active']);
 			$stmt->bindValue('node', $data['node']);
 			$stmt->bindValue('transition', $data['transition']);
+			$stmt->bindValue('depth', $data['depth']);
 			$stmt->bindValue('bkey', $data['bkey']);
 			$stmt->bindValue('vars', $data['vars']);
 			$stmt->execute();
@@ -360,9 +363,9 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			]);
 			
 			$sql = "	INSERT INTO `#__bpm_execution`
-							(`id`, `pid`, `process_id`, `definition_id`, `state`, `active`, `node`, `transition`, `business_key`, `vars`)
+							(`id`, `pid`, `process_id`, `definition_id`, `state`, `active`, `node`, `transition`, `depth`, `business_key`, `vars`)
 						VALUES
-							(:id, :pid, :process, :def, :state, :active, :node, :transition, :bkey, :vars)
+							(:id, :pid, :process, :def, :state, :active, :node, :transition, :depth, :bkey, :vars)
 			";
 			$stmt = $this->pdo->prepare($sql);
 			$stmt->execute($data);

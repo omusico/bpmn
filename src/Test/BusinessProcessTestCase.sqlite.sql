@@ -31,6 +31,7 @@ CREATE TABLE bpm_execution (
 	active INT UNSIGNED NOT NULL,
 	node VARCHAR(250) NULL,
 	transition VARCHAR(250) NULL,
+	depth INT UNSIGNED NOT NULL,
 	business_key VARCHAR(250) NULL,
 	vars LONGBLOB NOT NULL,
 	PRIMARY KEY (id),

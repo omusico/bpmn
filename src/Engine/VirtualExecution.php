@@ -66,6 +66,16 @@ class VirtualExecution extends Execution
 		$this->businessKey = ($businessKey === NULL) ? NULL : (string)$businessKey;
 	}
 	
+	public function getExecutionDepth()
+	{
+		if($this->parentExecution === NULL)
+		{
+			return 0;
+		}
+		
+		return $this->parentExecution->getExecutionDepth() + 1;
+	}
+	
 	public function setExecutionState($state)
 	{
 		$this->state = (int)$state;

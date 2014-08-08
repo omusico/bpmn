@@ -50,8 +50,10 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 	{
 		$sql = "	SELECT s.`id`, s.`execution_id`, s.`activity_id`, s.`node`
 					FROM `#__bpm_event_subscription` AS s
+					INNER JOIN `#__bpm_execution` AS e ON (e.`id` = s.`execution_id`)
 					WHERE s.`name` = :signal
 					AND s.`flags` = :flags
+					ORDER BY e.`depth` DESC
 		";
 			
 		if($this->executionId !== NULL)

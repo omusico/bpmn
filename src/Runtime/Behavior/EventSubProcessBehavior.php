@@ -45,7 +45,7 @@ class EventSubProcessBehavior extends AbstractBoundaryEventBehavior
 		$behavior->createEventSubscription($execution, $activityId, $node);
 	}
 	
-	// FIXME: Variable scopes of executions are not corret, need to fix this using correct execution hiererchy.
+	// FIXME: Variable scopes of executions are not correct, need to fix this using correct execution hiererchy.
 	// As of now boundary events are always executed outside of the scope, executing them inside the scope
 	// needs special handling in signalBehavior() of AbstractBoundaryEventBehavior.
 	
