@@ -15,6 +15,7 @@ use KoolKode\BPMN\Delegate\DelegateTaskFactoryInterface;
 use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
+use KoolKode\Database\Connection;
 use KoolKode\Event\EventDispatcherInterface;
 use KoolKode\Expression\ExpressionContextFactoryInterface;
 use KoolKode\Process\AbstractEngine;
@@ -45,7 +46,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	
 	protected $taskService;
 	
-	public function __construct(\PDO $pdo, EventDispatcherInterface $dispatcher, ExpressionContextFactoryInterface $factory, $handleTransactions = true)
+	public function __construct(Connection $pdo, EventDispatcherInterface $dispatcher, ExpressionContextFactoryInterface $factory, $handleTransactions = true)
 	{
 		parent::__construct($dispatcher, $factory);
 		

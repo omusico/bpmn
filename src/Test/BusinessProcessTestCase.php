@@ -13,12 +13,12 @@ namespace KoolKode\BPMN\Test;
 
 use KoolKode\BPMN\Delegate\DelegateTaskRegistry;
 use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
-use KoolKode\BPMN\Engine\ExtendedPDO;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
+use KoolKode\Database\Connection;
 use KoolKode\Event\EventDispatcher;
 use KoolKode\Expression\ExpressionContextFactory;
 use KoolKode\Meta\Info\ReflectionTypeInfo;
@@ -76,7 +76,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUpBeforeClass();
 		
-		self::$pdo = new ExtendedPDO('sqlite::memory:');
+		self::$pdo = new Connection('sqlite::memory:');
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		self::$pdo->exec("PRAGMA foreign_keys = ON");
 		
