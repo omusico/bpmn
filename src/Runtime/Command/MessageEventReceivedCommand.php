@@ -53,7 +53,7 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('message', $this->messageName);
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
-		$stmt->bindValue('eid', $this->executionId->toBinary());
+		$stmt->bindValue('eid', $this->executionId);
 		$stmt->execute();
 		
 		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -78,7 +78,7 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 					AND `activity_id` = :aid
 		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('eid', $execution->getId()->toBinary());
+		$stmt->bindValue('eid', $execution->getId());
 		$stmt->bindValue('aid', $row['activity_id']);
 		$stmt->execute();
 		

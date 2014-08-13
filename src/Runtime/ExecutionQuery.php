@@ -11,9 +11,10 @@
 
 namespace KoolKode\BPMN\Runtime;
 
+use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
-use KoolKode\Util\UUID;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\Util\UUID;
 
 class ExecutionQuery
 {
@@ -123,7 +124,7 @@ class ExecutionQuery
 			new UUID($row['def_id']),
 			$row['def_key'],
 			$row['def_rev'],
-			unserialize(gzuncompress($row['def_data'])),
+			unserialize(BinaryData::decode($row['def_data'])),
 			$row['def_name'],
 			new \DateTime('@' . $row['def_deployed'])
 		);
@@ -181,7 +182,7 @@ class ExecutionQuery
 		if($this->executionId !== NULL)
 		{
 			$where[] = 'e.`id` = ?';
-			$params[] = $this->executionId->toBinary();
+			$params[] = $this->executionId;
 		}
 		
 		if($this->processBusinessKey != NULL)
@@ -199,7 +200,7 @@ class ExecutionQuery
 		if($this->processInstanceId !== NULL)
 		{
 			$where[] = 'e.`process_id` = ?';
-			$params[] = $this->processInstanceId->toBinary();
+			$params[] = $this->processInstanceId;
 		}
 		
 		foreach($this->signalEventSubscriptionNames as $name)

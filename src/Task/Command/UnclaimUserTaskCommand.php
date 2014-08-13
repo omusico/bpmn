@@ -49,7 +49,7 @@ class UnclaimUserTaskCommand extends AbstractBusinessCommand
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('time', NULL);
 		$stmt->bindValue('assignee', NULL);
-		$stmt->bindValue('id', $task->getId()->toBinary());
+		$stmt->bindValue('id', $task->getId());
 		$stmt->execute();
 		
 		$engine->debug('User task "{task}" unclaimed', [

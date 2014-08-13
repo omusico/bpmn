@@ -176,7 +176,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		}
 		
 		$sub = '?';
-		$params = [$id->toBinary()];
+		$params = [$id];
 		
 		$sql = "	SELECT e.*, d.`definition`
 					FROM `#__bpm_execution` AS e
@@ -212,7 +212,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			}
 			else
 			{
-				$definition = $defs[$defId] = unserialize(gzuncompress($row['definition']));
+				$definition = $defs[$defId] = unserialize(BinaryData::decode($row['definition']));
 			}
 			
 			$state = (int)$row['state'];
@@ -220,7 +220,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$node = ($row['node'] === NULL) ? NULL : $definition->findNode($row['node']);
 			$transition = ($row['transition'] === NULL) ? NULL : $definition->findTransition($row['transition']);
 			$businessKey = $row['business_key'];
-			$vars = unserialize(gzuncompress($row['vars']));
+			$vars = unserialize(BinaryData::decode($row['vars']));
 			
 			$exec = $executions[(string)$id] = new VirtualExecution($id, $this, $definition);
 			$exec->setBusinessKey($businessKey);
@@ -264,22 +264,22 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	public function serializeExecution(VirtualExecution $execution)
 	{
 		$parent = $execution->getParentExecution();
-		$pid = ($parent === NULL) ? NULL : $parent->getId()->toBinary();
+		$pid = ($parent === NULL) ? NULL : $parent->getId();
 		$nid = ($execution->getNode() === NULL) ? NULL : $execution->getNode()->getId();
 		$tid = ($execution->getTransition() === NULL) ? NULL : $execution->getTransition()->getId();
 		
 		return [
-			'id' => $execution->getId()->toBinary(),
+			'id' => $execution->getId(),
 			'pid' => $pid,
-			'process' => $execution->getRootExecution()->getId()->toBinary(),
-			'def' => $execution->getProcessDefinition()->getId()->toBinary(),
+			'process' => $execution->getRootExecution()->getId(),
+			'def' => $execution->getProcessDefinition()->getId(),
 			'state' => $execution->getState(),
 			'active' => $execution->getTimestamp(),
 			'node' => $nid,
 			'transition' => $tid,
 			'depth' => $execution->getExecutionDepth(),
 			'bkey' => $execution->getBusinessKey(),
-			'vars' => gzcompress(serialize($execution->getVariablesLocal()), 1)
+			'vars' => new BinaryData(serialize($execution->getVariablesLocal()))
 		];
 	}
 	

@@ -46,7 +46,7 @@ class CompleteUserTaskCommand extends AbstractBusinessCommand
 					WHERE `id` = :id
 		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('id', $this->taskId->toBinary());
+		$stmt->bindValue('id', $this->taskId);
 		$stmt->execute();
 		
 		$engine->debug('Completed user task "{task}" with id {id}', [

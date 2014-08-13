@@ -12,6 +12,7 @@
 namespace KoolKode\BPMN\Runtime\Command;
 
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
+use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
@@ -67,7 +68,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 			
 		if($this->executionId !== NULL)
 		{
-			$stmt->bindValue('eid', $this->executionId->toBinary());
+			$stmt->bindValue('eid', $this->executionId);
 		}
 			
 		$stmt->execute();
@@ -78,7 +79,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		foreach($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row)
 		{
 			$execution = $executions[] = $engine->findExecution(new UUID($row['execution_id']));
-			$ids[(string)$execution->getId()] = [$execution->getId()->toBinary(), $row['activity_id']];
+			$ids[(string)$execution->getId()] = [$execution->getId(), $row['activity_id']];
 			
 			if($row['node'] !== NULL)
 			{
@@ -128,7 +129,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 				new UUID($row['id']),
 				$row['process_key'],
 				$row['revision'],
-				unserialize(gzuncompress($row['definition'])),
+				unserialize(BinaryData::decode($row['definition'])),
 				$row['name'],
 				new \DateTime('@' . $row['deployed_at'])
 			);

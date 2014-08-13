@@ -48,11 +48,11 @@ class CreateMessageSubscriptionCommand extends AbstractBusinessCommand
 						(:id, :eid, :aid, :node, :pid, :flags, :message, :created)
 		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('id', UUID::createRandom()->toBinary());
-		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
+		$stmt->bindValue('id', UUID::createRandom());
+		$stmt->bindValue('eid', $this->execution->getId());
 		$stmt->bindValue('aid', $this->activityId);
 		$stmt->bindValue('node', ($this->node === NULL) ? NULL : $this->node->getId());
-		$stmt->bindValue('pid', $this->execution->getRootExecution()->getId()->toBinary());
+		$stmt->bindValue('pid', $this->execution->getRootExecution()->getId());
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 		$stmt->bindValue('message', $this->message);
 		$stmt->bindValue('created', time());

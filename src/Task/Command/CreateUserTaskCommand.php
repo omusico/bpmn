@@ -46,8 +46,8 @@ class CreateUserTaskCommand extends AbstractBusinessCommand
 						(:id, :eid, :name, :doc, :activity, :created)
 		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('id', $id->toBinary());
-		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
+		$stmt->bindValue('id', $id);
+		$stmt->bindValue('eid', $this->execution->getId());
 		$stmt->bindValue('name', $this->name);
 		$stmt->bindValue('doc', $this->documentation);
 		$stmt->bindValue('activity', $this->execution->getNode()->getId());

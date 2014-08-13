@@ -40,7 +40,7 @@ class RemoveUserTaskCommand extends AbstractBusinessCommand
 					WHERE `execution_id` = :eid
 		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
+		$stmt->bindValue('eid', $this->execution->getId());
 		$stmt->execute();
 		
 		$engine->debug('Removed user task "{task}" with id {id}', [

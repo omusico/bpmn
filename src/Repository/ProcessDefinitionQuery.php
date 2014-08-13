@@ -11,6 +11,7 @@
 
 namespace KoolKode\BPMN\Repository;
 
+use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\UUID;
 
@@ -98,7 +99,7 @@ class ProcessDefinitionQuery
 			new UUID($row['id']),
 			$row['process_key'],
 			$row['revision'],
-			unserialize(gzuncompress($row['definition'])),
+			unserialize(BinaryData::decode($row['definition'])),
 			$row['name'],
 			new \DateTime('@' . $row['deployed_at'])
 		);

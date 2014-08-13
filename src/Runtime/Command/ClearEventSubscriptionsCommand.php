@@ -44,7 +44,7 @@ class ClearEventSubscriptionsCommand extends AbstractBusinessCommand
 					AND `activity_id` = :aid
 		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('eid', $this->execution->getId()->toBinary());
+		$stmt->bindValue('eid', $this->execution->getId());
 		$stmt->bindValue('aid', $this->activitId);
 		$stmt->execute();
 		

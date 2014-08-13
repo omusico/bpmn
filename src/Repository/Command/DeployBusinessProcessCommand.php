@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Repository\Command;
 
 use KoolKode\BPMN\BusinessProcessBuilder;
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
+use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
@@ -61,10 +62,10 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 						(:id, :key, :revision, :model, :name, :deployed)
 		";
 		$stmt = $engine->prepareQuery($sql);
-		$stmt->bindValue('id', $id->toBinary());
+		$stmt->bindValue('id', $id);
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->bindValue('revision', $revision + 1);
-		$stmt->bindValue('model', gzcompress(serialize($model), 3));
+		$stmt->bindValue('model', new BinaryData(serialize($model), 3));
 		$stmt->bindValue('name', $model->getTitle());
 		$stmt->bindValue('deployed', $time);
 		$stmt->execute();
@@ -98,8 +99,8 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 								(:id, :def, :flags, :message)
 				";
 				$stmt = $engine->prepareQuery($sql);
-				$stmt->bindValue('id', UUID::createRandom()->toBinary());
-				$stmt->bindValue('def', $id->toBinary());
+				$stmt->bindValue('id', UUID::createRandom());
+				$stmt->bindValue('def', $id);
 				$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 				$stmt->bindValue('message', $behavior->getMessageName());
 				$stmt->execute();
@@ -118,8 +119,8 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 								(:id, :def, :flags, :message)
 				";
 				$stmt = $engine->prepareQuery($sql);
-				$stmt->bindValue('id', UUID::createRandom()->toBinary());
-				$stmt->bindValue('def', $id->toBinary());
+				$stmt->bindValue('id', UUID::createRandom());
+				$stmt->bindValue('def', $id);
 				$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_SIGNAL);
 				$stmt->bindValue('message', $behavior->getSignalName());
 				$stmt->execute();

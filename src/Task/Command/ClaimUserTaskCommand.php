@@ -52,7 +52,7 @@ class ClaimUserTaskCommand extends AbstractBusinessCommand
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('time', time());
 		$stmt->bindValue('assignee', $this->assignee);
-		$stmt->bindValue('id', $task->getId()->toBinary());
+		$stmt->bindValue('id', $task->getId());
 		$stmt->execute();
 		
 		$engine->debug('User task "{task}" claimed by {assignee}', [

@@ -154,7 +154,7 @@ class TaskQuery
 		if($this->executionId !== NULL)
 		{
 			$where[] = 'e.`id` = ?';
-			$params[] = $this->executionId->toBinary();
+			$params[] = $this->executionId;
 		}
 		
 		if($this->processDefinitionKey !== NULL)
@@ -166,7 +166,7 @@ class TaskQuery
 		if($this->processInstanceId !== NULL)
 		{
 			$where[] = 'e.`process_id` = ?';
-			$params[] = $this->processInstanceId->toBinary();
+			$params[] = $this->processInstanceId;
 		}
 		
 		if($this->taskDefinitionKey !== NULL)
@@ -178,7 +178,7 @@ class TaskQuery
 		if($this->taskId !== NULL)
 		{
 			$where[] = 't.`id` = ?';
-			$params[] = $this->taskId->toBinary();
+			$params[] = $this->taskId;
 		}
 		
 		if($this->taskName !== NULL)

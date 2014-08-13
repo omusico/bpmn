@@ -13,6 +13,8 @@ namespace KoolKode\BPMN\Test;
 
 use KoolKode\BPMN\Delegate\DelegateTaskRegistry;
 use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
+use KoolKode\BPMN\Engine\BinaryDataParamEncoder;
+use KoolKode\BPMN\Engine\IdentifierParamEncoder;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
@@ -89,6 +91,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		self::$pdo = new Connection($dsn, $username, $password);
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		self::$pdo->registerParamEncoder(new BinaryDataParamEncoder());
+		self::$pdo->registerParamEncoder(new IdentifierParamEncoder());
 		
 		if(self::$pdo->isSqlite())
 		{
