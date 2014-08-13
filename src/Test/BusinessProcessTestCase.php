@@ -85,7 +85,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$username = self::getEnvParam('DB_USERNAME', NULL);
 		$password = self::getEnvParam('DB_PASSWORD', NULL);
 		
-		printf("DB: \"%s\"\n\n", $dsn);
+		printf("DB: \"%s\"\n", $dsn);
 		
 		self::$pdo = new Connection($dsn, $username, $password);
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -100,13 +100,20 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		{
 			$db = 'mysql';
 		}
+		elseif(self::$pdo->isPostgreSQL())
+		{
+			$db = 'pgsql';
+		}
 		else
 		{
 			throw new \RuntimeException(sprintf('Unsupported database resource: "%s"', $dsn));
 		}
 		
 		$dir = rtrim(realpath(__DIR__ . '/../Engine'), '/\\');
-		$chunks = explode(';', file_get_contents(sprintf('%s/ProcessEngine.%s.sql', $dir, $db)));
+		$ddl = str_replace('\\', '/', sprintf('%s/ProcessEngine.%s.sql', $dir, $db));
+		$chunks = explode(';', file_get_contents($ddl));
+		
+		printf("DDL: \"%s\"\n\n", $ddl);
 			
 		foreach($chunks as $chunk)
 		{
@@ -290,6 +297,13 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			finally
 			{
 				self::$pdo->exec("SET FOREIGN_KEY_CHECKS=1");
+			}
+		}
+		else
+		{
+			foreach($tables as $table)
+			{
+				self::$pdo->exec("DELETE FROM `#__$table`");
 			}
 		}
 	}

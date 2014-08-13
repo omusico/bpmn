@@ -6,41 +6,40 @@ DROP TABLE IF EXISTS `#__bpm_execution`;
 DROP TABLE IF EXISTS `#__bpm_process_definition`;
 
 CREATE TABLE `#__bpm_process_definition` (
-	`id` BINARY(16) NOT NULL,
-	`process_key` VARCHAR(250) NOT NULL,
-	`revision` INT UNSIGNED NOT NULL,
-	`definition` LONGBLOB NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
-	`deployed_at` INT UNSIGNED NOT NULL,
-	PRIMARY KEY (`id`)
+	`id` bytea NOT NULL,
+	`process_key` varchar(250) NOT NULL,
+	`revision` integer NOT NULL,
+	`definition` bytea NOT NULL,
+	`name` varchar(250) NOT NULL,
+	`deployed_at` integer NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE (`process_key`, `revision`)
 );
 
-CREATE UNIQUE INDEX `#__bpm_process_definition_versioning` ON `#__bpm_process_definition` (`process_key`, `revision`);
-
 CREATE TABLE `#__bpm_process_subscription` (
-	`id` BINARY(16) NOT NULL,
-	`definition_id` BINARY(16) NOT NULL,
-	`flags` INT UNSIGNED NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
+	`id` bytea NOT NULL,
+	`definition_id` bytea NOT NULL,
+	`flags` integer NOT NULL,
+	`name` varchar(250) NOT NULL,
 	PRIMARY KEY (`id`),
+	UNIQUE (`definition_id`, `name`),
 	FOREIGN KEY (`definition_id`) REFERENCES `#__bpm_process_definition` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX `#__bpm_process_subscription_integrity` ON `#__bpm_process_subscription` (`definition_id`, `name`);
 CREATE INDEX `#__bpm_process_subscription_lookup` ON `#__bpm_process_subscription` (`name`, `flags`);
 
 CREATE TABLE `#__bpm_execution` (
-	`id` BINARY(16) NOT NULL,
-	`pid` BINARY(16) NULL,
-	`process_id` BINARY(16) NULL,
-	`definition_id` BINARY(16) NOT NULL,
-	`state` INT UNSIGNED NOT NULL,
-	`active` DOUBLE NOT NULL,
-	`node` VARCHAR(250) NULL,
-	`transition` VARCHAR(250) NULL,
-	`depth` INT UNSIGNED NOT NULL,
-	`business_key` VARCHAR(250) NULL,
-	`vars` LONGBLOB NOT NULL,
+	`id` bytea NOT NULL,
+	`pid` bytea NULL,
+	`process_id` bytea NULL,
+	`definition_id` bytea NOT NULL,
+	`state` integer NOT NULL,
+	`active` real NOT NULL,
+	`node` varchar(250) NULL,
+	`transition` varchar(250) NULL,
+	`depth` integer NOT NULL,
+	`business_key` varchar(250) NULL,
+	`vars` bytea NOT NULL,
 	PRIMARY KEY (`id`),
 	FOREIGN KEY (`definition_id`) REFERENCES `#__bpm_process_definition` (`id`) ON UPDATE CASCADE,
 	FOREIGN KEY (`pid`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -55,14 +54,14 @@ CREATE INDEX `#__bpm_execution_business_key` ON `#__bpm_execution` (`business_ke
 CREATE INDEX `#__bpm_execution_node` ON `#__bpm_execution` (`node`);
 
 CREATE TABLE `#__bpm_event_subscription` (
-	`id` BINARY(16) NOT NULL,
-	`execution_id` BINARY(16) NOT NULL,
-	`activity_id` VARCHAR(250) NOT NULL,
-	`node` VARCHAR(250) NULL,
-	`process_instance_id` BINARY(16) NOT NULL,
-	`flags` INT UNSIGNED NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
-	`created_at` INT UNSIGNED NOT NULL,
+	`id` bytea NOT NULL,
+	`execution_id` bytea NOT NULL,
+	`activity_id` varchar(250) NOT NULL,
+	`node` varchar(250) NULL,
+	`process_instance_id` bytea NOT NULL,
+	`flags` integer NOT NULL,
+	`name` varchar(250) NOT NULL,
+	`created_at` integer NOT NULL,
 	PRIMARY KEY (`id`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (`process_instance_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
@@ -73,18 +72,18 @@ CREATE INDEX `#__bpm_event_subscription_process_instance_id` ON `#__bpm_event_su
 CREATE INDEX `#__bpm_event_subscription_lookup` ON `#__bpm_event_subscription` (`name`, `flags`);
 
 CREATE TABLE `#__bpm_user_task` (
-	`id` BINARY(16) NOT NULL,
-	`execution_id` BINARY(16) NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
+	`id` bytea NOT NULL,
+	`execution_id` bytea NOT NULL,
+	`name` varchar(250) NOT NULL,
 	`documentation` TEXT NULL,
-	`activity` VARCHAR(250) NOT NULL,
-	`created_at` INT UNSIGNED NOT NULL,
-	`claimed_at` INT UNSIGNED NULL,
-	`claimed_by` VARCHAR(250) NULL,
+	`activity` varchar(250) NOT NULL,
+	`created_at` integer NOT NULL,
+	`claimed_at` integer NULL,
+	`claimed_by` varchar(250) NULL,
 	PRIMARY KEY (`id`),
+	UNIQUE (`execution_id`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE INDEX `#__bpm_user_task_created_at` ON `#__bpm_user_task` (`created_at`);
-CREATE UNIQUE INDEX `#__bpm_user_task_execution_id` ON `#__bpm_user_task` (`execution_id`);
 CREATE INDEX `#__bpm_user_task_activity` ON `#__bpm_user_task` (`activity`);
