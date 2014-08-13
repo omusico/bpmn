@@ -81,9 +81,11 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			return;
 		}
 		
-		$dsn = empty($GLOBALS['db_dsn']) ? 'sqlite::memory:' : (string)$GLOBALS['db_dsn'];
-		$username = empty($GLOBALS['db_username']) ? NULL : (string)$GLOBALS['db_username'];
-		$password = empty($GLOBALS['db_password']) ? NULL : (string)$GLOBALS['db_password'];
+		$dsn = (string)self::getEnvParam('db_dsn', 'sqlite::memory:');
+		$username = self::getEnvParam('db_username', NULL);
+		$password = self::getEnvParam('db_password', NULL);
+		
+		printf("DB: \"%s\"\n\n", $dsn);
 		
 		self::$pdo = new Connection($dsn, $username, $password);
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -117,6 +119,31 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 			self::$pdo->exec($chunk);
 		}
+	}
+	
+	protected static function getEnvParam($name)
+	{
+		if(array_key_exists($name, $GLOBALS))
+		{
+			return $GLOBALS[$name];
+		}
+		
+		if(array_key_exists($name, $_ENV))
+		{
+			return $_ENV[$name];
+		}
+		
+		if(array_key_exists($name, $_SERVER))
+		{
+			return $_SERVER[$name];
+		}
+		
+		if(func_num_args() > 1)
+		{
+			return func_get_arg(1);
+		}
+		
+		throw new \OutOfBoundsException(sprintf('ENV param not found: "%s"', $name));
 	}
 	
 	protected function setUp()

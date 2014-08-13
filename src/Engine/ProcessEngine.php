@@ -119,13 +119,10 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		
 		if($this->executionDepth == 0 && $this->handleTransactions)
 		{
-			if(!$this->pdo->inTransaction())
-			{
-				$this->debug('BEGIN transaction');
-				
-				$this->pdo->beginTransaction();
-				$trans = true;
-			}
+			$this->debug('BEGIN transaction');
+			
+			$this->pdo->beginTransaction();
+			$trans = true;
 		}
 		
 		foreach($this->executions as $info)
