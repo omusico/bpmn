@@ -6,10 +6,9 @@ CREATE TABLE IF NOT EXISTS `#__bpm_process_definition` (
 	`definition` LONGBLOB NOT NULL,
 	`name` VARCHAR(250) NOT NULL,
 	`deployed_at` INT UNSIGNED NOT NULL,
-	PRIMARY KEY (`id`)
-);
-
-CREATE UNIQUE INDEX `#__bpm_process_definition_versioning` ON `#__bpm_process_definition` (`process_key`, `revision`);
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `#__bpm_process_definition_versioning` (`process_key`, `revision`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `#__bpm_process_subscription` (
 	`id` BINARY(16) NOT NULL,
@@ -17,11 +16,10 @@ CREATE TABLE IF NOT EXISTS `#__bpm_process_subscription` (
 	`flags` INT UNSIGNED NOT NULL,
 	`name` VARCHAR(250) NOT NULL,
 	PRIMARY KEY (`id`),
+	UNIQUE INDEX `#__bpm_process_subscription_integrity` (`definition_id`, `name`),
+	INDEX `#__bpm_process_subscription_lookup` (`name`, `flags`),
 	FOREIGN KEY (`definition_id`) REFERENCES `#__bpm_process_definition` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE UNIQUE INDEX `#__bpm_process_subscription_integrity` ON `#__bpm_process_subscription` (`definition_id`, `name`);
-CREATE INDEX `#__bpm_process_subscription_lookup` ON `#__bpm_process_subscription` (`name`, `flags`);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `#__bpm_execution` (
 	`id` BINARY(16) NOT NULL,
@@ -36,17 +34,16 @@ CREATE TABLE IF NOT EXISTS `#__bpm_execution` (
 	`business_key` VARCHAR(250) NULL,
 	`vars` LONGBLOB NOT NULL,
 	PRIMARY KEY (`id`),
+	INDEX `#__bpm_execution_pid` (`pid`),
+	INDEX `#__bpm_execution_definition_id` (`definition_id`),
+	INDEX `#__bpm_execution_process_id` (`process_id`),
+	INDEX `#__bpm_execution_active` (`active`),
+	INDEX `#__bpm_execution_business_key` (`business_key`),
+	INDEX `#__bpm_execution_node` (`node`),
 	FOREIGN KEY (`definition_id`) REFERENCES `#__bpm_process_definition` (`id`) ON UPDATE CASCADE,
 	FOREIGN KEY (`pid`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (`process_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE INDEX `#__bpm_execution_pid` ON `#__bpm_execution` (`pid`);
-CREATE INDEX `#__bpm_execution_definition_id` ON `#__bpm_execution` (`definition_id`);
-CREATE INDEX `#__bpm_execution_process_id` ON `#__bpm_execution` (`process_id`);
-CREATE INDEX `#__bpm_execution_active` ON `#__bpm_execution` (`active`);
-CREATE INDEX `#__bpm_execution_business_key` ON `#__bpm_execution` (`business_key`);
-CREATE INDEX `#__bpm_execution_node` ON `#__bpm_execution` (`node`);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `#__bpm_event_subscription` (
 	`id` BINARY(16) NOT NULL,
@@ -58,13 +55,12 @@ CREATE TABLE IF NOT EXISTS `#__bpm_event_subscription` (
 	`name` VARCHAR(250) NOT NULL,
 	`created_at` INT UNSIGNED NOT NULL,
 	PRIMARY KEY (`id`),
+	INDEX `#__bpm_event_subscription_execution_id` (`execution_id`, `activity_id`),
+	INDEX `#__bpm_event_subscription_process_instance_id` (`process_instance_id`),
+	INDEX `#__bpm_event_subscription_lookup` (`name`, `flags`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (`process_instance_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE INDEX `#__bpm_event_subscription_execution_id` ON `#__bpm_event_subscription` (`execution_id`, `activity_id`);
-CREATE INDEX `#__bpm_event_subscription_process_instance_id` ON `#__bpm_event_subscription` (`process_instance_id`);
-CREATE INDEX `#__bpm_event_subscription_lookup` ON `#__bpm_event_subscription` (`name`, `flags`);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `#__bpm_user_task` (
 	`id` BINARY(16) NOT NULL,
@@ -76,9 +72,8 @@ CREATE TABLE IF NOT EXISTS `#__bpm_user_task` (
 	`claimed_at` INT UNSIGNED NULL,
 	`claimed_by` VARCHAR(250) NULL,
 	PRIMARY KEY (`id`),
+	UNIQUE INDEX `#__bpm_user_task_execution_id` (`execution_id`),
+	INDEX `#__bpm_user_task_created_at` (`created_at`),
+	INDEX `#__bpm_user_task_activity` (`activity`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE INDEX `#__bpm_user_task_created_at` ON `#__bpm_user_task` (`created_at`);
-CREATE UNIQUE INDEX `#__bpm_user_task_execution_id` ON `#__bpm_user_task` (`execution_id`);
-CREATE INDEX `#__bpm_user_task_activity` ON `#__bpm_user_task` (`activity`);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

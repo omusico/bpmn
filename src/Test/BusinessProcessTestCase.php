@@ -76,11 +76,34 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUpBeforeClass();
 		
-		self::$pdo = new Connection('sqlite::memory:');
-		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		self::$pdo->exec("PRAGMA foreign_keys = ON");
+		if(self::$pdo !== NULL)
+		{
+			return;
+		}
 		
-		$chunks = explode(';', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'BusinessProcessTestCase.sqlite.sql'));
+		$dsn = empty($GLOBALS['db_dsn']) ? 'sqlite::memory:' : (string)$GLOBALS['db_dsn'];
+		$username = empty($GLOBALS['db_username']) ? NULL : (string)$GLOBALS['db_username'];
+		$password = empty($GLOBALS['db_password']) ? NULL : (string)$GLOBALS['db_password'];
+		
+		self::$pdo = new Connection($dsn, $username, $password);
+		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		
+		if(self::$pdo->isSqlite())
+		{
+			self::$pdo->exec("PRAGMA foreign_keys = ON");
+			
+			$db = 'sqlite';
+		}
+		elseif(self::$pdo->isMySQL())
+		{
+			$db = 'mysql';
+		}
+		else
+		{
+			throw new \RuntimeException(sprintf('Unsupported database resource: "%s"', $dsn));
+		}
+		
+		$chunks = explode(';', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . "BusinessProcessTestCase.$db.sql"));
 			
 		foreach($chunks as $chunk)
 		{
@@ -98,6 +121,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	protected function setUp()
 	{
 		parent::setUp();
+		
+		$this->clearTables();
 		
 		$logger = NULL;
 		
@@ -192,21 +217,52 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	
 	protected function tearDown()
 	{
-		static $tables = [
-			'bpm_process_definition',
-			'bpm_process_subscription',
-			'bpm_execution',
-			'bpm_event_subscription',
-			'bpm_user_task'
-		];
+		$this->clearTables();
 		
 		parent::tearDown();
+	}
+	
+	protected function clearTables()
+	{
+		static $tables = [
+			'bpm_process_subscription',
+			'bpm_event_subscription',
+			'bpm_user_task',
+			'bpm_execution',
+			'bpm_process_definition'
+		];
 		
-		self::$pdo->exec("PRAGMA foreign_keys = OFF");
-		
-		foreach($tables as $table)
+		if(self::$pdo->isSqlite())
 		{
-			self::$pdo->exec("DELETE FROM `#__$table`");
+			self::$pdo->exec("PRAGMA foreign_keys = OFF");
+	
+			try
+			{
+				foreach($tables as $table)
+				{
+					self::$pdo->exec("DELETE FROM `#__$table`");
+				}
+			}
+			finally
+			{
+				self::$pdo->exec("PRAGMA foreign_keys = ON");
+			}
+		}
+		elseif(self::$pdo->isMySQL())
+		{
+			self::$pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+			
+			try
+			{
+				foreach($tables as $table)
+				{
+					self::$pdo->exec("DELETE FROM `#__$table`");
+				}
+			}
+			finally
+			{
+				self::$pdo->exec("SET FOREIGN_KEY_CHECKS=1");
+			}
 		}
 	}
 	
