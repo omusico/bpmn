@@ -32,6 +32,7 @@ class ExecutionQuery
 	public function __construct(ProcessEngine $engine, $queryProcess = false)
 	{
 		$this->engine = $engine;
+		$this->queryProcess = $queryProcess ? true : false;
 	}
 	
 	public function processInstanceId($id)
