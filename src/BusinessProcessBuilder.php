@@ -89,11 +89,6 @@ class BusinessProcessBuilder
 		return $this;
 	}
 	
-	public function node($id)
-	{
-		return $this->builder->node($id);
-	}
-	
 	public function startEvent($id, $subProcessStart = false, $name = NULL)
 	{
 		$behavior = new NoneStartEventBehavior($subProcessStart);

@@ -103,12 +103,17 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		if(!empty($_SERVER['KK_LOG']))
 		{
+			$stderr = fopen('php://stderr', 'wb');
+			
 			$logger = new Logger('BPMN');
-			$logger->pushHandler(new StreamHandler(STDERR));
+			$logger->pushHandler(new StreamHandler($stderr));
 			$logger->pushProcessor(new PsrLogMessageProcessor());
 			
-			fwrite(STDERR, "\n");
-			fwrite(STDERR, sprintf("TEST CASE: %s\n", $this->getName()));
+			fwrite($stderr, "\n");
+			fwrite($stderr, sprintf("TEST CASE: %s\n", $this->getName()));
+			
+			self::$pdo->setDebug(true);
+			self::$pdo->setLogger($logger);
 		}
 		
 		$this->messageHandlers = [];
@@ -201,7 +206,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		foreach($tables as $table)
 		{
-			self::$pdo->exec("DELETE FROM $table");
+			self::$pdo->exec("DELETE FROM `#__$table`");
 		}
 	}
 	

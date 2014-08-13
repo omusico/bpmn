@@ -363,10 +363,13 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				'execution' => (string)$execution
 			]);
 			
-			$sql = "	INSERT INTO `#__bpm_execution`
-							(`id`, `pid`, `process_id`, `definition_id`, `state`, `active`, `node`, `transition`, `depth`, `business_key`, `vars`)
-						VALUES
-							(:id, :pid, :process, :def, :state, :active, :node, :transition, :depth, :bkey, :vars)
+			$sql = "	INSERT INTO `#__bpm_execution` (
+							`id`, `pid`, `process_id`, `definition_id`, `state`, `active`,
+							`node`, `transition`, `depth`, `business_key`, `vars`
+						) VALUES (
+							:id, :pid, :process, :def, :state, :active,
+							:node, :transition, :depth, :bkey, :vars
+						)
 			";
 			$stmt = $this->pdo->prepare($sql);
 			$stmt->execute($data);
