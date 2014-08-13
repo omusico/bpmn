@@ -85,8 +85,6 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$username = empty($GLOBALS['db_username']) ? NULL : (string)$GLOBALS['db_username'];
 		$password = empty($GLOBALS['db_password']) ? NULL : (string)$GLOBALS['db_password'];
 		
-		var_dump('DB SETTINGS', $dsn, $username, $password);
-		
 		self::$pdo = new Connection($dsn, $username, $password);
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		
@@ -105,7 +103,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			throw new \RuntimeException(sprintf('Unsupported database resource: "%s"', $dsn));
 		}
 		
-		$chunks = explode(';', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . "BusinessProcessTestCase.$db.sql"));
+		$dir = rtrim(realpath(__DIR__ . '/../Engine'), '/\\');
+		$chunks = explode(';', file_get_contents(sprintf('%s/ProcessEngine.%s.sql', $dir, $db)));
 			
 		foreach($chunks as $chunk)
 		{
