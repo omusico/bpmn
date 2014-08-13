@@ -85,6 +85,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$username = empty($GLOBALS['db_username']) ? NULL : (string)$GLOBALS['db_username'];
 		$password = empty($GLOBALS['db_password']) ? NULL : (string)$GLOBALS['db_password'];
 		
+		var_dump('DB SETTINGS', $dsn, $username, $password);
+		
 		self::$pdo = new Connection($dsn, $username, $password);
 		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		

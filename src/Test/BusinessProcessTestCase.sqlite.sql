@@ -1,5 +1,11 @@
 
-CREATE TABLE IF NOT EXISTS `#__bpm_process_definition` (
+DROP TABLE IF EXISTS `#__bpm_process_subscription`;
+DROP TABLE IF EXISTS `#__bpm_event_subscription`;
+DROP TABLE IF EXISTS `#__bpm_user_task`;
+DROP TABLE IF EXISTS `#__bpm_execution`;
+DROP TABLE IF EXISTS `#__bpm_process_definition`;
+
+CREATE TABLE `#__bpm_process_definition` (
 	`id` BINARY(16) NOT NULL,
 	`process_key` VARCHAR(250) NOT NULL,
 	`revision` INT UNSIGNED NOT NULL,
@@ -11,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `#__bpm_process_definition` (
 
 CREATE UNIQUE INDEX `#__bpm_process_definition_versioning` ON `#__bpm_process_definition` (`process_key`, `revision`);
 
-CREATE TABLE IF NOT EXISTS `#__bpm_process_subscription` (
+CREATE TABLE `#__bpm_process_subscription` (
 	`id` BINARY(16) NOT NULL,
 	`definition_id` BINARY(16) NOT NULL,
 	`flags` INT UNSIGNED NOT NULL,
@@ -23,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `#__bpm_process_subscription` (
 CREATE UNIQUE INDEX `#__bpm_process_subscription_integrity` ON `#__bpm_process_subscription` (`definition_id`, `name`);
 CREATE INDEX `#__bpm_process_subscription_lookup` ON `#__bpm_process_subscription` (`name`, `flags`);
 
-CREATE TABLE IF NOT EXISTS `#__bpm_execution` (
+CREATE TABLE `#__bpm_execution` (
 	`id` BINARY(16) NOT NULL,
 	`pid` BINARY(16) NULL,
 	`process_id` BINARY(16) NULL,
@@ -48,7 +54,7 @@ CREATE INDEX `#__bpm_execution_active` ON `#__bpm_execution` (`active`);
 CREATE INDEX `#__bpm_execution_business_key` ON `#__bpm_execution` (`business_key`);
 CREATE INDEX `#__bpm_execution_node` ON `#__bpm_execution` (`node`);
 
-CREATE TABLE IF NOT EXISTS `#__bpm_event_subscription` (
+CREATE TABLE `#__bpm_event_subscription` (
 	`id` BINARY(16) NOT NULL,
 	`execution_id` BINARY(16) NOT NULL,
 	`activity_id` VARCHAR(250) NOT NULL,
@@ -66,7 +72,7 @@ CREATE INDEX `#__bpm_event_subscription_execution_id` ON `#__bpm_event_subscript
 CREATE INDEX `#__bpm_event_subscription_process_instance_id` ON `#__bpm_event_subscription` (`process_instance_id`);
 CREATE INDEX `#__bpm_event_subscription_lookup` ON `#__bpm_event_subscription` (`name`, `flags`);
 
-CREATE TABLE IF NOT EXISTS `#__bpm_user_task` (
+CREATE TABLE `#__bpm_user_task` (
 	`id` BINARY(16) NOT NULL,
 	`execution_id` BINARY(16) NOT NULL,
 	`name` VARCHAR(250) NOT NULL,

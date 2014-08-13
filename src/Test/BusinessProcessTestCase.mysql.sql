@@ -1,5 +1,11 @@
 
-CREATE TABLE IF NOT EXISTS `#__bpm_process_definition` (
+DROP TABLE IF EXISTS `#__bpm_process_subscription`;
+DROP TABLE IF EXISTS `#__bpm_event_subscription`;
+DROP TABLE IF EXISTS `#__bpm_user_task`;
+DROP TABLE IF EXISTS `#__bpm_execution`;
+DROP TABLE IF EXISTS `#__bpm_process_definition`;
+
+CREATE TABLE `#__bpm_process_definition` (
 	`id` BINARY(16) NOT NULL,
 	`process_key` VARCHAR(250) NOT NULL,
 	`revision` INT UNSIGNED NOT NULL,
@@ -10,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `#__bpm_process_definition` (
 	UNIQUE INDEX `#__bpm_process_definition_versioning` (`process_key`, `revision`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `#__bpm_process_subscription` (
+CREATE TABLE `#__bpm_process_subscription` (
 	`id` BINARY(16) NOT NULL,
 	`definition_id` BINARY(16) NOT NULL,
 	`flags` INT UNSIGNED NOT NULL,
@@ -21,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `#__bpm_process_subscription` (
 	FOREIGN KEY (`definition_id`) REFERENCES `#__bpm_process_definition` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `#__bpm_execution` (
+CREATE TABLE `#__bpm_execution` (
 	`id` BINARY(16) NOT NULL,
 	`pid` BINARY(16) NULL,
 	`process_id` BINARY(16) NULL,
@@ -45,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `#__bpm_execution` (
 	FOREIGN KEY (`process_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `#__bpm_event_subscription` (
+CREATE TABLE `#__bpm_event_subscription` (
 	`id` BINARY(16) NOT NULL,
 	`execution_id` BINARY(16) NOT NULL,
 	`activity_id` VARCHAR(250) NOT NULL,
@@ -62,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `#__bpm_event_subscription` (
 	FOREIGN KEY (`process_instance_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `#__bpm_user_task` (
+CREATE TABLE `#__bpm_user_task` (
 	`id` BINARY(16) NOT NULL,
 	`execution_id` BINARY(16) NOT NULL,
 	`name` VARCHAR(250) NOT NULL,

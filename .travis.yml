@@ -17,7 +17,7 @@ install:
   - 'composer install --no-interaction --dev --prefer-source'
   
 before_script:
-  - if [[ "$DB" == "mysql" ]]; then mysql -e "create database IF NOT EXISTS bpmn;" -uroot; fi
+  - 'if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS bpmn;" -uroot; fi'
 
 script:
   - './vendor/bin/phpunit -c "./test/phpunit-$DB.xml" --coverage-text'
