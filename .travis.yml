@@ -31,3 +31,8 @@ matrix:
   allow_failures:
     - php: hhvm
     - php: hhvm-nightly
+  exclude:
+    - php: hhvm
+      env: 'DB=pgsql DB_DSN="pgsql:host=localhost;dbname=bpmn" DB_USERNAME=postgres'
+    - php: hhvm-nightly
+      env: 'DB=pgsql DB_DSN="pgsql:host=localhost;dbname=bpmn" DB_USERNAME=postgres'
