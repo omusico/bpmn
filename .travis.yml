@@ -19,7 +19,7 @@ install:
   
 before_script:
   - 'if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE bpmn;" -uroot; fi'
-  - 'if [[ "$DB" == "pgsql" ]]; then pgsql -c "CREATE DATABASE bpmn;" -U postgres; fi'
+  - 'if [[ "$DB" == "pgsql" ]]; then psql -c "CREATE DATABASE bpmn;" -U postgres; fi'
 
 script:
   - './vendor/bin/phpunit -c "./test/phpunit.xml" --coverage-text'
