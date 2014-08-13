@@ -27,12 +27,7 @@ class BinaryDataParamEncoder implements ParamEncoderInterface
 		{
 			$isEncoded = true;
 			
-			if($conn->isPostgreSQL())
-			{
-				return BinaryData::TYPE_HEX . bin2hex($param->encode());
-			}
-			
-			return BinaryData::TYPE_RAW . $param->encode();
+			return $param->encode();
 		}
 	}
 }

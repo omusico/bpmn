@@ -65,7 +65,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$stmt->bindValue('id', $id);
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->bindValue('revision', $revision + 1);
-		$stmt->bindValue('model', new BinaryData(serialize($model), 3));
+		$stmt->bindValue('model', new BinaryData(serialize($model), 3), \PDO::PARAM_LOB);
 		$stmt->bindValue('name', $model->getTitle());
 		$stmt->bindValue('deployed', $time);
 		$stmt->execute();

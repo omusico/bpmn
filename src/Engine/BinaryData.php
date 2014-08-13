@@ -44,14 +44,6 @@ class BinaryData
 			return NULL;
 		}
 		
-		switch($input[0])
-		{
-			case self::TYPE_HEX:
-				return gzuncompress(hex2bin(substr($input, 1)));
-			case self::TYPE_RAW:
-				return gzuncompress(substr($input, 1));
-		}
-		
-		throw new \RuntimeException('Unable to decode binary data');
+		return gzuncompress($input);
 	}
 }

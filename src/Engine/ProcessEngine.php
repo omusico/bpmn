@@ -349,7 +349,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$stmt->bindValue('transition', $data['transition']);
 			$stmt->bindValue('depth', $data['depth']);
 			$stmt->bindValue('bkey', $data['bkey']);
-			$stmt->bindValue('vars', $data['vars']);
+			$stmt->bindValue('vars', $data['vars'], \PDO::PARAM_LOB);
 			$stmt->execute();
 				
 			$info->update($data);
@@ -369,7 +369,20 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 						)
 			";
 			$stmt = $this->pdo->prepare($sql);
-			$stmt->execute($data);
+			
+			foreach($data as $k => $v)
+			{
+				if($k == 'vars')
+				{
+					$stmt->bindValue($k, $v, \PDO::PARAM_LOB);
+				}
+				else
+				{
+					$stmt->bindValue($k, $v);					
+				}
+			}
+			
+			$stmt->execute();
 				
 			$info->update($data);
 		}
