@@ -81,9 +81,9 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			return;
 		}
 		
-		$dsn = (string)self::getEnvParam('db_dsn', 'sqlite::memory:');
-		$username = self::getEnvParam('db_username', NULL);
-		$password = self::getEnvParam('db_password', NULL);
+		$dsn = (string)self::getEnvParam('DB_DSN', 'sqlite::memory:');
+		$username = self::getEnvParam('DB_USERNAME', NULL);
+		$password = self::getEnvParam('DB_PASSWORD', NULL);
 		
 		printf("DB: \"%s\"\n\n", $dsn);
 		

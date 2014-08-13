@@ -7,8 +7,8 @@ php:
   - hhvm-nightly
 
 env:
-  - DB=sqlite
-  - DB=mysql
+  - 'DB=sqlite DB_DSN=sqlite::memory:'
+  - 'DB=mysql DB_DSN=mysql:host=localhost;dbname=bpmn DB_USERNAME=root'
 
 before_install:
   - 'composer selfupdate --no-interaction'
@@ -20,7 +20,7 @@ before_script:
   - 'if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS bpmn;" -uroot; fi'
 
 script:
-  - './vendor/bin/phpunit -c "./test/phpunit-$DB.xml" --coverage-text'
+  - './vendor/bin/phpunit -c "./test/phpunit.xml" --coverage-text'
 
 notifications:
   email: false
