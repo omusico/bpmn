@@ -34,9 +34,9 @@ class ScriptTaskTest extends BusinessProcessTestCase
 	{
 		$this->deployFile('ScriptTaskTest.bpmn');
 		
-		$this->expectedResult = $result;
-		
 		$process = $this->runtimeService->startProcessInstanceByKey('main');
+		
+		$this->runtimeService->setProcessVariable($process->getId(), 'expected', $result);
 		
 		$task = $this->taskService->createTaskQuery()->findOne();
 		$this->assertTrue($task instanceof TaskInterface);
@@ -49,8 +49,6 @@ class ScriptTaskTest extends BusinessProcessTestCase
 		$this->assertEquals(0, $this->runtimeService->createExecutionQuery()->count());
 	}
 	
-	protected $expectedResult = 0;
-	
 	/**
 	 * @ServiceTaskHandler("ServiceTask_1", processKey = "main")
 	 * 
@@ -58,6 +56,6 @@ class ScriptTaskTest extends BusinessProcessTestCase
 	 */
 	public function verifyNumbersAdded(DelegateExecutionInterface $execution)
 	{
-		$this->assertEquals($this->expectedResult, $execution->getVariable('result'));
+		$this->assertEquals($execution->getVariable('expected'), $execution->getVariable('result'));
 	}
 }

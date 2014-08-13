@@ -15,7 +15,6 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Runtime\Command\MessageEventReceivedCommand;
 use KoolKode\BPMN\Runtime\Command\SetProcessVariableCommand;
 use KoolKode\BPMN\Runtime\Command\SignalEventReceivedCommand;
-use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\BPMN\Runtime\Command\StartProcessInstanceCommand;
 use KoolKode\Util\Uuid;
 
@@ -41,13 +40,6 @@ class RuntimeService
 	public function createMessageCorrelation($messageName)
 	{
 		return new MessageCorrelation($this, $messageName);
-	}
-	
-	public function signal(UUID $executionId, array $variables = [])
-	{
-		$execution = $this->engine->findExecution($executionId);
-		
-		$this->engine->executeCommand(new SignalExecutionCommand($execution, NULL, $variables));
 	}
 	
 	public function messageEventReceived($messageName, UUID $executionId, array $variables = [])
