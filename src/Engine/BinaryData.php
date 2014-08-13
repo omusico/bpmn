@@ -39,6 +39,11 @@ class BinaryData
 	
 	public static function decode($input)
 	{
+		if(is_resource($input))
+		{
+			$input = stream_get_contents($input);
+		}
+		
 		if($input === NULL || '' === (string)$input)
 		{
 			return NULL;

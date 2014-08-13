@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS `#__bpm_execution`;
 DROP TABLE IF EXISTS `#__bpm_process_definition`;
 
 CREATE TABLE `#__bpm_process_definition` (
-	`id` bytea NOT NULL,
+	`id` character(32) NOT NULL,
 	`process_key` varchar(250) NOT NULL,
 	`revision` integer NOT NULL,
 	`definition` bytea NOT NULL,
@@ -17,8 +17,8 @@ CREATE TABLE `#__bpm_process_definition` (
 );
 
 CREATE TABLE `#__bpm_process_subscription` (
-	`id` bytea NOT NULL,
-	`definition_id` bytea NOT NULL,
+	`id` character(32) NOT NULL,
+	`definition_id` character(32) NOT NULL,
 	`flags` integer NOT NULL,
 	`name` varchar(250) NOT NULL,
 	PRIMARY KEY (`id`),
@@ -29,10 +29,10 @@ CREATE TABLE `#__bpm_process_subscription` (
 CREATE INDEX `#__bpm_process_subscription_lookup` ON `#__bpm_process_subscription` (`name`, `flags`);
 
 CREATE TABLE `#__bpm_execution` (
-	`id` bytea NOT NULL,
-	`pid` bytea NULL,
-	`process_id` bytea NULL,
-	`definition_id` bytea NOT NULL,
+	`id` character(32) NOT NULL,
+	`pid` character(32) NULL,
+	`process_id` character(32) NULL,
+	`definition_id` character(32) NOT NULL,
 	`state` integer NOT NULL,
 	`active` real NOT NULL,
 	`node` varchar(250) NULL,
@@ -54,11 +54,11 @@ CREATE INDEX `#__bpm_execution_business_key` ON `#__bpm_execution` (`business_ke
 CREATE INDEX `#__bpm_execution_node` ON `#__bpm_execution` (`node`);
 
 CREATE TABLE `#__bpm_event_subscription` (
-	`id` bytea NOT NULL,
-	`execution_id` bytea NOT NULL,
+	`id` character(32) NOT NULL,
+	`execution_id` character(32) NOT NULL,
 	`activity_id` varchar(250) NOT NULL,
 	`node` varchar(250) NULL,
-	`process_instance_id` bytea NOT NULL,
+	`process_instance_id` character(32) NOT NULL,
 	`flags` integer NOT NULL,
 	`name` varchar(250) NOT NULL,
 	`created_at` integer NOT NULL,
@@ -72,8 +72,8 @@ CREATE INDEX `#__bpm_event_subscription_process_instance_id` ON `#__bpm_event_su
 CREATE INDEX `#__bpm_event_subscription_lookup` ON `#__bpm_event_subscription` (`name`, `flags`);
 
 CREATE TABLE `#__bpm_user_task` (
-	`id` bytea NOT NULL,
-	`execution_id` bytea NOT NULL,
+	`id` character(32) NOT NULL,
+	`execution_id` character(32) NOT NULL,
 	`name` varchar(250) NOT NULL,
 	`documentation` TEXT NULL,
 	`activity` varchar(250) NOT NULL,
