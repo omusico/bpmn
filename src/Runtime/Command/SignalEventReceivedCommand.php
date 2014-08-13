@@ -111,7 +111,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		}
 		
 		// Include signal start events subscriptions.
-		$sql = "	SELECT s.`name` AS signal, d.* 
+		$sql = "	SELECT s.`name` AS signal_name, d.* 
 					FROM `#__bpm_process_subscription` AS s
 					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = s.`definition_id`)
 					WHERE s.`flags` = :flags
@@ -135,7 +135,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 			
 			$engine->pushCommand(new StartProcessInstanceCommand(
 				$definition,
-				$definition->findSignalStartEvent($row['signal']),
+				$definition->findSignalStartEvent($row['signal_name']),
 				($this->sourceExecution === NULL) ? NULL : $this->sourceExecution->getBusinessKey(),
 				$this->variables
 			));
