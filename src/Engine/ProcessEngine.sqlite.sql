@@ -6,23 +6,21 @@ DROP TABLE IF EXISTS `#__bpm_execution`;
 DROP TABLE IF EXISTS `#__bpm_process_definition`;
 
 CREATE TABLE `#__bpm_process_definition` (
-	`id` BINARY(16) NOT NULL,
-	`process_key` VARCHAR(250) NOT NULL,
-	`revision` INT UNSIGNED NOT NULL,
-	`definition` LONGBLOB NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
-	`deployed_at` INT UNSIGNED NOT NULL,
-	PRIMARY KEY (`id`)
+	`id` TEXT PRIMARY KEY,
+	`process_key` TEXT NOT NULL,
+	`revision` INTEGER NOT NULL,
+	`definition` BLOB NOT NULL,
+	`name` TEXT NOT NULL,
+	`deployed_at` INTEGER NOT NULL
 );
 
 CREATE UNIQUE INDEX `#__bpm_process_definition_versioning` ON `#__bpm_process_definition` (`process_key`, `revision`);
 
 CREATE TABLE `#__bpm_process_subscription` (
-	`id` BINARY(16) NOT NULL,
-	`definition_id` BINARY(16) NOT NULL,
-	`flags` INT UNSIGNED NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
-	PRIMARY KEY (`id`),
+	`id` TEXT PRIMARY KEY,
+	`definition_id` TEXT NOT NULL,
+	`flags` INTEGER NOT NULL,
+	`name` TEXT NOT NULL,
 	FOREIGN KEY (`definition_id`) REFERENCES `#__bpm_process_definition` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -30,18 +28,17 @@ CREATE UNIQUE INDEX `#__bpm_process_subscription_integrity` ON `#__bpm_process_s
 CREATE INDEX `#__bpm_process_subscription_lookup` ON `#__bpm_process_subscription` (`name`, `flags`);
 
 CREATE TABLE `#__bpm_execution` (
-	`id` BINARY(16) NOT NULL,
-	`pid` BINARY(16) NULL,
-	`process_id` BINARY(16) NULL,
-	`definition_id` BINARY(16) NOT NULL,
-	`state` INT UNSIGNED NOT NULL,
-	`active` DOUBLE NOT NULL,
-	`node` VARCHAR(250) NULL,
-	`transition` VARCHAR(250) NULL,
-	`depth` INT UNSIGNED NOT NULL,
-	`business_key` VARCHAR(250) NULL,
-	`vars` LONGBLOB NOT NULL,
-	PRIMARY KEY (`id`),
+	`id` TEXT PRIMARY KEY,
+	`pid` TEXT NULL,
+	`process_id` TEXT NULL,
+	`definition_id` TEXT NOT NULL,
+	`state` INTEGER NOT NULL,
+	`active` REAL NOT NULL,
+	`node` TEXT NULL,
+	`transition` TEXT NULL,
+	`depth` INTEGER NOT NULL,
+	`business_key` TEXT NULL,
+	`vars` BLOB NOT NULL,
 	FOREIGN KEY (`definition_id`) REFERENCES `#__bpm_process_definition` (`id`) ON UPDATE CASCADE,
 	FOREIGN KEY (`pid`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (`process_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
@@ -55,15 +52,14 @@ CREATE INDEX `#__bpm_execution_business_key` ON `#__bpm_execution` (`business_ke
 CREATE INDEX `#__bpm_execution_node` ON `#__bpm_execution` (`node`);
 
 CREATE TABLE `#__bpm_event_subscription` (
-	`id` BINARY(16) NOT NULL,
-	`execution_id` BINARY(16) NOT NULL,
-	`activity_id` VARCHAR(250) NOT NULL,
-	`node` VARCHAR(250) NULL,
-	`process_instance_id` BINARY(16) NOT NULL,
-	`flags` INT UNSIGNED NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
-	`created_at` INT UNSIGNED NOT NULL,
-	PRIMARY KEY (`id`),
+	`id` TEXT PRIMARY KEY,
+	`execution_id` TEXT NOT NULL,
+	`activity_id` TEXT NOT NULL,
+	`node` TEXT NULL,
+	`process_instance_id` TEXT NOT NULL,
+	`flags` INTEGER NOT NULL,
+	`name` TEXT NOT NULL,
+	`created_at` INTEGER NOT NULL,
 	FOREIGN KEY (`execution_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (`process_instance_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -73,15 +69,14 @@ CREATE INDEX `#__bpm_event_subscription_process_instance_id` ON `#__bpm_event_su
 CREATE INDEX `#__bpm_event_subscription_lookup` ON `#__bpm_event_subscription` (`name`, `flags`);
 
 CREATE TABLE `#__bpm_user_task` (
-	`id` BINARY(16) NOT NULL,
-	`execution_id` BINARY(16) NOT NULL,
-	`name` VARCHAR(250) NOT NULL,
+	`id` TEXT PRIMARY KEY,
+	`execution_id` TEXT NOT NULL,
+	`name` TEXT NOT NULL,
 	`documentation` TEXT NULL,
-	`activity` VARCHAR(250) NOT NULL,
-	`created_at` INT UNSIGNED NOT NULL,
-	`claimed_at` INT UNSIGNED NULL,
-	`claimed_by` VARCHAR(250) NULL,
-	PRIMARY KEY (`id`),
+	`activity` TEXT NOT NULL,
+	`created_at` INTEGER NOT NULL,
+	`claimed_at` INTEGER NULL,
+	`claimed_by` TEXT NULL,
 	FOREIGN KEY (`execution_id`) REFERENCES `#__bpm_execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
 

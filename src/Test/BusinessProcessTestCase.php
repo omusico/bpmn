@@ -271,44 +271,10 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			'bpm_process_definition'
 		];
 		
-		if(self::$pdo->isSqlite())
+		// Need to delete from tabls in correct order to prevent errors due to foreign key constraints.
+		foreach($tables as $table)
 		{
-			self::$pdo->exec("PRAGMA foreign_keys = OFF");
-	
-			try
-			{
-				foreach($tables as $table)
-				{
-					self::$pdo->exec("DELETE FROM `#__$table`");
-				}
-			}
-			finally
-			{
-				self::$pdo->exec("PRAGMA foreign_keys = ON");
-			}
-		}
-		elseif(self::$pdo->isMySQL())
-		{
-			self::$pdo->exec("SET FOREIGN_KEY_CHECKS=0");
-			
-			try
-			{
-				foreach($tables as $table)
-				{
-					self::$pdo->exec("DELETE FROM `#__$table`");
-				}
-			}
-			finally
-			{
-				self::$pdo->exec("SET FOREIGN_KEY_CHECKS=1");
-			}
-		}
-		else
-		{
-			foreach($tables as $table)
-			{
-				self::$pdo->exec("DELETE FROM `#__$table`");
-			}
+			self::$pdo->exec("DELETE FROM `#__$table`");
 		}
 	}
 	
