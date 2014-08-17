@@ -34,9 +34,7 @@ class BinaryData
 	
 	public function encode()
 	{
-		return $this->data;
-		// FIXME: Compress data...
-// 		return gzcompress($this->data, $this->level);
+		return gzcompress($this->data, $this->level);
 	}
 	
 	public static function decode($input)
@@ -50,8 +48,7 @@ class BinaryData
 		{
 			return NULL;
 		}
-		return $input;
-		// FIXME: Uncompress data...
+		
 		return gzuncompress($input);
 	}
 }

@@ -257,13 +257,10 @@ class ExecutionQuery
 			$sql .= ' WHERE ' . implode(' AND ', $where);
 		}
 		
-		if($limit > 0)
-		{
-			$sql .= sprintf(' LIMIT %u OFFSET %u', $limit, $offset);
-		}
-		
 		$stmt = $this->engine->prepareQuery($sql);
 		$stmt->bindAll($params);
+		$stmt->setLimit($limit);
+		$stmt->setOffset($offset);
 		$stmt->execute();
 		
 		return $stmt;

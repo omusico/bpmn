@@ -48,12 +48,12 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 					AND s.`flags` = :flags
 					AND s.`execution_id` = :eid
 					ORDER BY e.`depth` DESC, s.`created_at`
-					LIMIT 1
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('message', $this->messageName);
 		$stmt->bindValue('flags', ProcessEngine::SUB_FLAG_MESSAGE);
 		$stmt->bindValue('eid', $this->executionId);
+		$stmt->setLimit(1);
 		$stmt->execute();
 		
 		$row = $stmt->fetchNextRow();

@@ -16,7 +16,6 @@ use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
 use KoolKode\Database\ConnectionInterface;
-use KoolKode\Database\LargeObjectStream;
 use KoolKode\Database\StatementInterface;
 use KoolKode\Event\EventDispatcherInterface;
 use KoolKode\Expression\ExpressionContextFactoryInterface;
@@ -349,7 +348,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$stmt->bindValue('transition', $data['transition']);
 			$stmt->bindValue('depth', $data['depth']);
 			$stmt->bindValue('bkey', $data['bkey']);
-			$stmt->bindValue('vars', new LargeObjectStream($data['vars']));
+			$stmt->bindValue('vars', $data['vars']);
 			$stmt->execute();
 				
 			$info->update($data);
@@ -372,14 +371,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			
 			foreach($data as $k => $v)
 			{
-				if($k == 'vars')
-				{
-					$stmt->bindValue($k, new LargeObjectStream($v));
-				}
-				else
-				{
-					$stmt->bindValue($k, $v);					
-				}
+				$stmt->bindValue($k, $v);
 			}
 			
 			$stmt->execute();

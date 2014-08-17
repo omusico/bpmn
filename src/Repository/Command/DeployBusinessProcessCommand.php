@@ -45,10 +45,10 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 					FROM `#__bpm_process_definition`
 					WHERE `process_key` = :key
 					ORDER BY `revision` DESC
-					LIMIT 1
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('key', $this->builder->getKey());
+		$stmt->setLimit(1);
 		$stmt->execute();
 		$revision = $stmt->fetchNextColumn(0);
 			
