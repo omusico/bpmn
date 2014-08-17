@@ -20,7 +20,7 @@ use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
-use KoolKode\Database\Connection;
+use KoolKode\Database\PDO\Connection;
 use KoolKode\Event\EventDispatcher;
 use KoolKode\Expression\ExpressionContextFactory;
 use KoolKode\Meta\Info\ReflectionTypeInfo;
@@ -28,6 +28,8 @@ use KoolKode\Process\Event\CreateExpressionContextEvent;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
+use KoolKode\Database\ParamEncoderDecorator;
+use KoolKode\Database\DB;
 
 /**
  * Sets up in in-memory Sqlite databse and a process engine using it.
@@ -36,7 +38,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
  */
 abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 {
-	protected static $pdo;
+	protected static $conn;
 	
 	/**
 	 * @var EventDispatcher
@@ -78,7 +80,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	{
 		parent::setUpBeforeClass();
 		
-		if(self::$pdo !== NULL)
+		if(self::$conn !== NULL)
 		{
 			return;
 		}
@@ -89,32 +91,25 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		printf("DB: \"%s\"\n", $dsn);
 		
-		self::$pdo = new Connection($dsn, $username, $password);
-		self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		self::$pdo->registerParamEncoder(new BinaryDataParamEncoder());
-		self::$pdo->registerParamEncoder(new IdentifierParamEncoder());
+		$pdo = new \PDO($dsn, $username, $password);
+		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		
-		if(self::$pdo->isSqlite())
+		$conn = new ParamEncoderDecorator(new Connection($pdo));
+		$conn->registerParamEncoder(new BinaryDataParamEncoder());
+		$conn->registerParamEncoder(new IdentifierParamEncoder());
+		
+		switch($conn->getDriverName())
 		{
-			self::$pdo->exec("PRAGMA foreign_keys = ON");
-			
-			$db = 'sqlite';
-		}
-		elseif(self::$pdo->isMySQL())
-		{
-			$db = 'mysql';
-		}
-		elseif(self::$pdo->isPostgreSQL())
-		{
-			$db = 'pgsql';
-		}
-		else
-		{
-			throw new \RuntimeException(sprintf('Unsupported database resource: "%s"', $dsn));
+			case DB::DRIVER_SQLITE:
+				$conn->execute("PRAGMA foreign_keys = ON");
+				break;
+			case DB::DRIVER_MYSQL:
+				$conn->execute("SET NAMES 'utf8'");
+				break;
 		}
 		
 		$dir = rtrim(realpath(__DIR__ . '/../Engine'), '/\\');
-		$ddl = str_replace('\\', '/', sprintf('%s/ProcessEngine.%s.sql', $dir, $db));
+		$ddl = str_replace('\\', '/', sprintf('%s/ProcessEngine.%s.sql', $dir, $conn->getDriverName()));
 		$chunks = explode(';', file_get_contents($ddl));
 		
 		printf("DDL: \"%s\"\n\n", $ddl);
@@ -128,8 +123,10 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 				continue;
 			}
 		
-			self::$pdo->exec($chunk);
+			$conn->execute($chunk);
 		}
+		
+		self::$conn = $conn;
 	}
 	
 	protected static function getEnvParam($name)
@@ -176,8 +173,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			fwrite($stderr, "\n");
 			fwrite($stderr, sprintf("TEST CASE: %s\n", $this->getName()));
 			
-			self::$pdo->setDebug(true);
-			self::$pdo->setLogger($logger);
+// 			self::$pdo->setDebug(true);
+// 			self::$pdo->setLogger($logger);
 		}
 		
 		$this->messageHandlers = [];
@@ -219,7 +216,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		$this->delegateTasks = new DelegateTaskRegistry();
 		
-		$this->processEngine = new ProcessEngine(self::$pdo, $this->eventDispatcher, new ExpressionContextFactory());
+		$this->processEngine = new ProcessEngine(self::$conn, $this->eventDispatcher, new ExpressionContextFactory());
 		$this->processEngine->setDelegateTaskFactory($this->delegateTasks);
 		$this->processEngine->setLogger($logger);
 		
@@ -264,17 +261,17 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	protected function clearTables()
 	{
 		static $tables = [
-			'bpm_process_subscription',
-			'bpm_event_subscription',
-			'bpm_user_task',
-			'bpm_execution',
-			'bpm_process_definition'
+			'#__bpm_process_subscription',
+			'#__bpm_event_subscription',
+			'#__bpm_user_task',
+			'#__bpm_execution',
+			'#__bpm_process_definition'
 		];
 		
 		// Need to delete from tabls in correct order to prevent errors due to foreign key constraints.
 		foreach($tables as $table)
 		{
-			self::$pdo->exec("DELETE FROM `#__$table`");
+			self::$conn->execute("DELETE FROM `$table`");
 		}
 	}
 	

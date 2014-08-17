@@ -15,7 +15,9 @@ use KoolKode\BPMN\Delegate\DelegateTaskFactoryInterface;
 use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
-use KoolKode\Database\Connection;
+use KoolKode\Database\ConnectionInterface;
+use KoolKode\Database\LargeObjectStream;
+use KoolKode\Database\StatementInterface;
 use KoolKode\Event\EventDispatcherInterface;
 use KoolKode\Expression\ExpressionContextFactoryInterface;
 use KoolKode\Process\AbstractEngine;
@@ -34,7 +36,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	
 	protected $executions = [];
 	
-	protected $pdo;
+	protected $conn;
 	
 	protected $handleTransactions;
 	
@@ -46,11 +48,11 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	
 	protected $taskService;
 	
-	public function __construct(Connection $pdo, EventDispatcherInterface $dispatcher, ExpressionContextFactoryInterface $factory, $handleTransactions = true)
+	public function __construct(ConnectionInterface $conn, EventDispatcherInterface $dispatcher, ExpressionContextFactoryInterface $factory, $handleTransactions = true)
 	{
 		parent::__construct($dispatcher, $factory);
 		
-		$this->pdo = $pdo;
+		$this->conn = $conn;
 		$this->handleTransactions = $handleTransactions ? true : false;
 			
 		$this->repositoryService = new RepositoryService($this);
@@ -77,14 +79,11 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	 * Create a prepared statement from the given SQL.
 	 * 
 	 * @param string $sql
-	 * @return \PDOStatement
+	 * @return StatementInterface
 	 */
 	public function prepareQuery($sql)
 	{
-		$stmt = $this->pdo->prepare($sql);
-		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
-		
-		return $stmt;
+		return $this->conn->prepare($sql);
 	}
 	
 	/**
@@ -95,7 +94,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	 */
 	public function getLastInsertId($seq = NULL)
 	{
-		return $this->pdo->lastInsertId($seq);
+		return $this->conn->lastInsertId($seq);
 	}
 	
 	public function setDelegateTaskFactory(DelegateTaskFactoryInterface $factory = NULL)
@@ -121,7 +120,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		{
 			$this->debug('BEGIN transaction');
 			
-			$this->pdo->beginTransaction();
+			$this->conn->beginTransaction();
 			$trans = true;
 		}
 		
@@ -142,7 +141,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			if($trans)
 			{
 				$this->debug('COMMIT transaction');
-				$this->pdo->commit();
+				$this->conn->commit();
 			}
 			
 			return $result;
@@ -152,7 +151,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			if($trans)
 			{
 				$this->debug('ROLL BACK transaction');
-				$this->pdo->rollBack();
+				$this->conn->rollBack();
 			}
 			
 			throw $e;
@@ -175,8 +174,8 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			return $this->executions[$ref]->getExecution();
 		}
 		
-		$sub = '?';
-		$params = [$id];
+		$sub = ':p1';
+		$params = ['p1' => $id];
 		
 		$sql = "	SELECT e.*, d.`definition`
 					FROM `#__bpm_execution` AS e
@@ -187,14 +186,15 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 						WHERE `id` IN ($sub)
 					)
 		";
-		$stmt = $this->pdo->prepare($sql);
-		$stmt->execute($params);
+		$stmt = $this->conn->prepare($sql);
+		$stmt->bindAll($params);
+		$stmt->execute();
 		
 		$executions = [];
 		$parents = [];
 		$defs = [];
 		
-		while($row = $stmt->fetch(\PDO::FETCH_ASSOC))
+		while($row = $stmt->fetchNextRow())
 		{
 			$id = new UUID($row['id']);
 			$pid = ($row['pid'] === NULL) ? NULL : new UUID($row['pid']);
@@ -312,7 +312,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$sql = "	DELETE FROM `#__bpm_execution`
 						WHERE `id` = :id
 			";
-			$stmt = $this->pdo->prepare($sql);
+			$stmt = $this->conn->prepare($sql);
 			$stmt->bindValue('id', $data['id']);
 			$stmt->execute();
 				
@@ -339,7 +339,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 							`vars` = :vars
 						WHERE `id` = :id
 			";
-			$stmt = $this->pdo->prepare($sql);
+			$stmt = $this->conn->prepare($sql);
 			$stmt->bindValue('id', $data['id']);
 			$stmt->bindValue('pid', $data['pid']);
 			$stmt->bindValue('process', $data['process']);
@@ -349,7 +349,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$stmt->bindValue('transition', $data['transition']);
 			$stmt->bindValue('depth', $data['depth']);
 			$stmt->bindValue('bkey', $data['bkey']);
-			$stmt->bindValue('vars', $data['vars'], \PDO::PARAM_LOB);
+			$stmt->bindValue('vars', new LargeObjectStream($data['vars']));
 			$stmt->execute();
 				
 			$info->update($data);
@@ -368,13 +368,13 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 							:node, :transition, :depth, :bkey, :vars
 						)
 			";
-			$stmt = $this->pdo->prepare($sql);
+			$stmt = $this->conn->prepare($sql);
 			
 			foreach($data as $k => $v)
 			{
 				if($k == 'vars')
 				{
-					$stmt->bindValue($k, $v, \PDO::PARAM_LOB);
+					$stmt->bindValue($k, new LargeObjectStream($v));
 				}
 				else
 				{

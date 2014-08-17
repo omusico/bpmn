@@ -50,7 +50,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->execute();
-		$revision = $stmt->fetchColumn(0) ?: 0;
+		$revision = $stmt->fetchNextColumn(0);
 			
 		$model = $this->builder->build();
 		$id = $model->getId();
@@ -65,7 +65,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$stmt->bindValue('id', $id);
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->bindValue('revision', $revision + 1);
-		$stmt->bindValue('model', new BinaryData(serialize($model), 3), \PDO::PARAM_LOB);
+		$stmt->bindValue('model', new BinaryData(serialize($model), 3));
 		$stmt->bindValue('name', $model->getTitle());
 		$stmt->bindValue('deployed', $time);
 		$stmt->execute();

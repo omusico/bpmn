@@ -56,7 +56,7 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 		$stmt->bindValue('eid', $this->executionId);
 		$stmt->execute();
 		
-		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
+		$row = $stmt->fetchNextRow();
 		
 		if($row === false)
 		{

@@ -20,7 +20,8 @@
 		"koolkode/expression" : "dev-master",
 		"koolkode/util" : "dev-master",
 		"koolkode/xml" : "dev-master",
-		"koolkode/database" : "dev-master"
+		"koolkode/database" : "dev-master",
+		"koolkode/stream" : "dev-master"
 	},
 	"require-dev" : {
 		"phpunit/phpunit" : "4.*",

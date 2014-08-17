@@ -84,13 +84,13 @@ class TaskQuery
 	{
 		$stmt = $this->executeSql(true);
 		
-		return (int)$stmt->fetchColumn(0);
+		return (int)$stmt->fetchNextColumn(0);
 	}
 	
 	public function findOne()
 	{
 		$stmt = $this->executeSql(false, 1);
-		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
+		$row = $stmt->fetchNextRow();
 		
 		if($row === false)
 		{
@@ -105,7 +105,7 @@ class TaskQuery
 		$stmt = $this->executeSql();
 		$result = [];
 		
-		while($row = $stmt->fetch(\PDO::FETCH_ASSOC))
+		while($row = $stmt->fetchNextRow())
 		{
 			$result[] = $this->unserializeTask($row);
 		}
@@ -131,6 +131,8 @@ class TaskQuery
 	
 	protected function executeSql($count = false, $limit = 0, $offset = 0)
 	{
+		$pp = 0;
+		
 		if($count)
 		{
 			$fields = 'COUNT(*) AS num';
@@ -153,38 +155,50 @@ class TaskQuery
 		
 		if($this->executionId !== NULL)
 		{
-			$where[] = 'e.`id` = ?';
-			$params[] = $this->executionId;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "e.`id` = :$p1";
+			$params[$p1] = $this->executionId;
 		}
 		
 		if($this->processDefinitionKey !== NULL)
 		{
-			$where[] = 'd.`process_key` = ?';
-			$params[] = $this->processDefinitionKey;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "d.`process_key` = :$p1";
+			$params[$p1] = $this->processDefinitionKey;
 		}
 		
 		if($this->processInstanceId !== NULL)
 		{
-			$where[] = 'e.`process_id` = ?';
-			$params[] = $this->processInstanceId;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "e.`process_id` = :$p1";
+			$params[$p1] = $this->processInstanceId;
 		}
 		
 		if($this->taskDefinitionKey !== NULL)
 		{
-			$where[] = 't.`activity` = ?';
-			$params[] = $this->taskDefinitionKey;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "t.`activity` = :$p1";
+			$params[$p1] = $this->taskDefinitionKey;
 		}
 		
 		if($this->taskId !== NULL)
 		{
-			$where[] = 't.`id` = ?';
-			$params[] = $this->taskId;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "t.`id` = :$p1";
+			$params[$p1] = $this->taskId;
 		}
 		
 		if($this->taskName !== NULL)
 		{
-			$where[] = 't.`name` = ?';
-			$params[] = $this->taskName;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "t.`name` = :$p1";
+			$params[$p1] = $this->taskName;
 		}
 		
 		if($this->taskUnassigned)
@@ -208,7 +222,8 @@ class TaskQuery
 		}
 		
 		$stmt = $this->engine->prepareQuery($sql);
-		$stmt->execute($params);
+		$stmt->bindAll($params);
+		$stmt->execute();
 		
 		return $stmt;
 	}

@@ -76,7 +76,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		$ids = [];
 		$executions = [];
 		
-		foreach($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row)
+		foreach($stmt->fetchRows() as $row)
 		{
 			$execution = $executions[] = $engine->findExecution(new UUID($row['execution_id']));
 			$ids[(string)$execution->getId()] = [$execution->getId(), $row['activity_id']];
@@ -123,7 +123,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		$stmt->bindValue('name', $this->signal);
 		$stmt->execute();
 		
-		while($row = $stmt->fetch(\PDO::FETCH_ASSOC))
+		while($row = $stmt->fetchNextRow())
 		{
 			$definition = new BusinessProcessDefinition(
 				new UUID($row['id']),

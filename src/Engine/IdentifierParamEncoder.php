@@ -11,7 +11,8 @@
 
 namespace KoolKode\BPMN\Engine;
 
-use KoolKode\Database\Connection;
+use KoolKode\Database\ConnectionInterface;
+use KoolKode\Database\DB;
 use KoolKode\Database\ParamEncoderInterface;
 use KoolKode\Util\UUID;
 
@@ -22,13 +23,13 @@ use KoolKode\Util\UUID;
  */
 class IdentifierParamEncoder implements ParamEncoderInterface
 {
-	public function encodeParam(Connection $conn, $param, & $isEncoded)
+	public function encodeParam(ConnectionInterface $conn, $param, & $isEncoded)
 	{
 		if($param instanceof UUID)
 		{
 			$isEncoded = true;
 			
-			if($conn->isPostgreSQL())
+			if($conn->getDriverName() == DB::DRIVER_POSTGRESQL)
 			{
 				return str_replace('-', '', (string)$param);
 			}

@@ -46,9 +46,7 @@ class ClearEventSubscriptionsCommand extends AbstractBusinessCommand
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('eid', $this->execution->getId());
 		$stmt->bindValue('aid', $this->activitId);
-		$stmt->execute();
-		
-		$count = (int)$stmt->rowCount();
+		$count = $stmt->execute();
 		
 		if($count > 0)
 		{

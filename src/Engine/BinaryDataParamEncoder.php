@@ -11,7 +11,8 @@
 
 namespace KoolKode\BPMN\Engine;
 
-use KoolKode\Database\Connection;
+use KoolKode\Database\ConnectionInterface;
+use KoolKode\Database\LargeObjectStream;
 use KoolKode\Database\ParamEncoderInterface;
 
 /**
@@ -21,13 +22,14 @@ use KoolKode\Database\ParamEncoderInterface;
  */
 class BinaryDataParamEncoder implements ParamEncoderInterface
 {
-	public function encodeParam(Connection $conn, $param, & $isEncoded)
+	public function encodeParam(ConnectionInterface $conn, $param, & $isEncoded)
 	{
 		if($param instanceof BinaryData)
 		{
 			$isEncoded = true;
-			
+			// FIXME: Go with LOB stream instead.
 			return $param->encode();
+			return new LargeObjectStream($param->encode());
 		}
 	}
 }

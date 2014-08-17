@@ -89,13 +89,13 @@ class ExecutionQuery
 	{
 		$stmt = $this->executeSql(true);
 		
-		return (int)$stmt->fetchColumn(0);
+		return (int)$stmt->fetchNextColumn(0);
 	}
 	
 	public function findOne()
 	{
 		$stmt = $this->executeSql(false, 1);
-		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
+		$row = $stmt->fetchNextRow();
 		
 		if($row === false)
 		{
@@ -110,7 +110,7 @@ class ExecutionQuery
 		$stmt = $this->executeSql();
 		$result = [];
 		
-		while($row = $stmt->fetch(\PDO::FETCH_ASSOC))
+		while($row = $stmt->fetchNextRow())
 		{
 			$result[] = $this->unserializeExecution($row);
 		}
@@ -142,6 +142,8 @@ class ExecutionQuery
 	
 	protected function executeSql($count = false, $limit = 0, $offset = 0)
 	{
+		$pp = 0;
+		
 		if($count)
 		{
 			$fields = 'COUNT(*) AS num';
@@ -175,43 +177,56 @@ class ExecutionQuery
 		
 		if($this->activityId !== NULL)
 		{
-			$where[] = 'e.`node` = ?';
-			$params[] = $this->activityId;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "e.`node` = :$p1";
+			$params[$p1] = $this->activityId;
 		}
 		
 		if($this->executionId !== NULL)
 		{
-			$where[] = 'e.`id` = ?';
-			$params[] = $this->executionId;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "e.`id` = :$p1";
+			$params[$p1] = $this->executionId;
 		}
 		
 		if($this->processBusinessKey != NULL)
 		{
-			$where[] = 'e.`business_key` = ?';
-			$params[] = $this->processBusinessKey;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "e.`business_key` = :$p1";
+			$params[$p1] = $this->processBusinessKey;
 		}
 		
 		if($this->processDefinitionKey !== NULL)
 		{
-			$where[] = 'd.`process_key` = ?';
-			$params[] = $this->processDefinitionKey;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "d.`process_key` = :$p1";
+			$params[$p1] = $this->processDefinitionKey;
 		}
 		
 		if($this->processInstanceId !== NULL)
 		{
-			$where[] = 'e.`process_id` = ?';
-			$params[] = $this->processInstanceId;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "e.`process_id` = :$p1";
+			$params[$p1] = $this->processInstanceId;
 		}
 		
 		foreach($this->signalEventSubscriptionNames as $name)
 		{
 			$joins[] = 'INNER JOIN `#__bpm_event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
 			
-			$where[] = "s$alias.`flags` = ?";
-			$params[] = ProcessEngine::SUB_FLAG_SIGNAL;
+			$p1 = 'p' . (++$pp);
+			$p2 = 'p' . (++$pp);
 			
-			$where[] = "s$alias.`name` = ?";
-			$params[] = $name;
+			$where[] = "s$alias.`flags` = :$p1";
+			$params[$p1] = ProcessEngine::SUB_FLAG_SIGNAL;
+			
+			$where[] = "s$alias.`name` = :$p2";
+			$params[$p2] = $name;
 			
 			$alias++;
 		}
@@ -219,12 +234,15 @@ class ExecutionQuery
 		foreach($this->messageEventSubscriptionNames as $name)
 		{
 			$joins[] = 'INNER JOIN `#__bpm_event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
+			
+			$p1 = 'p' . (++$pp);
+			$p2 = 'p' . (++$pp);
+			
+			$where[] = "s$alias.`flags` = :$p1";
+			$params[$p1] = ProcessEngine::SUB_FLAG_MESSAGE;
 				
-			$where[] = "s$alias.`flags` = ?";
-			$params[] = ProcessEngine::SUB_FLAG_MESSAGE;
-				
-			$where[] = "s$alias.`name` = ?";
-			$params[] = $name;
+			$where[] = "s$alias.`name` = :$p2";
+			$params[$p2] = $name;
 				
 			$alias++;
 		}
@@ -245,7 +263,8 @@ class ExecutionQuery
 		}
 		
 		$stmt = $this->engine->prepareQuery($sql);
-		$stmt->execute($params);
+		$stmt->bindAll($params);
+		$stmt->execute();
 		
 		return $stmt;
 	}

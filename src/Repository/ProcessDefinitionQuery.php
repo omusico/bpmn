@@ -64,13 +64,13 @@ class ProcessDefinitionQuery
 	{
 		$stmt = $this->executeSql(true);
 	
-		return (int)$stmt->fetchColumn(0);
+		return (int)$stmt->fetchNextColumn(0);
 	}
 	
 	public function findOne()
 	{
 		$stmt = $this->executeSql(false, 1);
-		$row = $stmt->fetch(\PDO::FETCH_ASSOC);
+		$row = $stmt->fetchNextRow();
 	
 		if($row === false)
 		{
@@ -85,7 +85,7 @@ class ProcessDefinitionQuery
 		$stmt = $this->executeSql();
 		$result = [];
 	
-		while($row = $stmt->fetch(\PDO::FETCH_ASSOC))
+		while($row = $stmt->fetchNextRow())
 		{
 			$result[] = $this->unserializeProcessDefinition($row);
 		}
@@ -107,6 +107,8 @@ class ProcessDefinitionQuery
 	
 	protected function executeSql($count = false, $limit = 0, $offset = 0)
 	{
+		$pp = 0;
+		
 		if($count)
 		{
 			$fields = 'COUNT(*) AS num';
@@ -137,23 +139,30 @@ class ProcessDefinitionQuery
 		
 		if($this->messageEventSubscriptionName !== NULL)
 		{
+			$p1 = 'p' . (++$pp);
+			$p2 = 'p' . (++$pp);
+			
 			$joins[] = 'INNER JOIN `#__bpm_process_subscription` AS s ON (s.`definition_id` = d.`id`)';
-			$where[] = 's.`flags` = ?';
-			$where[] = 's.`name` = ?';
-			$params[] = ProcessEngine::SUB_FLAG_MESSAGE;
-			$params[] = $this->messageEventSubscriptionName;
+			$where[] = "s.`flags` = :$p1";
+			$where[] = "s.`name` = :$p2";
+			$params[$p1] = ProcessEngine::SUB_FLAG_MESSAGE;
+			$params[$p2] = $this->messageEventSubscriptionName;
 		}
 		
 		if($this->processDefinitionKey !== NULL)
 		{
-			$where[] = 'd.`process_key` = ?';
-			$params[] = $this->processDefinitionKey;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "d.`process_key` = :$p1";
+			$params[$p1] = $this->processDefinitionKey;
 		}
 		
 		if($this->processDefinitionVersion !== NULL)
 		{
-			 $where[] = 'd.`revision` = ?';
-			 $params[] = $this->processDefinitionVersion;
+			$p1 = 'p' . (++$pp);
+			
+			$where[] = "d.`revision` = :$p1";
+			$params[$p1] = $this->processDefinitionVersion;
 		}
 		
 		foreach($joins as $join)
@@ -172,7 +181,8 @@ class ProcessDefinitionQuery
 		}
 		
 		$stmt = $this->engine->prepareQuery($sql);
-		$stmt->execute($params);
+		$stmt->bindAll($params);
+		$stmt->execute();
 		
 		return $stmt;
 	}
