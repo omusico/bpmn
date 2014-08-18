@@ -20,7 +20,9 @@ use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
+use KoolKode\Database\DB;
 use KoolKode\Database\PDO\Connection;
+use KoolKode\Database\PrefixConnectionDecorator;
 use KoolKode\Event\EventDispatcher;
 use KoolKode\Expression\ExpressionContextFactory;
 use KoolKode\Meta\Info\ReflectionTypeInfo;
@@ -28,8 +30,6 @@ use KoolKode\Process\Event\CreateExpressionContextEvent;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
-use KoolKode\Database\ParamEncoderDecorator;
-use KoolKode\Database\DB;
 
 /**
  * Sets up in in-memory Sqlite databse and a process engine using it.
@@ -94,9 +94,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		$pdo = new \PDO($dsn, $username, $password);
 		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		
-		$conn = new ParamEncoderDecorator(new Connection($pdo));
-		$conn->registerParamEncoder(new BinaryDataParamEncoder());
-		$conn->registerParamEncoder(new IdentifierParamEncoder());
+		$conn = new PrefixConnectionDecorator(new Connection($pdo), 'bpm_');
 		
 		switch($conn->getDriverName())
 		{
@@ -122,7 +120,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			{
 				continue;
 			}
-		
+			
 			$conn->execute($chunk);
 		}
 		
@@ -261,11 +259,11 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 	protected function clearTables()
 	{
 		static $tables = [
-			'#__bpm_process_subscription',
-			'#__bpm_event_subscription',
-			'#__bpm_user_task',
-			'#__bpm_execution',
-			'#__bpm_process_definition'
+			'#__process_subscription',
+			'#__event_subscription',
+			'#__user_task',
+			'#__execution',
+			'#__process_definition'
 		];
 		
 		// Need to delete from tabls in correct order to prevent errors due to foreign key constraints.

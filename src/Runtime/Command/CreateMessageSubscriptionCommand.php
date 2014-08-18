@@ -42,7 +42,7 @@ class CreateMessageSubscriptionCommand extends AbstractBusinessCommand
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
-		$sql = "	INSERT INTO `#__bpm_event_subscription`
+		$sql = "	INSERT INTO `#__event_subscription`
 						(`id`, `execution_id`, `activity_id`, `node`, `process_instance_id`, `flags`, `name`, `created_at`)
 					VALUES
 						(:id, :eid, :aid, :node, :pid, :flags, :message, :created)

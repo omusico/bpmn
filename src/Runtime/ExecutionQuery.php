@@ -161,8 +161,8 @@ class ExecutionQuery
 		}
 		
 		$sql = "	SELECT $fields
-					FROM `#__bpm_execution` AS e
-					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
+					FROM `#__execution` AS e
+					INNER JOIN `#__process_definition` AS d ON (d.`id` = e.`definition_id`)
 		";
 		
 		$alias = 1;
@@ -217,7 +217,7 @@ class ExecutionQuery
 		
 		foreach($this->signalEventSubscriptionNames as $name)
 		{
-			$joins[] = 'INNER JOIN `#__bpm_event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
+			$joins[] = 'INNER JOIN `#__event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
 			
 			$p1 = 'p' . (++$pp);
 			$p2 = 'p' . (++$pp);
@@ -233,7 +233,7 @@ class ExecutionQuery
 		
 		foreach($this->messageEventSubscriptionNames as $name)
 		{
-			$joins[] = 'INNER JOIN `#__bpm_event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
+			$joins[] = 'INNER JOIN `#__event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
 			
 			$p1 = 'p' . (++$pp);
 			$p2 = 'p' . (++$pp);

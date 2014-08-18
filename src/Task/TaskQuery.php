@@ -143,9 +143,9 @@ class TaskQuery
 		}
 		
 		$sql = "	SELECT $fields
-					FROM `#__bpm_user_task` AS t
-					INNER JOIN `#__bpm_execution` AS e ON (e.`id` = t.`execution_id`)
-					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
+					FROM `#__user_task` AS t
+					INNER JOIN `#__execution` AS e ON (e.`id` = t.`execution_id`)
+					INNER JOIN `#__process_definition` AS d ON (d.`id` = e.`definition_id`)
 		";
 		
 		$alias = 1;

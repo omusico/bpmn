@@ -36,7 +36,7 @@ class RemoveUserTaskCommand extends AbstractBusinessCommand
 					   ->executionId($this->execution->getId())
 					   ->findOne();
 		
-		$sql = "	DELETE FROM `#__bpm_user_task`
+		$sql = "	DELETE FROM `#__user_task`
 					WHERE `execution_id` = :eid
 		";
 		$stmt = $engine->prepareQuery($sql);

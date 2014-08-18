@@ -119,7 +119,7 @@ class ProcessDefinitionQuery
 		}
 	
 		$sql = "	SELECT $fields
-					FROM `#__bpm_process_definition` AS d
+					FROM `#__process_definition` AS d
 		";
 	
 		$alias = 1;
@@ -131,7 +131,7 @@ class ProcessDefinitionQuery
 		{
 			$joins[] = "	INNER JOIN (
 								SELECT `process_key`, MAX(`revision`) AS revision
-								FROM `#__bpm_process_definition`
+								FROM `#__process_definition`
 								GROUP BY `process_key`
 							) AS m USING (`process_key`, revision)
 			";
@@ -142,7 +142,7 @@ class ProcessDefinitionQuery
 			$p1 = 'p' . (++$pp);
 			$p2 = 'p' . (++$pp);
 			
-			$joins[] = 'INNER JOIN `#__bpm_process_subscription` AS s ON (s.`definition_id` = d.`id`)';
+			$joins[] = 'INNER JOIN `#__process_subscription` AS s ON (s.`definition_id` = d.`id`)';
 			$where[] = "s.`flags` = :$p1";
 			$where[] = "s.`name` = :$p2";
 			$params[$p1] = ProcessEngine::SUB_FLAG_MESSAGE;

@@ -42,7 +42,7 @@ class CompleteUserTaskCommand extends AbstractBusinessCommand
 		
 		$engine->notify(new UserTaskCompletedEvent($task, $engine));
 		
-		$sql = "	DELETE FROM `#__bpm_user_task`
+		$sql = "	DELETE FROM `#__user_task`
 					WHERE `id` = :id
 		";
 		$stmt = $engine->prepareQuery($sql);

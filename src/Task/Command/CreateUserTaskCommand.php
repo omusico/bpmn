@@ -40,7 +40,7 @@ class CreateUserTaskCommand extends AbstractBusinessCommand
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$id = UUID::createRandom();
-		$sql = "	INSERT INTO `#__bpm_user_task`
+		$sql = "	INSERT INTO `#__user_task`
 						(`id`, `execution_id`, `name`, `documentation`, `activity`, `created_at`)
 					VALUES
 						(:id, :eid, :name, :doc, :activity, :created)

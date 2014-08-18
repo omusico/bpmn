@@ -16,6 +16,7 @@ use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\RuntimeService;
 use KoolKode\BPMN\Task\TaskService;
 use KoolKode\Database\ConnectionInterface;
+use KoolKode\Database\ParamEncoderDecorator;
 use KoolKode\Database\StatementInterface;
 use KoolKode\Event\EventDispatcherInterface;
 use KoolKode\Expression\ExpressionContextFactoryInterface;
@@ -50,6 +51,10 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	public function __construct(ConnectionInterface $conn, EventDispatcherInterface $dispatcher, ExpressionContextFactoryInterface $factory, $handleTransactions = true)
 	{
 		parent::__construct($dispatcher, $factory);
+		
+		$conn = new ParamEncoderDecorator($conn);
+		$conn->registerParamEncoder(new BinaryDataParamEncoder());
+		$conn->registerParamEncoder(new IdentifierParamEncoder());
 		
 		$this->conn = $conn;
 		$this->handleTransactions = $handleTransactions ? true : false;
@@ -177,11 +182,11 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		$params = ['p1' => $id];
 		
 		$sql = "	SELECT e.*, d.`definition`
-					FROM `#__bpm_execution` AS e
-					INNER JOIN `#__bpm_process_definition` AS d ON (d.`id` = e.`definition_id`)
+					FROM `#__execution` AS e
+					INNER JOIN `#__process_definition` AS d ON (d.`id` = e.`definition_id`)
 					WHERE e.`process_id` IN (
 						SELECT `process_id` 
-						FROM `#__bpm_execution`
+						FROM `#__execution`
 						WHERE `id` IN ($sub)
 					)
 		";
@@ -308,7 +313,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				$this->syncExecution($child, $this->executions[(string)$child->getId()]);
 			}
 				
-			$sql = "	DELETE FROM `#__bpm_execution`
+			$sql = "	DELETE FROM `#__execution`
 						WHERE `id` = :id
 			";
 			$stmt = $this->conn->prepare($sql);
@@ -326,7 +331,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				'execution' => (string)$execution
 			]);
 			
-			$sql = "	UPDATE `#__bpm_execution`
+			$sql = "	UPDATE `#__execution`
 						SET `pid` = :pid,
 							`process_id` = :process,
 							`state` = :state,
@@ -359,7 +364,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				'execution' => (string)$execution
 			]);
 			
-			$sql = "	INSERT INTO `#__bpm_execution` (
+			$sql = "	INSERT INTO `#__execution` (
 							`id`, `pid`, `process_id`, `definition_id`, `state`, `active`,
 							`node`, `transition`, `depth`, `business_key`, `vars`
 						) VALUES (

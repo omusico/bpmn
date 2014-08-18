@@ -44,7 +44,7 @@ class ClaimUserTaskCommand extends AbstractBusinessCommand
 			throw new \RuntimeException(sprintf('User task %s is already claimed by %s', $task->getId(), $task->getAssignee()));
 		}
 		
-		$sql = "	UPDATE `#__bpm_user_task`
+		$sql = "	UPDATE `#__user_task`
 					SET `claimed_at` = :time,
 						`claimed_by` = :assignee
 					WHERE `id` = :id

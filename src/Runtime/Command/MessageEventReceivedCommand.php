@@ -42,8 +42,8 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$sql = "	SELECT s.`id`, s.`execution_id`, s.`activity_id`, s.`node`
-					FROM `#__bpm_event_subscription` AS s
-					INNER JOIN `#__bpm_execution` AS e ON (e.`id` = s.`execution_id`)
+					FROM `#__event_subscription` AS s
+					INNER JOIN `#__execution` AS e ON (e.`id` = s.`execution_id`)
 					WHERE s.`name` = :message
 					AND s.`flags` = :flags
 					AND s.`execution_id` = :eid
@@ -73,7 +73,7 @@ class MessageEventReceivedCommand extends AbstractBusinessCommand
 			$engine->syncExecutionState($execution);
 		}
 		
-		$sql = "	DELETE FROM `#__bpm_event_subscription`
+		$sql = "	DELETE FROM `#__event_subscription`
 					WHERE `execution_id` = :eid
 					AND `activity_id` = :aid
 		";

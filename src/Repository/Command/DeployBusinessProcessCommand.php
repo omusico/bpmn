@@ -42,7 +42,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$sql = "	SELECT `revision`
-					FROM `#__bpm_process_definition`
+					FROM `#__process_definition`
 					WHERE `process_key` = :key
 					ORDER BY `revision` DESC
 		";
@@ -56,7 +56,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$id = $model->getId();
 		$time = time();
 			
-		$sql = "	INSERT INTO `#__bpm_process_definition`
+		$sql = "	INSERT INTO `#__process_definition`
 						(`id`, `process_key`, `revision`, `definition`, `name`, `deployed_at`)
 					VALUES
 						(:id, :key, :revision, :model, :name, :deployed)
@@ -70,10 +70,10 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$stmt->bindValue('deployed', $time);
 		$stmt->execute();
 		
-		$sql = "	DELETE FROM `#__bpm_process_subscription`
+		$sql = "	DELETE FROM `#__process_subscription`
 					WHERE `definition_id` IN (
 						SELECT `id`
-						FROM `#__bpm_process_definition`
+						FROM `#__process_definition`
 						WHERE `process_key` = :key
 					)
 		";
@@ -93,7 +93,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 			
 			if($behavior instanceof MessageStartEventBehavior && !$behavior->isSubProcessStart())
 			{
-				$sql = "	INSERT INTO `#__bpm_process_subscription`
+				$sql = "	INSERT INTO `#__process_subscription`
 								(`id`, `definition_id`, `flags`, `name`)
 							VALUES
 								(:id, :def, :flags, :message)
@@ -113,7 +113,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 			
 			if($behavior instanceof SignalStartEventBehavior && !$behavior->isSubProcessStart())
 			{
-				$sql = "	INSERT INTO `#__bpm_process_subscription`
+				$sql = "	INSERT INTO `#__process_subscription`
 								(`id`, `definition_id`, `flags`, `name`)
 							VALUES
 								(:id, :def, :flags, :message)

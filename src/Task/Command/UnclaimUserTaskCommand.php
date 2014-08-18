@@ -41,7 +41,7 @@ class UnclaimUserTaskCommand extends AbstractBusinessCommand
 			throw new \RuntimeException(sprintf('User task %s is not claimed', $task->getId()));
 		}
 		
-		$sql = "	UPDATE `#__bpm_user_task`
+		$sql = "	UPDATE `#__user_task`
 					SET `claimed_at` = :time,
 						`claimed_by` = :assignee
 					WHERE `id` = :id
