@@ -22,7 +22,8 @@ use KoolKode\Event\EventDispatcherInterface;
 use KoolKode\Expression\ExpressionContextFactoryInterface;
 use KoolKode\Process\AbstractEngine;
 use KoolKode\Process\Execution;
-use KoolKode\Util\Uuid;
+use KoolKode\Util\UnicodeString;
+use KoolKode\Util\UUID;
 
 /**
  * BPMN 2.0 process engine backed by a relational database.
@@ -194,6 +195,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		$stmt->bindAll($params);
 		$stmt->execute();
 		
+		$variables = [];
 		$executions = [];
 		$parents = [];
 		$defs = [];
@@ -224,7 +226,8 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$node = ($row['node'] === NULL) ? NULL : $definition->findNode($row['node']);
 			$transition = ($row['transition'] === NULL) ? NULL : $definition->findTransition($row['transition']);
 			$businessKey = $row['business_key'];
-			$vars = unserialize(BinaryData::decode($row['vars']));
+			
+			$variables[(string)$id] = [];
 			
 			$exec = $executions[(string)$id] = new VirtualExecution($id, $this, $definition);
 			$exec->setBusinessKey($businessKey);
@@ -232,12 +235,43 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$exec->setNode($node);
 			$exec->setTransition($transition);
 			$exec->setTimestamp($active);
-			$exec->setVariablesLocal($vars);
 		}
 		
 		foreach($parents as $id => $pid)
 		{
 			$executions[$id]->setParentExecution($executions[$pid]);
+		}
+		
+		if(!empty($variables))
+		{
+			$params = [];
+			
+			foreach(array_keys($variables) as $i => $k)
+			{
+				$params['p' . $i] = new UUID($k);
+			}
+			
+			$placeholders = implode(', ', array_map(function($p) {
+				return ':' . $p;
+			}, array_keys($params)));
+			
+			$sql = "	SELECT `execution_id`, `name`, `value`, `value_blob`
+						FROM `#__execution_variables`
+						WHERE `execution_id` IN ($placeholders)
+			";
+			$stmt = $this->conn->prepare($sql);
+			$stmt->bindAll($params);
+			$stmt->execute();
+			
+			while(false !== ($row = $stmt->fetchNextRow()))
+			{
+				$variables[(string)new UUID($row['execution_id'])][$row['name']] = unserialize(BinaryData::decode($row['value_blob']));
+			}
+		}
+		
+		foreach($variables as $id => $vars)
+		{
+			$executions[$id]->setVariablesLocal($vars);
 		}
 		
 		foreach($executions as $execution)
@@ -283,7 +317,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			'transition' => $tid,
 			'depth' => $execution->getExecutionDepth(),
 			'bkey' => $execution->getBusinessKey(),
-			'vars' => new BinaryData(serialize($execution->getVariablesLocal()))
+			'vars' => $execution->getVariablesLocal()
 		];
 	}
 	
@@ -324,7 +358,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				
 			return;
 		}
-	
+		
 		if($state == ExecutionInfo::STATE_MODIFIED)
 		{
 			$this->debug('SYNC [update]: {execution}', [
@@ -339,8 +373,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 							`node` = :node,
 							`depth` = :depth,
 							`transition` = :transition,
-							`business_key` = :bkey,
-							`vars` = :vars
+							`business_key` = :bkey
 						WHERE `id` = :id
 			";
 			$stmt = $this->conn->prepare($sql);
@@ -353,9 +386,10 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$stmt->bindValue('transition', $data['transition']);
 			$stmt->bindValue('depth', $data['depth']);
 			$stmt->bindValue('bkey', $data['bkey']);
-			$stmt->bindValue('vars', $data['vars']);
 			$stmt->execute();
-				
+			
+			$delta = $info->getVariableDelta($data['vars']);
+			
 			$info->update($data);
 		}
 		elseif($state == ExecutionInfo::STATE_NEW)
@@ -366,24 +400,88 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			
 			$sql = "	INSERT INTO `#__execution` (
 							`id`, `pid`, `process_id`, `definition_id`, `state`, `active`,
-							`node`, `transition`, `depth`, `business_key`, `vars`
+							`node`, `transition`, `depth`, `business_key`
 						) VALUES (
 							:id, :pid, :process, :def, :state, :active,
-							:node, :transition, :depth, :bkey, :vars
+							:node, :transition, :depth, :bkey
 						)
 			";
 			$stmt = $this->conn->prepare($sql);
 			
 			foreach($data as $k => $v)
 			{
+				if($k == 'vars')
+				{
+					continue;
+				}
+				
 				$stmt->bindValue($k, $v);
 			}
 			
 			$stmt->execute();
-				
+
+			$delta = $info->getVariableDelta($data['vars']);
+			
 			$info->update($data);
 		}
-	
+		
+		if(!empty($delta))
+		{
+			if(!empty($delta[ExecutionInfo::STATE_REMOVED]))
+			{
+				$params = [];
+				
+				foreach($delta[ExecutionInfo::STATE_REMOVED] as $k)
+				{
+					$params['n' . count($params)] = $k;
+				}
+				
+				$placeholders = implode(', ', array_map(function($p) {
+					return ':' . $p;
+				}, array_keys($params)));
+				
+				$sql = "	DELETE FROM `#__execution_variables`
+							WHERE `execution_id` = :eid
+							AND `name` IN ($placeholders)
+				";
+				$stmt = $this->conn->prepare($sql);
+				$stmt->bindValue('eid', $data['id']);
+				$stmt->bindAll($params);
+				$stmt->execute();
+			}
+			
+			if(!empty($delta[ExecutionInfo::STATE_NEW]))
+			{
+				$sql = "	INSERT INTO `#__execution_variables`
+								(`execution_id`, `name`, `value`, `value_blob`)
+							VALUES
+								(:eid, :name, :value, :blob)
+				";
+				$stmt = $this->conn->prepare($sql);
+				$stmt->bindValue('eid', $data['id']);
+				
+				foreach($delta[ExecutionInfo::STATE_NEW] as $k)
+				{
+					$value = NULL;
+					
+					if(is_scalar($k))
+					{
+						$value = new UnicodeString(trim($k));
+						
+						if($value->length() > 250)
+						{
+							$value = $value->substring(0, 250);
+						}
+					}
+					
+					$stmt->bindValue('name', $k);
+					$stmt->bindValue('value', $value);
+					$stmt->bindValue('blob', new BinaryData(serialize($data['vars'][$k])));
+					$stmt->execute();
+				}
+			}
+		}
+		
 		if($syncChildExecutions)
 		{
 			foreach($execution->findChildExecutions() as $child)

@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS `#__process_subscription`;
 DROP TABLE IF EXISTS `#__event_subscription`;
 DROP TABLE IF EXISTS `#__user_task`;
+DROP TABLE IF EXISTS `#__execution_variables`;
 DROP TABLE IF EXISTS `#__execution`;
 DROP TABLE IF EXISTS `#__process_definition`;
 
@@ -38,7 +39,6 @@ CREATE TABLE `#__execution` (
 	`transition` VARCHAR(250) NULL,
 	`depth` INT UNSIGNED NOT NULL,
 	`business_key` VARCHAR(250) NULL,
-	`vars` LONGBLOB NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `#__execution_pid` (`pid`),
 	INDEX `#__execution_definition_id` (`definition_id`),
@@ -50,6 +50,16 @@ CREATE TABLE `#__execution` (
 	FOREIGN KEY (`pid`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (`process_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `#__execution_variables` (
+	`execution_id` BINARY(16) NOT NULL,
+	`name` VARCHAR(150) NOT NULL,
+	`value` VARCHAR(250) NULL,
+	`value_blob` LONGBLOB NOT NULL,
+	PRIMARY KEY (`execution_id`, `name`),
+	INDEX `#__execution_variables_lookup` (`name`, `value`),
+	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+);
 
 CREATE TABLE `#__event_subscription` (
 	`id` BINARY(16) NOT NULL,

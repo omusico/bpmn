@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS `#__process_subscription`;
 DROP TABLE IF EXISTS `#__event_subscription`;
 DROP TABLE IF EXISTS `#__user_task`;
+DROP TABLE IF EXISTS `#__execution_variables`;
 DROP TABLE IF EXISTS `#__execution`;
 DROP TABLE IF EXISTS `#__process_definition`;
 
@@ -38,7 +39,6 @@ CREATE TABLE `#__execution` (
 	`transition` TEXT NULL,
 	`depth` INTEGER NOT NULL,
 	`business_key` TEXT NULL,
-	`vars` BLOB NOT NULL,
 	FOREIGN KEY (`definition_id`) REFERENCES `#__process_definition` (`id`) ON UPDATE CASCADE,
 	FOREIGN KEY (`pid`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (`process_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
@@ -50,6 +50,18 @@ CREATE INDEX `#__execution_process_id` ON `#__execution` (`process_id`);
 CREATE INDEX `#__execution_active` ON `#__execution` (`active`);
 CREATE INDEX `#__execution_business_key` ON `#__execution` (`business_key`);
 CREATE INDEX `#__execution_node` ON `#__execution` (`node`);
+
+CREATE TABLE `#__execution_variables` (
+	`execution_id` TEXT NOT NULL,
+	`name` TEXT NOT NULL,
+	`value` TEXT NULL,
+	`value_blob` BLOB NOT NULL,
+	PRIMARY KEY (`execution_id`, `name`),
+	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE INDEX `#__execution_variables_lookup` ON `#__execution_variables` (`name`, `value`)
+WHERE `value` IS NOT NULL;
 
 CREATE TABLE `#__event_subscription` (
 	`id` TEXT PRIMARY KEY,

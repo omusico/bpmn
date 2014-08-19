@@ -250,6 +250,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			'#__process_subscription',
 			'#__event_subscription',
 			'#__user_task',
+			'#__execution_variables',
 			'#__execution',
 			'#__process_definition'
 		];

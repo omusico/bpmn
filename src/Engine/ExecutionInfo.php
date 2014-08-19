@@ -56,4 +56,42 @@ class ExecutionInfo
 		
 		return self::STATE_NONE;
 	}
+	
+	public function getVariableDelta(array $data)
+	{
+		$result = [
+			self::STATE_REMOVED => [],
+			self::STATE_NEW => []
+		];
+		
+		foreach((array)$this->clean['vars'] as $k => $v)
+		{
+			if(!array_key_exists($k, $data))
+			{
+				$result[self::STATE_REMOVED][$k] = true;
+				
+				unset($data[$k]);
+				
+				continue;
+			}
+			
+			if($v !== $data[$k])
+			{
+				$result[self::STATE_REMOVED][$k] = true;
+				$result[self::STATE_NEW][$k] = true;
+			}
+			
+			unset($data[$k]);
+		}
+		
+		foreach($data as $k => $v)
+		{
+			$result[self::STATE_NEW][$k] = true;
+		}
+		
+		$result[self::STATE_REMOVED] = array_keys($result[self::STATE_REMOVED]);
+		$result[self::STATE_NEW] = array_keys($result[self::STATE_NEW]);
+		
+		return $result;
+	}
 }
