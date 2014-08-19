@@ -34,9 +34,15 @@ class ScriptTaskTest extends BusinessProcessTestCase
 	{
 		$this->deployFile('ScriptTaskTest.bpmn');
 		
-		$process = $this->runtimeService->startProcessInstanceByKey('main');
+		$process = $this->runtimeService->startProcessInstanceByKey('main', NULL, [
+			'foo' => 'bar'
+		]);
 		
-		$this->runtimeService->setProcessVariable($process->getId(), 'expected', $result);
+		$this->runtimeService->setExecutionVariable($process->getId(), 'expected', $result);
+		$this->assertEquals([
+			'foo' => 'bar',
+			'expected' => $result
+		], $this->runtimeService->getExecutionVariables($process->getId()));
 		
 		$task = $this->taskService->createTaskQuery()->findOne();
 		$this->assertTrue($task instanceof TaskInterface);

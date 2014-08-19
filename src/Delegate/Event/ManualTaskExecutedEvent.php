@@ -27,7 +27,7 @@ class ManualTaskExecutedEvent
 	 * 
 	 * @var string
 	 */
-	protected $name;
+	public $name;
 	
 	/**
 	 * Provides access to the execution that triggered the service task.

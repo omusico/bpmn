@@ -16,11 +16,11 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\Uuid;
 
 /**
- * Populates a process variable in a target execution.
+ * Populates a local variable in a target execution.
  * 
  * @author Martin Schröder
  */
-class SetProcessVariableCommand extends AbstractBusinessCommand
+class SetExecutionVariableCommand extends AbstractBusinessCommand
 {
 	protected $executionId;
 	protected $variableName;

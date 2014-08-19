@@ -12,11 +12,12 @@
 namespace KoolKode\BPMN\Runtime;
 
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Runtime\Command\GetExecutionVariablesCommand;
 use KoolKode\BPMN\Runtime\Command\MessageEventReceivedCommand;
-use KoolKode\BPMN\Runtime\Command\SetProcessVariableCommand;
+use KoolKode\BPMN\Runtime\Command\SetExecutionVariableCommand;
 use KoolKode\BPMN\Runtime\Command\SignalEventReceivedCommand;
 use KoolKode\BPMN\Runtime\Command\StartProcessInstanceCommand;
-use KoolKode\Util\Uuid;
+use KoolKode\Util\UUID;
 
 class RuntimeService
 {
@@ -74,8 +75,13 @@ class RuntimeService
 		return $this->createProcessInstanceQuery()->processInstanceId($id)->findOne();
 	}
 	
-	public function setProcessVariable(UUID $executionId, $variableName, $variableValue)
+	public function getExecutionVariables(UUID $executionId)
 	{
-		$this->engine->executeCommand(new SetProcessVariableCommand($executionId, $variableName, $variableValue));
+		return $this->engine->executeCommand(new GetExecutionVariablesCommand($executionId));
+	}
+	
+	public function setExecutionVariable(UUID $executionId, $variableName, $variableValue)
+	{
+		$this->engine->executeCommand(new SetExecutionVariableCommand($executionId, $variableName, $variableValue));
 	}
 }
