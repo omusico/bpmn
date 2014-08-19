@@ -57,6 +57,7 @@ class SimpleProcessTest extends BusinessProcessTestCase
 		$this->taskService->complete($task->getId(), [
 			'amount' => $amount
 		]);
+		$this->assertEquals(1, $this->runtimeService->createExecutionQuery()->variableValueEqualTo('amount', $amount)->count());
 		
 		foreach($this->taskService->createTaskQuery()->taskDefinitionKey('discountTask')->findAll() as $task)
 		{

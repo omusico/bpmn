@@ -59,7 +59,7 @@ CREATE TABLE `#__execution_variables` (
 	PRIMARY KEY (`execution_id`, `name`),
 	INDEX `#__execution_variables_lookup` (`name`, `value`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `#__event_subscription` (
 	`id` BINARY(16) NOT NULL,

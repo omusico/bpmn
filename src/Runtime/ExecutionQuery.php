@@ -24,6 +24,8 @@ class ExecutionQuery
 	protected $processBusinessKey;
 	protected $processDefinitionKey;
 	
+	protected $variableValues = [];
+	
 	protected $signalEventSubscriptionNames = [];
 	protected $messageEventSubscriptionNames = [];
 	
@@ -68,6 +70,62 @@ class ExecutionQuery
 	{
 		$this->processDefinitionKey = (string)$key;
 		
+		return $this;
+	}
+	
+	public function variableValueEqualTo($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, '=');
+		
+		return $this;
+	}
+	
+	public function variableValueNotEqualTo($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, '<>');
+	
+		return $this;
+	}
+	
+	public function variableValueLike($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, 'LIKE');
+	
+		return $this;
+	}
+	
+	public function variableValueNotLike($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, 'NOT LIKE');
+	
+		return $this;
+	}
+	
+	public function variableValueLessThan($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, '<');
+	
+		return $this;
+	}
+	
+	public function variableValueLessThanOrEqualTo($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, '<=');
+	
+		return $this;
+	}
+	
+	public function variableValueGreaterThan($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, '>');
+	
+		return $this;
+	}
+	
+	public function variableValueGreaterThanOrEqualTo($name, $value)
+	{
+		$this->variableValues[] = new QueryVariableValue($name, $value, '>=');
+	
 		return $this;
 	}
 	
@@ -213,6 +271,22 @@ class ExecutionQuery
 			
 			$where[] = "e.`process_id` = :$p1";
 			$params[$p1] = $this->processInstanceId;
+		}
+		
+		foreach($this->variableValues as $var)
+		{
+			$joins[] = 'INNER JOIN `#__execution_variables` AS v' . $alias . " ON (v$alias.`execution_id` = e.`id`)";
+			
+			$p1 = 'p' . (++$pp);
+			$p2 = 'p' . (++$pp);
+			
+			$where[] = "v$alias.`name` = :$p1";
+			$params[$p1] = $var->getName();
+				
+			$where[] = "v$alias.`value` " . $var->getOperator() . " :$p2";
+			$params[$p2] = $var->getValue();
+			
+			$alias++;
 		}
 		
 		foreach($this->signalEventSubscriptionNames as $name)

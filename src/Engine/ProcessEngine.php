@@ -255,7 +255,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				return ':' . $p;
 			}, array_keys($params)));
 			
-			$sql = "	SELECT `execution_id`, `name`, `value`, `value_blob`
+			$sql = "	SELECT `execution_id`, `name`, `value_blob`
 						FROM `#__execution_variables`
 						WHERE `execution_id` IN ($placeholders)
 			";
@@ -464,14 +464,16 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 				{
 					$value = NULL;
 					
-					if(is_scalar($k))
+					if(is_scalar($data['vars'][$k]))
 					{
-						$value = new UnicodeString(trim($k));
+						$value = new UnicodeString(trim($data['vars'][$k]));
 						
 						if($value->length() > 250)
 						{
 							$value = $value->substring(0, 250);
 						}
+						
+						$value = $value->toLowerCase();
 					}
 					
 					$stmt->bindValue('name', $k);
