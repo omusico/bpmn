@@ -60,8 +60,7 @@ CREATE TABLE `#__execution_variables` (
 	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE INDEX `#__execution_variables_lookup` ON `#__execution_variables` (`name`, `value`)
-WHERE `value` IS NOT NULL;
+CREATE INDEX `#__execution_variables_lookup` ON `#__execution_variables` (`name`, `value`);
 
 CREATE TABLE `#__event_subscription` (
 	`id` TEXT PRIMARY KEY,
