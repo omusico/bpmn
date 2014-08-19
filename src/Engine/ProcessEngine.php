@@ -466,7 +466,14 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 					
 					if(is_scalar($data['vars'][$k]))
 					{
-						$value = new UnicodeString(trim($data['vars'][$k]));
+						$val = $data['vars'][$k];
+						
+						if(is_bool($val))
+						{
+							$val = $val ? '1' : '0';
+						}
+						
+						$value = new UnicodeString(trim($val));
 						
 						if($value->length() > 250)
 						{

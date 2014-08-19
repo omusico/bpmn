@@ -14,6 +14,7 @@ namespace KoolKode\BPMN\Runtime;
 use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\Util\UnicodeString;
 use KoolKode\Util\UUID;
 
 class ExecutionQuery
@@ -282,9 +283,20 @@ class ExecutionQuery
 			
 			$where[] = "v$alias.`name` = :$p1";
 			$params[$p1] = $var->getName();
-				
+			
+			$val = $var->getValue();
+			
+			if(is_bool($val))
+			{
+				$val = $val ? '1' : '0';
+			}
+			else
+			{
+				$val = (string)(new UnicodeString($val))->toLowerCase();
+			}
+			
 			$where[] = "v$alias.`value` " . $var->getOperator() . " :$p2";
-			$params[$p2] = $var->getValue();
+			$params[$p2] = $val;
 			
 			$alias++;
 		}
