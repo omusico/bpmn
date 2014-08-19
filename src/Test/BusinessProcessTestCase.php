@@ -13,8 +13,6 @@ namespace KoolKode\BPMN\Test;
 
 use KoolKode\BPMN\Delegate\DelegateTaskRegistry;
 use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
-use KoolKode\BPMN\Engine\BinaryDataParamEncoder;
-use KoolKode\BPMN\Engine\IdentifierParamEncoder;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
@@ -96,16 +94,6 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		
 		$conn = new PrefixConnectionDecorator(new Connection($pdo), 'bpm_');
 		
-		switch($conn->getDriverName())
-		{
-			case DB::DRIVER_SQLITE:
-				$conn->execute("PRAGMA foreign_keys = ON");
-				break;
-			case DB::DRIVER_MYSQL:
-				$conn->execute("SET NAMES 'utf8'");
-				break;
-		}
-		
 		$dir = rtrim(realpath(__DIR__ . '/../Engine'), '/\\');
 		$ddl = str_replace('\\', '/', sprintf('%s/ProcessEngine.%s.sql', $dir, $conn->getDriverName()));
 		$chunks = explode(';', file_get_contents($ddl));
@@ -171,8 +159,8 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			fwrite($stderr, "\n");
 			fwrite($stderr, sprintf("TEST CASE: %s\n", $this->getName()));
 			
-// 			self::$pdo->setDebug(true);
-// 			self::$pdo->setLogger($logger);
+// 			self::$conn->setDebug(true);
+// 			self::$conn->setLogger($logger);
 		}
 		
 		$this->messageHandlers = [];
