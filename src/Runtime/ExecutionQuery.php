@@ -21,6 +21,7 @@ class ExecutionQuery
 {
 	protected $processInstanceId;
 	protected $executionId;
+	protected $parentId;
 	protected $activityId;
 	protected $processBusinessKey;
 	protected $processDefinitionKey;
@@ -49,6 +50,13 @@ class ExecutionQuery
 	public function executionId($id)
 	{
 		$this->executionId = new UUID($id);
+		
+		return $this;
+	}
+	
+	public function parentId($id)
+	{
+		$this->parentId = new UUID($id);
 		
 		return $this;
 	}
@@ -250,6 +258,14 @@ class ExecutionQuery
 			$params[$p1] = $this->executionId;
 		}
 		
+		if($this->parentId !== NULL)
+		{
+			$p1 = 'p' . (++$pp);
+				
+			$where[] = "e.`pid` = :$p1";
+			$params[$p1] = $this->parentId;
+		}
+		
 		if($this->processBusinessKey != NULL)
 		{
 			$p1 = 'p' . (++$pp);
@@ -285,6 +301,7 @@ class ExecutionQuery
 			$params[$p1] = $var->getName();
 			
 			$val = $var->getValue();
+			$field = 'value';
 			
 			if(is_bool($val))
 			{
@@ -292,10 +309,21 @@ class ExecutionQuery
 			}
 			else
 			{
-				$val = (string)(new UnicodeString($val))->toLowerCase();
+				$val = (new UnicodeString($val))->toLowerCase();
+				
+				if($val->length() > 250)
+				{
+					if(!in_array($var->getOperator(), ['=', '<>']))
+					{
+						throw new \RuntimeException(sprintf('Large variable values (more than 250 characters) only support "=" and "<>" operators'));
+					}
+					
+					$val = new BinaryData(serialize($val));
+					$field = 'value_blob';
+				}
 			}
 			
-			$where[] = "v$alias.`value` " . $var->getOperator() . " :$p2";
+			$where[] = "v$alias.`$field` " . $var->getOperator() . " :$p2";
 			$params[$p2] = $val;
 			
 			$alias++;
