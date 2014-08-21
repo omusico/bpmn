@@ -13,7 +13,7 @@ namespace KoolKode\BPMN\Task;
 
 use KoolKode\Util\UUID;
 
-class Task implements TaskInterface
+class Task implements TaskInterface, \JsonSerializable
 {
 	protected $id;
 	protected $executionId;
@@ -34,6 +34,19 @@ class Task implements TaskInterface
 		$this->created = clone $created;
 		$this->claimDate = ($claimDate === NULL) ? NULL : clone $claimDate;
 		$this->assignee = ($assignee === NULL) ? NULL : (string)$assignee;
+	}
+	
+	public function jsonSerialize()
+	{
+		return [
+			'id' => (string)$this->id,
+			'executionId' => (string)$this->executionId,
+			'name' => $this->name,
+			'activityId' => $this->activityId,
+			'assignee' => $this->assignee,
+			'creationDate' => $this->created->format(\DateTime::ISO8601),
+			'claimDate' => ($this->claimDate === NULL) ? NULL : $this->claimDate->format(\DateTime::ISO8601)
+		];
 	}
 	
 	public function getId()

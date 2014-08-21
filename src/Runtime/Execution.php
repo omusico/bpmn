@@ -14,7 +14,7 @@ namespace KoolKode\BPMN\Runtime;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\Util\UUID;
 
-class Execution implements ExecutionInterface
+class Execution implements ExecutionInterface, \JsonSerializable
 {
 	protected $id;
 	protected $parentId;
@@ -33,6 +33,20 @@ class Execution implements ExecutionInterface
 		$this->activityId = (string)$activityId;
 		$this->ended = $ended ? true : false;
 		$this->businessKey = ($businessKey === NULL) ? NULL : (string)$businessKey; 
+	}
+	
+	public function jsonSerialize()
+	{
+		return [
+			'id' => (string)$this->id,
+			'parentId' => ($this->parentId === NULL) ? NULL : (string)$this->parentId,
+			'processInstanceId' => ($this->processInstanceId === NULL) ? NULL : (string)$this->processInstanceId,
+			'processDefinitionId' => (string)$this->definition->getId(),
+			'processDefinitionKey' => $this->definition->getKey(),
+			'processDefiitionRevision' => $this->definition->getRevision(),
+			'activityId' => $this->activityId,
+			'businessKey' => $this->businessKey
+		];
 	}
 	
 	public function isProcessInstance()

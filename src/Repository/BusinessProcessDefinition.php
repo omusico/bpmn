@@ -17,7 +17,7 @@ use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\Process\ProcessDefinition;
 use KoolKode\Util\Uuid;
 
-class BusinessProcessDefinition
+class BusinessProcessDefinition implements \JsonSerializable
 {
 	protected $id;
 	protected $key;
@@ -34,6 +34,17 @@ class BusinessProcessDefinition
 		$this->revision = (int)$revision;
 		$this->model = $model;
 		$this->deployed = $deployed;
+	}
+	
+	public function jsonSerialize()
+	{
+		return [
+			'id' => (string)$this->id,
+			'key' => $this->key,
+			'revision' => $this->revision,
+			'name' => $this->name,
+			'deployed' => $this->deployed->format(\DateTime::ISO8601)
+		];
 	}
 	
 	public function getId()
