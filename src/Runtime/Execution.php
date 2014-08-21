@@ -43,7 +43,7 @@ class Execution implements ExecutionInterface, \JsonSerializable
 			'processInstanceId' => ($this->processInstanceId === NULL) ? NULL : (string)$this->processInstanceId,
 			'processDefinitionId' => (string)$this->definition->getId(),
 			'processDefinitionKey' => $this->definition->getKey(),
-			'processDefiitionRevision' => $this->definition->getRevision(),
+			'processDefinitionRevision' => $this->definition->getRevision(),
 			'activityId' => $this->activityId,
 			'businessKey' => $this->businessKey
 		];
