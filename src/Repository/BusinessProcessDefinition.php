@@ -43,7 +43,7 @@ class BusinessProcessDefinition implements \JsonSerializable
 			'key' => $this->key,
 			'revision' => $this->revision,
 			'name' => $this->name,
-			'deployed' => $this->deployed->format(\DateTime::ISO8601)
+			'deployDate' => $this->deployed->format(\DateTime::ISO8601)
 		];
 	}
 	
