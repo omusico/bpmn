@@ -17,6 +17,8 @@ use KoolKode\Util\UUID;
 
 class ProcessDefinitionQuery
 {
+	protected $processDefinitionId;
+	
 	protected $latestVersion;
 	
 	protected $messageEventSubscriptionName;
@@ -30,6 +32,13 @@ class ProcessDefinitionQuery
 	public function __construct(ProcessEngine $engine)
 	{
 		$this->engine = $engine;
+	}
+	
+	public function processDefinitionId($processDefinitionId)
+	{
+		$this->processDefinitionId = new UUID($processDefinitionId);
+		
+		return $this;
 	}
 	
 	public function latestVersion()
@@ -147,6 +156,14 @@ class ProcessDefinitionQuery
 			$where[] = "s.`name` = :$p2";
 			$params[$p1] = ProcessEngine::SUB_FLAG_MESSAGE;
 			$params[$p2] = $this->messageEventSubscriptionName;
+		}
+		
+		if($this->processDefinitionId !== NULL)
+		{
+			$p1 = 'p' . (++$pp);
+				
+			$where[] = "d.`id` = :$p1";
+			$params[$p1] = $this->processDefinitionId;
 		}
 		
 		if($this->processDefinitionKey !== NULL)
