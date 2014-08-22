@@ -32,6 +32,14 @@ class BinaryData
 		return $this->data;
 	}
 	
+	public function __debugInfo()
+	{
+		return [
+			'length' => strlen($this->data),
+			'compressionLevel' => $this->level
+		];
+	}
+	
 	public function encode()
 	{
 		return gzcompress($this->data, $this->level);

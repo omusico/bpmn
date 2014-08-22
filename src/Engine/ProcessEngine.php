@@ -65,6 +65,19 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		$this->taskService = new TaskService($this);
 	}
 	
+	public function __debugInfo()
+	{
+		return [
+			'conn' => $this->conn,
+			'transactional' => $this->handleTransactions,
+			'executionDepth' => $this->executionDepth,
+			'executionCount' => $this->executionCount,
+			'executions' => array_values(array_map(function(ExecutionInfo $info) {
+				return $info->getExecution();
+			}, $this->executions))
+		];
+	}
+	
 	public function getRepositoryService()
 	{
 		return $this->repositoryService;

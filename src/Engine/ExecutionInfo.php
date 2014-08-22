@@ -27,6 +27,13 @@ class ExecutionInfo
 		$this->clean = $clean;
 	}
 	
+	public function __debugInfo()
+	{
+		return [
+			'execution' => (string)$this->execution->getId()
+		];
+	}
+	
 	public function getExecution()
 	{
 		return $this->execution;
