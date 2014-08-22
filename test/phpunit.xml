@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit backupStaticAttributes="false" backupGlobals="false" processIsolation="false" bootstrap="./phpunit.php">
+<phpunit backupStaticAttributes="false" backupGlobals="false" processIsolation="false" bootstrap="../vendor/autoload.php">
 
   <testsuites>
     <testsuite name="unit">
