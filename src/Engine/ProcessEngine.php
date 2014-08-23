@@ -292,6 +292,11 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			$this->registerExecution($execution, $this->serializeExecution($execution));
 		}
 		
+		if(empty($this->executions[$ref]))
+		{
+			throw new \OutOfBoundsException(sprintf('Execution not found: "%s"', $ref));
+		}
+		
 		return $this->executions[$ref]->getExecution();
 	}
 	
