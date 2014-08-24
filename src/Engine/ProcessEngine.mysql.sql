@@ -91,5 +91,6 @@ CREATE TABLE `#__user_task` (
 	UNIQUE INDEX `#__user_task_execution_id` (`execution_id`),
 	INDEX `#__user_task_created_at` (`created_at`),
 	INDEX `#__user_task_activity` (`activity`),
+	INDEX `#__user_task_assignee` (`claimed_by`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -94,3 +94,4 @@ CREATE TABLE `#__user_task` (
 CREATE INDEX `#__user_task_created_at` ON `#__user_task` (`created_at`);
 CREATE UNIQUE INDEX `#__user_task_execution_id` ON `#__user_task` (`execution_id`);
 CREATE INDEX `#__user_task_activity` ON `#__user_task` (`activity`);
+CREATE INDEX `#__user_task_assignee` ON `#__user_task` (`claimed_by`);

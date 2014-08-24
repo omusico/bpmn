@@ -26,10 +26,13 @@ class TaskQuery extends AbstractQuery
 	protected $processInstanceId;
 	protected $processDefinitionKey;
 	protected $processBusinessKey;
+	
 	protected $taskDefinitionKey;
 	protected $taskId;
 	protected $taskName;
+	
 	protected $taskUnassigned;
+	protected $taskAssignee;
 	
 	protected $engine;
 	
@@ -98,6 +101,13 @@ class TaskQuery extends AbstractQuery
 	public function taskUnassigned()
 	{
 		$this->taskUnassigned = true;
+		
+		return $this;
+	}
+	
+	public function taskAssignee($assignee)
+	{
+		$this->populateMultiProperty($this->taskAssignee, $assignee);
 		
 		return $this;
 	}
@@ -177,9 +187,12 @@ class TaskQuery extends AbstractQuery
 		$this->buildPredicate("e.`process_id`", $this->processInstanceId, $where, $params);
 		$this->buildPredicate("e.`business_key`", $this->processBusinessKey, $where, $params);
 		$this->buildPredicate("d.`process_key`", $this->processDefinitionKey, $where, $params);
+		
 		$this->buildPredicate("t.`id`", $this->taskId, $where, $params);
 		$this->buildPredicate("t.`activity`", $this->taskDefinitionKey, $where, $params);
 		$this->buildPredicate("t.`name`", $this->taskName, $where, $params);
+		
+		$this->buildPredicate("t.`claimed_by`", $this->taskAssignee, $where, $params);
 		
 		if($this->taskUnassigned)
 		{

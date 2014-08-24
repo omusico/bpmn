@@ -62,8 +62,7 @@ CREATE TABLE `#__execution_variables` (
 	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE INDEX `#__execution_variables_lookup` ON `#__execution_variables` (`name`, `value`)
-WHERE `value` IS NOT NULL;
+CREATE INDEX `#__execution_variables_lookup` ON `#__execution_variables` (`name`, `value`) WHERE `value` IS NOT NULL;
 
 CREATE TABLE `#__event_subscription` (
 	`id` character(32) NOT NULL,
@@ -99,3 +98,4 @@ CREATE TABLE `#__user_task` (
 
 CREATE INDEX `#__user_task_created_at` ON `#__user_task` (`created_at`);
 CREATE INDEX `#__user_task_activity` ON `#__user_task` (`activity`);
+CREATE INDEX `#__user_task_assignee` ON `#__user_task` (`claimed_by`) WHERE `claimed_by` IS NOT NULL;
