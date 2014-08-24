@@ -18,16 +18,21 @@ use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\Util\UnicodeString;
 use KoolKode\Util\UUID;
 
+/**
+ * Queries for persisted executions.
+ * 
+ * @author Martin Schröder
+ */
 class ExecutionQuery extends AbstractQuery
 {
+	use VariableQueryTrait;
+	
 	protected $processInstanceId;
 	protected $executionId;
 	protected $parentId;
 	protected $activityId;
 	protected $processBusinessKey;
 	protected $processDefinitionKey;
-	
-	protected $variableValues = [];
 	
 	protected $signalEventSubscriptionNames = [];
 	protected $messageEventSubscriptionNames = [];
@@ -86,62 +91,6 @@ class ExecutionQuery extends AbstractQuery
 	{
 		$this->populateMultiProperty($this->processDefinitionKey, $key);
 		
-		return $this;
-	}
-	
-	public function variableValueEqualTo($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, '=');
-		
-		return $this;
-	}
-	
-	public function variableValueNotEqualTo($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, '<>');
-	
-		return $this;
-	}
-	
-	public function variableValueLike($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, 'LIKE');
-	
-		return $this;
-	}
-	
-	public function variableValueNotLike($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, 'NOT LIKE');
-	
-		return $this;
-	}
-	
-	public function variableValueLessThan($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, '<');
-	
-		return $this;
-	}
-	
-	public function variableValueLessThanOrEqualTo($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, '<=');
-	
-		return $this;
-	}
-	
-	public function variableValueGreaterThan($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, '>');
-	
-		return $this;
-	}
-	
-	public function variableValueGreaterThanOrEqualTo($name, $value)
-	{
-		$this->variableValues[] = new QueryVariableValue($name, $value, '>=');
-	
 		return $this;
 	}
 	

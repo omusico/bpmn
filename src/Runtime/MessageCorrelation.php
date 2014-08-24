@@ -11,17 +11,20 @@
 
 namespace KoolKode\BPMN\Runtime;
 
-use KoolKode\Util\UUID;
-
+/**
+ * Helper for simplified message correlation to an execution.
+ * 
+ * @author Martin Schröder
+ */
 class MessageCorrelation
 {
+	use VariableQueryTrait;
+	
 	protected $messageName;
 	
-	protected $processInstanceId;
-	
-	protected $businessKey;
-	
 	protected $variables = [];
+	
+	protected $query;
 	
 	protected $runtimeService;
 	
@@ -29,18 +32,48 @@ class MessageCorrelation
 	{
 		$this->runtimeService = $runtimeService;
 		$this->messageName = (string)$messageName;
+		
+		$this->query = $runtimeService->createExecutionQuery()->messageEventSubscriptionName($this->messageName);
 	}
 	
-	public function processInstanceId($pid)
+	public function executionId($id)
 	{
-		$this->processInstanceId = new UUID($pid);
+		$this->query->executionId($id);
 		
 		return $this;
 	}
 	
-	public function processBusinessKey($businessKey)
+	public function processInstanceId($id)
 	{
-		$this->businessKey = (string)$businessKey;
+		$this->query->processInstanceId($id);
+		
+		return $this;
+	}
+	
+	public function parentId($id)
+	{
+		$this->query->parentId($id);
+		
+		return $this;
+	}
+	
+	public function activityId($id)
+	{
+		$this->query->activityId($id);
+		
+		return $this;
+	}
+	
+	public function processBusinessKey($key)
+	{
+		$this->query->processBusinessKey($key);
+		
+		return $this;
+	}
+	
+	public function processDefinitionKey($key)
+	{
+		$this->query->processDefinitionKey($key);
 		
 		return $this;
 	}
@@ -54,19 +87,13 @@ class MessageCorrelation
 	
 	public function correlate()
 	{
-		$query = $this->runtimeService->createExecutionQuery();
-		$query->messageEventSubscriptionName($this->messageName);
+		$query = clone $this->query;
 		
-		if($this->processInstanceId !== NULL)
+		foreach($this->variableValues as $var)
 		{
-			$query->processInstanceId($this->processInstanceId);
+			$query->variableValue($var);
 		}
 		
-		if($this->businessKey !== NULL)
-		{
-			$query->processBusinessKey($this->businessKey);
-		}
-		
-		$this->runtimeService->messageEventReceived($this->messageName, $query->findOne()->getId(), $this->variables);
+		return $this->runtimeService->messageEventReceived($this->messageName, $query->findOne()->getId(), $this->variables);
 	}
 }
