@@ -42,25 +42,37 @@ class ExecutionQuery
 	
 	public function processInstanceId($id)
 	{
-		$this->processInstanceId = new UUID($id);
+		if(is_array($id) || $id instanceof \Traversable)
+		{
+			$this->processInstanceId = [];
+			
+			foreach($id as $tmp)
+			{
+				$this->processInstanceId[] = new UUID($tmp);
+			}
+		}
+		else
+		{
+			$this->processInstanceId = [new UUID($id)];
+		}
 		
 		return $this;
 	}
 	
 	public function executionId($id)
 	{
-		$this->executionId = [new UUID($id)];
-		
-		return $this;
-	}
-	
-	public function executionIdIn(array $ids)
-	{
-		$this->executionId = [];
-		
-		foreach($ids as $id)
+		if(is_array($id) || $id instanceof \Traversable)
 		{
-			$this->executionId[] = new UUID($id);
+			$this->executionId = [];
+			
+			foreach($id as $tmp)
+			{
+				$this->executionId[] = new UUID($tmp);
+			}
+		}
+		else
+		{
+			$this->executionId = [new UUID($id)];
 		}
 		
 		return $this;
@@ -311,12 +323,29 @@ class ExecutionQuery
 			$params[$p1] = $this->processDefinitionKey;
 		}
 		
-		if($this->processInstanceId !== NULL)
+		if(!empty($this->processInstanceId))
 		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "e.`process_id` = :$p1";
-			$params[$p1] = $this->processInstanceId;
+			if(count($this->processInstanceId) == 1)
+			{
+				$p1 = 'p' . (++$pp);
+		
+				$where[] = "e.`process_id` = :$p1";
+				$params[$p1] = $this->processInstanceId[0];
+			}
+			else
+			{
+				$ph = [];
+		
+				foreach($this->processInstanceId as $id)
+				{
+					$p1 = 'p' . (++$pp);
+						
+					$ph[] = ":$p1";
+					$params[$p1] = $id;
+				}
+		
+				$where[] = "e.`process_id` IN (" . implode(', ', $ph) . ")";
+			}
 		}
 		
 		foreach($this->variableValues as $var)

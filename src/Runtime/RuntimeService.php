@@ -53,7 +53,7 @@ class RuntimeService
 	{
 		$ids = $this->engine->executeCommand(new SignalEventReceivedCommand($signalName, $executionId, $variables));
 		
-		return $this->createExecutionQuery()->executionIdIn($ids)->findAll();
+		return $this->createExecutionQuery()->executionId($ids)->findAll();
 	}
 	
 	public function startProcessInstance(BusinessProcessDefinition $def, $businessKey = NULL, array $variables = [])
