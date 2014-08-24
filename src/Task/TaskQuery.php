@@ -36,6 +36,8 @@ class TaskQuery extends AbstractQuery
 	
 	protected $dueBefore;
 	protected $dueAfter;
+	protected $taskCreatedBefore;
+	protected $taskCreatedAfter;
 	
 	protected $taskMinPriority;
 	protected $taskMaxPriority;
@@ -146,6 +148,20 @@ class TaskQuery extends AbstractQuery
 		return $this;
 	}
 	
+	public function taskCreatedBefore(\DateTimeInterface $date)
+	{
+		$this->taskCreatedBefore = $date->getTimestamp();
+	
+		return $this;
+	}
+	
+	public function taskCreatedAfter(\DateTimeInterface $date)
+	{
+		$this->taskCreatedAfter = $date->getTimestamp();
+	
+		return $this;
+	}
+	
 	public function count()
 	{
 		$stmt = $this->executeSql(true);
@@ -235,11 +251,16 @@ class TaskQuery extends AbstractQuery
 			$where[] = 't.`claimed` IS NULL';
 		}
 		
+		if($this->dueAfter !== NULL || $this->dueBefore !== NULL)
+		{
+			$where[] = "t.`due_at` IS NOT NULL";
+		}
+		
 		if($this->dueBefore !== NULL)
 		{
 			$p1 = 'p' . count($params);
-				
-			$where[] = "t.`due_at` IS NOT NULL AND t.`due_at` < :$p1";
+			
+			$where[] = "t.`due_at` < :$p1";
 			$params[$p1] = $this->dueBefore;
 		}
 		
@@ -247,8 +268,24 @@ class TaskQuery extends AbstractQuery
 		{
 			$p1 = 'p' . count($params);
 		
-			$where[] = "t.`due_at` IS NOT NULL AND t.`due_at` > :$p1";
+			$where[] = "t.`due_at` > :$p1";
 			$params[$p1] = $this->dueAfter;
+		}
+		
+		if($this->taskCreatedBefore !== NULL)
+		{
+			$p1 = 'p' . count($params);
+		
+			$where[] = "t.`created_at` < :$p1";
+			$params[$p1] = $this->taskCreatedBefore;
+		}
+		
+		if($this->taskCreatedAfter !== NULL)
+		{
+			$p1 = 'p' . count($params);
+		
+			$where[] = "t.`created_at` > :$p1";
+			$params[$p1] = $this->taskCreatedAfter;
 		}
 		
 		if($this->taskMinPriority !== NULL)
