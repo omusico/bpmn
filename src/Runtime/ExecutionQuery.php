@@ -11,13 +11,14 @@
 
 namespace KoolKode\BPMN\Runtime;
 
+use KoolKode\BPMN\Engine\AbstractQuery;
 use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\Util\UnicodeString;
 use KoolKode\Util\UUID;
 
-class ExecutionQuery
+class ExecutionQuery extends AbstractQuery
 {
 	protected $processInstanceId;
 	protected $executionId;
@@ -42,66 +43,48 @@ class ExecutionQuery
 	
 	public function processInstanceId($id)
 	{
-		if(is_array($id) || $id instanceof \Traversable)
-		{
-			$this->processInstanceId = [];
-			
-			foreach($id as $tmp)
-			{
-				$this->processInstanceId[] = new UUID($tmp);
-			}
-		}
-		else
-		{
-			$this->processInstanceId = [new UUID($id)];
-		}
+		$this->populateMultiProperty($this->processInstanceId, $id, function($value) {
+			return new UUID($value);
+		});
 		
 		return $this;
 	}
 	
 	public function executionId($id)
 	{
-		if(is_array($id) || $id instanceof \Traversable)
-		{
-			$this->executionId = [];
-			
-			foreach($id as $tmp)
-			{
-				$this->executionId[] = new UUID($tmp);
-			}
-		}
-		else
-		{
-			$this->executionId = [new UUID($id)];
-		}
+		$this->populateMultiProperty($this->executionId, $id, function($value) {
+			return new UUID($value);
+		});
 		
 		return $this;
 	}
 	
 	public function parentId($id)
 	{
-		$this->parentId = new UUID($id);
+		$this->populateMultiProperty($this->parentId, $id, function($value) {
+			return new UUID($value);
+		});
 		
 		return $this;
 	}
 	
 	public function activityId($id)
 	{
-		$this->activityId = (string)$id;
+		$this->populateMultiProperty($this->activityId, $id);
 		
 		return $this;
 	}
 	
 	public function processBusinessKey($key)
 	{
-		$this->processBusinessKey = (string)$key;
+		$this->populateMultiProperty($this->processBusinessKey, $key);
 		
 		return $this;
 	}
 	
 	public function processDefinitionKey($key)
 	{
-		$this->processDefinitionKey = (string)$key;
+		$this->populateMultiProperty($this->processDefinitionKey, $key);
 		
 		return $this;
 	}
@@ -233,8 +216,6 @@ class ExecutionQuery
 	
 	protected function executeSql($count = false, $limit = 0, $offset = 0)
 	{
-		$pp = 0;
-		
 		if($count)
 		{
 			$fields = 'COUNT(*) AS num';
@@ -266,94 +247,19 @@ class ExecutionQuery
 			$where[] = 'e.`id` = e.`process_id`';
 		}
 		
-		if($this->activityId !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "e.`node` = :$p1";
-			$params[$p1] = $this->activityId;
-		}
-		
-		if(!empty($this->executionId))
-		{
-			if(count($this->executionId) == 1)
-			{
-				$p1 = 'p' . (++$pp);
-				
-				$where[] = "e.`id` = :$p1";
-				$params[$p1] = $this->executionId[0];
-			}
-			else
-			{
-				$ph = [];
-				
-				foreach($this->executionId as $id)
-				{
-					$p1 = 'p' . (++$pp);
-					
-					$ph[] = ":$p1";
-					$params[$p1] = $id;
-				}
-				
-				$where[] = "e.`id` IN (" . implode(', ', $ph) . ")";
-			}
-		}
-		
-		if($this->parentId !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-				
-			$where[] = "e.`pid` = :$p1";
-			$params[$p1] = $this->parentId;
-		}
-		
-		if($this->processBusinessKey != NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "e.`business_key` = :$p1";
-			$params[$p1] = $this->processBusinessKey;
-		}
-		
-		if($this->processDefinitionKey !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "d.`process_key` = :$p1";
-			$params[$p1] = $this->processDefinitionKey;
-		}
-		
-		if(!empty($this->processInstanceId))
-		{
-			if(count($this->processInstanceId) == 1)
-			{
-				$p1 = 'p' . (++$pp);
-		
-				$where[] = "e.`process_id` = :$p1";
-				$params[$p1] = $this->processInstanceId[0];
-			}
-			else
-			{
-				$ph = [];
-		
-				foreach($this->processInstanceId as $id)
-				{
-					$p1 = 'p' . (++$pp);
-						
-					$ph[] = ":$p1";
-					$params[$p1] = $id;
-				}
-		
-				$where[] = "e.`process_id` IN (" . implode(', ', $ph) . ")";
-			}
-		}
+		$this->buildPredicate("e.`id`", $this->executionId, $where, $params);
+		$this->buildPredicate("e.`process_id`", $this->processInstanceId, $where, $params);
+		$this->buildPredicate("e.`pid`", $this->parentId, $where, $params);
+		$this->buildPredicate("e.`node`", $this->activityId, $where, $params);
+		$this->buildPredicate("e.`business_key`", $this->processBusinessKey, $where, $params);
+		$this->buildPredicate("d.`process_key`", $this->processDefinitionKey, $where, $params);
 		
 		foreach($this->variableValues as $var)
 		{
 			$joins[] = 'INNER JOIN `#__execution_variables` AS v' . $alias . " ON (v$alias.`execution_id` = e.`id`)";
 			
-			$p1 = 'p' . (++$pp);
-			$p2 = 'p' . (++$pp);
+			$p1 = 'p' . count($params);
+			$p2 = 'p' . (count($params) + 1);
 			
 			$where[] = "v$alias.`name` = :$p1";
 			$params[$p1] = $var->getName();
@@ -391,8 +297,8 @@ class ExecutionQuery
 		{
 			$joins[] = 'INNER JOIN `#__event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
 			
-			$p1 = 'p' . (++$pp);
-			$p2 = 'p' . (++$pp);
+			$p1 = 'p' . count($params);
+			$p2 = 'p' . (count($params) + 1);
 			
 			$where[] = "s$alias.`flags` = :$p1";
 			$params[$p1] = ProcessEngine::SUB_FLAG_SIGNAL;
@@ -407,8 +313,8 @@ class ExecutionQuery
 		{
 			$joins[] = 'INNER JOIN `#__event_subscription` AS s' . $alias . " ON (s$alias.`execution_id` = e.`id`)";
 			
-			$p1 = 'p' . (++$pp);
-			$p2 = 'p' . (++$pp);
+			$p1 = 'p' . count($params);
+			$p2 = 'p' . (count($params) + 1);
 			
 			$where[] = "s$alias.`flags` = :$p1";
 			$params[$p1] = ProcessEngine::SUB_FLAG_MESSAGE;
