@@ -59,7 +59,7 @@ interface TaskInterface
 	/**
 	 * Get the time of creation of this activity instance.
 	 * 
-	 * @return \DateTime
+	 * @return \DateTimeImmutable
 	 */
 	public function getCreated();
 	
@@ -73,7 +73,7 @@ interface TaskInterface
 	/**
 	 * Get the assignment date of this task.
 	 * 
-	 * @return \DateTime or NULL when the task instance has not been claimed yet.
+	 * @return \DateTimeImmutable or NULL when the task instance has not been claimed yet.
 	 */
 	public function getClaimDate();
 	
@@ -83,4 +83,25 @@ interface TaskInterface
 	 * @return string or NULL when the task instance has not been claimed yet.
 	 */
 	public function getAssignee();
+	
+	/**
+	 * Get the task priority, defaults to 0.
+	 * 
+	 * @return integer
+	 */
+	public function getPriority();
+	
+	/**
+	 * Check if the task has a due date set.
+	 * 
+	 * @return boolean
+	 */
+	public function hasDueDate();
+	
+	/**
+	 * Get the due date of the task.
+	 * 
+	 * @return \DateTimeImmutable or NULL when no due date is set.
+	 */
+	public function getDueDate();
 }

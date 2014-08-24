@@ -87,10 +87,14 @@ CREATE TABLE `#__user_task` (
 	`created_at` INT UNSIGNED NOT NULL,
 	`claimed_at` INT UNSIGNED NULL,
 	`claimed_by` VARCHAR(250) NULL,
+	`priority` INT UNSIGNED NOT NULL,
+	`due_at` INT UNSIGNED NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `#__user_task_execution_id` (`execution_id`),
 	INDEX `#__user_task_created_at` (`created_at`),
 	INDEX `#__user_task_activity` (`activity`),
 	INDEX `#__user_task_assignee` (`claimed_by`),
+	INDEX `#__user_task_priority` (`priority`),
+	INDEX `#__user_task_due` (`due_at`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

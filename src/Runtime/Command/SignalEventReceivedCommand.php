@@ -135,7 +135,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 				$row['revision'],
 				unserialize(BinaryData::decode($row['definition'])),
 				$row['name'],
-				new \DateTime('@' . $row['deployed_at'])
+				new \DateTimeImmutable('@' . $row['deployed_at'])
 			);
 			
 			$uuids[] = $engine->executeCommand(new StartProcessInstanceCommand(

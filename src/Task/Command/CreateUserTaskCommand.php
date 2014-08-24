@@ -26,24 +26,41 @@ class CreateUserTaskCommand extends AbstractBusinessCommand
 {
 	protected $name;
 	
+	protected $priority;
+	
+	protected $dueDate;
+	
 	protected $execution;
 	
 	protected $documentation;
 	
-	public function __construct($name, VirtualExecution $execution, $documentation = NULL)
+	public function __construct($name, $priority, VirtualExecution $execution, $documentation = NULL)
 	{
 		$this->name = (string)$name;
+		$this->priority = (int)$priority;
 		$this->execution = $execution;
 		$this->documentation = ($documentation === NULL) ? NULL : (string)$documentation;
+	}
+	
+	public function setDueDate(\DateTimeInterface $dueDate = NULL)
+	{
+		if($dueDate === NULL)
+		{
+			$this->dueDate = NULL;
+		}
+		else
+		{
+			$this->dueDate = $dueDate->getTimestamp();
+		}
 	}
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
 		$id = UUID::createRandom();
 		$sql = "	INSERT INTO `#__user_task`
-						(`id`, `execution_id`, `name`, `documentation`, `activity`, `created_at`)
+						(`id`, `execution_id`, `name`, `documentation`, `activity`, `created_at`, `priority`, `due_at`)
 					VALUES
-						(:id, :eid, :name, :doc, :activity, :created)
+						(:id, :eid, :name, :doc, :activity, :created, :priority, :due)
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('id', $id);
@@ -52,6 +69,8 @@ class CreateUserTaskCommand extends AbstractBusinessCommand
 		$stmt->bindValue('doc', $this->documentation);
 		$stmt->bindValue('activity', $this->execution->getNode()->getId());
 		$stmt->bindValue('created', time());
+		$stmt->bindValue('priority', $this->priority);
+		$stmt->bindValue('due', $this->dueDate);
 		$stmt->execute();
 		
 		$engine->debug('Created user task "{task}" with id {id}', [

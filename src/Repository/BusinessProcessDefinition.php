@@ -26,7 +26,7 @@ class BusinessProcessDefinition implements \JsonSerializable
 	protected $model;
 	protected $deployed;
 	
-	public function __construct(UUID $id, $key, $revision, ProcessDefinition $model, $name, \DateTime $deployed)
+	public function __construct(UUID $id, $key, $revision, ProcessDefinition $model, $name, \DateTimeImmutable $deployed)
 	{
 		$this->id = $id;
 		$this->key = $key;

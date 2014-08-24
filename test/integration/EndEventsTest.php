@@ -36,7 +36,7 @@ class EndEventsTest extends BusinessProcessTestCase
 		$this->assertTrue($task instanceof TaskInterface);
 		$this->assertEquals('Task A', $task->getName());
 		$this->assertEquals('foobar', $task->getAssignee());
-		$this->assertTrue($task->getClaimDate() instanceof \DateTime);
+		$this->assertTrue($task->getClaimDate() instanceof \DateTimeImmutable);
 		
 		$this->taskService->unclaim($task->getId());
 		$task = $this->taskService->createTaskQuery()->findOne();

@@ -138,7 +138,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 			$revision + 1,
 			$model,
 			$model->getTitle(),
-			new \DateTime('@' . $time)
+			new \DateTimeImmutable('@' . $time)
 		);
 	}
 }

@@ -33,20 +33,30 @@ class ScriptTaskTest extends BusinessProcessTestCase
 	public function testCanAddNumbers($a, $b, $result)
 	{
 		$this->deployFile('ScriptTaskTest.bpmn');
+
+		$due = new \DateTimeImmutable('+5 hours');
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('main', NULL, [
-			'foo' => 'bar'
+			'foo' => 'bar',
+			'due' => $due
 		]);
 		
 		$this->runtimeService->setExecutionVariable($process->getId(), 'expected', $result);
 		$this->assertEquals([
 			'foo' => 'bar',
-			'expected' => $result
+			'expected' => $result,
+			'due' => $due
 		], $this->runtimeService->getExecutionVariables($process->getId()));
 		
-		$task = $this->taskService->createTaskQuery()->findOne();
-		$this->assertTrue($task instanceof TaskInterface);
+		$query = $this->taskService->createTaskQuery();
+		$query->taskMinPriority(1200)->taskMaxPriority(1400);
+		$query->dueAfter(new \DateTime())->dueBefore(new \DateTime('+2 days'));
 		
+		$task = $query->findOne();
+		$this->assertTrue($task instanceof TaskInterface);
+		$this->assertEquals(1337, $task->getPriority());
+		$this->assertEquals($due->getTimestamp(), $task->getDueDate()->getTimestamp());
+
 		$this->taskService->complete($task->getId(), [
 			'a' => $a,
 			'b' => $b

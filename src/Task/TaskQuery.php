@@ -34,6 +34,12 @@ class TaskQuery extends AbstractQuery
 	protected $taskUnassigned;
 	protected $taskAssignee;
 	
+	protected $dueBefore;
+	protected $dueAfter;
+	
+	protected $taskMinPriority;
+	protected $taskMaxPriority;
+	
 	protected $engine;
 	
 	public function __construct(ProcessEngine $engine)
@@ -112,6 +118,34 @@ class TaskQuery extends AbstractQuery
 		return $this;
 	}
 	
+	public function dueBefore(\DateTimeInterface $date)
+	{
+		$this->dueBefore = $date->getTimestamp();
+		
+		return $this;
+	}
+	
+	public function dueAfter(\DateTimeInterface $date)
+	{
+		$this->dueAfter = $date->getTimestamp();
+		
+		return $this;
+	}
+	
+	public function taskMinPriority($priority)
+	{
+		$this->taskMinPriority = (int)$priority;
+		
+		return $this;
+	}
+	
+	public function taskMaxPriority($priority)
+	{
+		$this->taskMaxPriority = (int)$priority;
+		
+		return $this;
+	}
+	
 	public function count()
 	{
 		$stmt = $this->executeSql(true);
@@ -152,9 +186,11 @@ class TaskQuery extends AbstractQuery
 			new UUID($row['execution_id']),
 			$row['name'],
 			$row['activity'],
-			new \DateTime('@' . $row['created_at']),
-			empty($row['claimed_at']) ? NULL : new \DateTime('@' . $row['claimed_at']),
-			$row['claimed_by']
+			new \DateTimeImmutable('@' . $row['created_at']),
+			empty($row['claimed_at']) ? NULL : new \DateTimeImmutable('@' . $row['claimed_at']),
+			$row['claimed_by'],
+			$row['priority'],
+			empty($row['due_at']) ? NULL : new \DateTimeImmutable('@' . $row['due_at'])
 		);
 		$task->setDocumentation($row['documentation']);
 		
@@ -197,6 +233,38 @@ class TaskQuery extends AbstractQuery
 		if($this->taskUnassigned)
 		{
 			$where[] = 't.`claimed` IS NULL';
+		}
+		
+		if($this->dueBefore !== NULL)
+		{
+			$p1 = 'p' . count($params);
+				
+			$where[] = "t.`due_at` IS NOT NULL AND t.`due_at` < :$p1";
+			$params[$p1] = $this->dueBefore;
+		}
+		
+		if($this->dueAfter !== NULL)
+		{
+			$p1 = 'p' . count($params);
+		
+			$where[] = "t.`due_at` IS NOT NULL AND t.`due_at` > :$p1";
+			$params[$p1] = $this->dueAfter;
+		}
+		
+		if($this->taskMinPriority !== NULL)
+		{
+			$p1 = 'p' . count($params);
+			
+			$where[] = "t.`priority` >= :$p1";
+			$params[$p1] = $this->taskMinPriority;
+		}
+		
+		if($this->taskMaxPriority !== NULL)
+		{
+			$p1 = 'p' . count($params);
+				
+			$where[] = "t.`priority` <= :$p1";
+			$params[$p1] = $this->taskMaxPriority;
 		}
 		
 		foreach($joins as $join)

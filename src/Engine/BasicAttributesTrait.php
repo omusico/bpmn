@@ -35,8 +35,35 @@ trait BasicAttributesTrait
 		return ($exp === NULL || $context === NULL) ? NULL : $exp($context);
 	}
 	
+	public function getIntegerValue(ExpressionInterface $exp = NULL, ExpressionContextInterface $context = NULL)
+	{
+		return ($exp === NULL || $context === NULL) ? 0 : (int)$exp($context);
+	}
+	
 	public function getStringValue(ExpressionInterface $exp = NULL, ExpressionContextInterface $context = NULL)
 	{
 		return ($exp === NULL || $context === NULL) ? '' : (string)$exp($context);
+	}
+	
+	public function getDateValue(ExpressionInterface $exp = NULL, ExpressionContextInterface $context = NULL)
+	{
+		$value = ($exp === NULL || $context === NULL) ? NULL : $exp($context);
+		
+		if($value === NULL)
+		{
+			return;
+		}
+		
+		if(is_numeric($value))
+		{
+			return new \DateTimeImmutable('@' . $value);
+		}
+		
+		if($value instanceof \DateTimeInterface)
+		{
+			return new \DateTimeImmutable('@' . $value->getTimestamp());
+		}
+		
+		return new \DateTimeImmutable($value);
 	}
 }

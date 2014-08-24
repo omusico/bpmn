@@ -149,7 +149,7 @@ class ExecutionQuery extends AbstractQuery
 			$row['def_rev'],
 			unserialize(BinaryData::decode($row['def_data'])),
 			$row['def_name'],
-			new \DateTime('@' . $row['def_deployed'])
+			new \DateTimeImmutable('@' . $row['def_deployed'])
 		);
 		
 		return new Execution(

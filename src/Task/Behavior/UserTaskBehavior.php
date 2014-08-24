@@ -27,26 +27,49 @@ class UserTaskBehavior extends AbstractScopeBehavior
 {
 	protected $assignee;
 	
+	protected $priority;
+	
+	protected $dueDate;
+	
 	public function setAssignee(ExpressionInterface $assignee = NULL)
 	{
 		$this->assignee = $assignee;
+	}
+	
+	public function setPriority(ExpressionInterface $priority = NULL)
+	{
+		$this->priority = $priority;
+	}
+	
+	public function setDueDate(ExpressionInterface $dueDate = NULL)
+	{
+		$this->dueDate = $dueDate;
 	}
 	
 	public function executeBehavior(VirtualExecution $execution)
 	{
 		$this->createScopedEventSubscriptions($execution);
 		
-		$task = $execution->getEngine()->executeCommand(new CreateUserTaskCommand(
-			$this->getStringValue($this->name, $execution->getExpressionContext()),
+		$context = $execution->getExpressionContext();
+		$command = new CreateUserTaskCommand(
+			$this->getStringValue($this->name, $context),
+			(int)$this->getIntegerValue($this->priority, $context),
 			$execution,
-			$this->getStringValue($this->documentation, $execution->getExpressionContext())
-		));
+			$this->getStringValue($this->documentation, $context)
+		);
+		
+		if(NULL !== ($due = $this->getDateValue($this->dueDate, $context)))
+		{
+			$command->setDueDate($due);
+		}
+		
+		$task = $execution->getEngine()->executeCommand($command);
 		
 		if($this->assignee !== NULL)
 		{
 			$execution->getEngine()->pushCommand(new ClaimUserTaskCommand(
 				$task->getId(),
-				$this->getStringValue($this->assignee, $execution->getExpressionContext())
+				$this->getStringValue($this->assignee, $context)
 			));
 		}
 		

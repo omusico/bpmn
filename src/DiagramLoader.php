@@ -224,6 +224,16 @@ class DiagramLoader
 			$userTask->setAssignee($builder->stringExp($el->getAttributeNS(self::NS_IMPL, 'assignee')));
 		}
 		
+		if($el->hasAttributeNS(self::NS_IMPL, 'priority') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'priority')))
+		{
+			$userTask->setPriority($builder->stringExp($el->getAttributeNS(self::NS_IMPL, 'priority')));
+		}
+		
+		if($el->hasAttributeNS(self::NS_IMPL, 'dueDate') && '' !== trim($el->getAttributeNS(self::NS_IMPL, 'dueDate')))
+		{
+			$userTask->setDueDate($builder->exp($el->getAttributeNS(self::NS_IMPL, 'dueDate')));
+		}
+		
 		return $userTask;
 	}
 	

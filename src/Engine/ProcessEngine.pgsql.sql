@@ -91,6 +91,8 @@ CREATE TABLE `#__user_task` (
 	`created_at` integer NOT NULL,
 	`claimed_at` integer NULL,
 	`claimed_by` varchar(250) NULL,
+	`priority` integer NOT NULL,
+	`due_at` integer NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE (`execution_id`),
 	FOREIGN KEY (`execution_id`) REFERENCES `#__execution` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
@@ -99,3 +101,5 @@ CREATE TABLE `#__user_task` (
 CREATE INDEX `#__user_task_created_at` ON `#__user_task` (`created_at`);
 CREATE INDEX `#__user_task_activity` ON `#__user_task` (`activity`);
 CREATE INDEX `#__user_task_assignee` ON `#__user_task` (`claimed_by`) WHERE `claimed_by` IS NOT NULL;
+CREATE INDEX `#__user_task_priority` ON `#__user_task` (`priority`);
+CREATE INDEX `#__user_task_due` ON `#__user_task` (`due_at`) WHERE `due_at` IS NOT NULL;
