@@ -11,14 +11,21 @@
 
 namespace KoolKode\BPMN\Task;
 
+use KoolKode\BPMN\Engine\AbstractQuery;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\UUID;
 
-class TaskQuery
+/**
+ * Query for active user tasks.
+ * 
+ * @author Martin Schröder
+ */
+class TaskQuery extends AbstractQuery
 {
 	protected $executionId;
-	protected $processDefinitionKey;
 	protected $processInstanceId;
+	protected $processDefinitionKey;
+	protected $processBusinessKey;
 	protected $taskDefinitionKey;
 	protected $taskId;
 	protected $taskName;
@@ -33,42 +40,57 @@ class TaskQuery
 	
 	public function executionId($id)
 	{
-		$this->executionId = new UUID($id);
-		
-		return $this;
-	}
-	
-	public function processDefinitionKey($key)
-	{
-		$this->processDefinitionKey = (string)$key;
+		$this->populateMultiProperty($this->executionId, $id, function($value) {
+			return new UUID($value);
+		});
 		
 		return $this;
 	}
 	
 	public function processInstanceId($id)
 	{
-		$this->processInstanceId = new UUID($id);
+		$this->populateMultiProperty($this->processInstanceId, $id, function($value) {
+			return new UUID($value);
+		});
+		
+		return $this;
+	}
+	
+	public function processDefinitionKey($key)
+	{
+		$this->populateMultiProperty($this->processDefinitionKey, $key);
+		
+		return $this;
+	}
+	
+	public function processBusinessKey($key)
+	{
+		$this->populateMultiProperty($this->processBusinessKey, $key, function($value) {
+			return new UUID($value);
+		});
 		
 		return $this;
 	}
 	
 	public function taskDefinitionKey($key)
 	{
-		$this->taskDefinitionKey = (string)$key;
+		$this->populateMultiProperty($this->taskDefinitionKey, $key);
 		
 		return $this;
 	}
 	
 	public function taskId($id)
 	{
-		$this->taskId = new UUID($id);
+		$this->populateMultiProperty($this->taskId, $id, function($value) {
+			return new UUID($value);
+		});
 		
 		return $this;
 	}
 	
 	public function taskName($name)
 	{
-		$this->taskName = (string)$name;
+		$this->populateMultiProperty($this->taskName, $name);
 		
 		return $this;
 	}
@@ -131,8 +153,6 @@ class TaskQuery
 	
 	protected function executeSql($count = false, $limit = 0, $offset = 0)
 	{
-		$pp = 0;
-		
 		if($count)
 		{
 			$fields = 'COUNT(*) AS num';
@@ -153,53 +173,13 @@ class TaskQuery
 		$where = [];
 		$params = [];
 		
-		if($this->executionId !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "e.`id` = :$p1";
-			$params[$p1] = $this->executionId;
-		}
-		
-		if($this->processDefinitionKey !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "d.`process_key` = :$p1";
-			$params[$p1] = $this->processDefinitionKey;
-		}
-		
-		if($this->processInstanceId !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "e.`process_id` = :$p1";
-			$params[$p1] = $this->processInstanceId;
-		}
-		
-		if($this->taskDefinitionKey !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "t.`activity` = :$p1";
-			$params[$p1] = $this->taskDefinitionKey;
-		}
-		
-		if($this->taskId !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "t.`id` = :$p1";
-			$params[$p1] = $this->taskId;
-		}
-		
-		if($this->taskName !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "t.`name` = :$p1";
-			$params[$p1] = $this->taskName;
-		}
+		$this->buildPredicate("e.`id`", $this->executionId, $where, $params);
+		$this->buildPredicate("e.`process_id`", $this->processInstanceId, $where, $params);
+		$this->buildPredicate("e.`business_key`", $this->processBusinessKey, $where, $params);
+		$this->buildPredicate("d.`process_key`", $this->processDefinitionKey, $where, $params);
+		$this->buildPredicate("t.`id`", $this->taskId, $where, $params);
+		$this->buildPredicate("t.`activity`", $this->taskDefinitionKey, $where, $params);
+		$this->buildPredicate("t.`name`", $this->taskName, $where, $params);
 		
 		if($this->taskUnassigned)
 		{
