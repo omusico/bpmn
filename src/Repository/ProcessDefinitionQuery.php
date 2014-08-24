@@ -11,17 +11,25 @@
 
 namespace KoolKode\BPMN\Repository;
 
+use KoolKode\BPMN\Engine\AbstractQuery;
 use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\UUID;
 
-class ProcessDefinitionQuery
+/**
+ * Query for deployed process definitions.
+ * 
+ * @author Martin Schröder
+ */
+class ProcessDefinitionQuery extends AbstractQuery
 {
 	protected $processDefinitionId;
 	
 	protected $latestVersion;
 	
-	protected $messageEventSubscriptionName;
+	protected $messageEventSubscriptionNames;
+	
+	protected $signalEventSubscriptionNames;
 	
 	protected $processDefinitionKey;
 	
@@ -36,7 +44,9 @@ class ProcessDefinitionQuery
 	
 	public function processDefinitionId($processDefinitionId)
 	{
-		$this->processDefinitionId = new UUID($processDefinitionId);
+		$this->populateMultiProperty($this->processDefinitionId, $processDefinitionId, function($value) {
+			return new UUID($value);
+		});
 		
 		return $this;
 	}
@@ -50,21 +60,32 @@ class ProcessDefinitionQuery
 	
 	public function messageEventSubscriptionName($name)
 	{
-		$this->messageEventSubscriptionName = (string)$name;
+		$this->messageEventSubscriptionNames[] = [];
+		$this->populateMultiProperty($this->messageEventSubscriptionNames[count($this->messageEventSubscriptionNames) - 1], $name);
+		
+		return $this;
+	}
+	
+	public function signalEventSubscriptionName($name)
+	{
+		$this->signalEventSubscriptionNames[] = [];
+		$this->populateMultiProperty($this->signalEventSubscriptionNames[count($this->signalEventSubscriptionNames) - 1], $name);
 		
 		return $this;
 	}
 	
 	public function processDefinitionKey($key)
 	{
-		$this->processDefinitionKey = (string)$key;
+		$this->populateMultiProperty($this->processDefinitionKey, $key);
 		
 		return $this;
 	}
 	
 	public function processDefinitionVersion($version)
 	{
-		$this->processDefinitionVersion = (int)$version;
+		$this->populateMultiProperty($this->processDefinitionVersion, $version, function($value) {
+			return (int)$value;
+		});
 		
 		return $this;
 	}
@@ -116,8 +137,6 @@ class ProcessDefinitionQuery
 	
 	protected function executeSql($count = false, $limit = 0, $offset = 0)
 	{
-		$pp = 0;
-		
 		if($count)
 		{
 			$fields = 'COUNT(*) AS num';
@@ -136,50 +155,47 @@ class ProcessDefinitionQuery
 		$where = [];
 		$params = [];
 		
+		$this->buildPredicate("d.`id`", $this->processDefinitionId, $where, $params);
+		$this->buildPredicate("d.`process_key`", $this->processDefinitionKey, $where, $params);
+		$this->buildPredicate("d.`revision`", $this->processDefinitionVersion, $where, $params);
+		
+		foreach((array)$this->messageEventSubscriptionNames as $name)
+		{
+			$joins[] = "INNER JOIN `#__process_subscription` AS s$alias ON (s$alias.`definition_id` = d.`id`)";
+			
+			$p1 = 'p' . count($params);
+			
+			$where[] = "s$alias.`flags` = :$p1";
+			$params[$p1] = ProcessEngine::SUB_FLAG_MESSAGE;
+			
+			$this->buildPredicate("s$alias.`name`", $name, $where, $params);
+			
+			$alias++;
+		}
+		
+		foreach((array)$this->signalEventSubscriptionNames as $name)
+		{
+			$joins[] = "INNER JOIN `#__process_subscription` AS s$alias ON (s$alias.`definition_id` = d.`id`)";
+				
+			$p1 = 'p' . count($params);
+				
+			$where[] = "s$alias.`flags` = :$p1";
+			$params[$p1] = ProcessEngine::SUB_FLAG_SIGNAL;
+				
+			$this->buildPredicate("s$alias.`name`", $name, $where, $params);
+				
+			$alias++;
+		}
+		
 		if($this->latestVersion)
 		{
-			$joins[] = "	INNER JOIN (
-								SELECT `process_key`, MAX(`revision`) AS revision
-								FROM `#__process_definition`
-								GROUP BY `process_key`
-							) AS m USING (`process_key`, revision)
+			// Using an anti-join to improve query performance (no need for aggregate functions).
+			$joins[] = "	LEFT JOIN `#__process_definition` AS d2 ON (
+								d2.`process_key` = d.`process_key`
+								AND d2.`revision` > d.`revision`
+							)
 			";
-		}
-		
-		if($this->messageEventSubscriptionName !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			$p2 = 'p' . (++$pp);
-			
-			$joins[] = 'INNER JOIN `#__process_subscription` AS s ON (s.`definition_id` = d.`id`)';
-			$where[] = "s.`flags` = :$p1";
-			$where[] = "s.`name` = :$p2";
-			$params[$p1] = ProcessEngine::SUB_FLAG_MESSAGE;
-			$params[$p2] = $this->messageEventSubscriptionName;
-		}
-		
-		if($this->processDefinitionId !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-				
-			$where[] = "d.`id` = :$p1";
-			$params[$p1] = $this->processDefinitionId;
-		}
-		
-		if($this->processDefinitionKey !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "d.`process_key` = :$p1";
-			$params[$p1] = $this->processDefinitionKey;
-		}
-		
-		if($this->processDefinitionVersion !== NULL)
-		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "d.`revision` = :$p1";
-			$params[$p1] = $this->processDefinitionVersion;
+			$where[] = "d2.`revision` IS NULL";
 		}
 		
 		foreach($joins as $join)
