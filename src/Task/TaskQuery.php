@@ -39,6 +39,7 @@ class TaskQuery extends AbstractQuery
 	protected $taskCreatedBefore;
 	protected $taskCreatedAfter;
 	
+	protected $taskPriority;
 	protected $taskMinPriority;
 	protected $taskMaxPriority;
 	
@@ -134,6 +135,15 @@ class TaskQuery extends AbstractQuery
 		return $this;
 	}
 	
+	public function taskPriority($priority)
+	{
+		$this->populateMultiProperty($this->taskPriority, $priority, function($value) {
+			return (int)$value;
+		});
+		
+		return $this;
+	}
+	
 	public function taskMinPriority($priority)
 	{
 		$this->taskMinPriority = (int)$priority;
@@ -144,7 +154,7 @@ class TaskQuery extends AbstractQuery
 	public function taskMaxPriority($priority)
 	{
 		$this->taskMaxPriority = (int)$priority;
-		
+	
 		return $this;
 	}
 	
@@ -287,6 +297,8 @@ class TaskQuery extends AbstractQuery
 			$where[] = "t.`created_at` > :$p1";
 			$params[$p1] = $this->taskCreatedAfter;
 		}
+		
+		$this->buildPredicate("t.`priority`", $this->taskPriority, $where, $params);
 		
 		if($this->taskMinPriority !== NULL)
 		{
