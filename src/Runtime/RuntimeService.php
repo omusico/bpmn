@@ -51,7 +51,9 @@ class RuntimeService
 	
 	public function signalEventReceived($signalName, UUID $executionId = NULL, array $variables = [])
 	{
-		$this->engine->executeCommand(new SignalEventReceivedCommand($signalName, $executionId, $variables));
+		$ids = $this->engine->executeCommand(new SignalEventReceivedCommand($signalName, $executionId, $variables));
+		
+		return $this->createExecutionQuery()->executionIdIn($ids)->findAll();
 	}
 	
 	public function startProcessInstance(BusinessProcessDefinition $def, $businessKey = NULL, array $variables = [])

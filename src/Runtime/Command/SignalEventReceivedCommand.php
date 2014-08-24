@@ -106,8 +106,12 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 			}
 		}
 		
+		$uuids = [];
+		
 		foreach($executions as $execution)
 		{
+			$uuids[] = $execution->getId();
+			
 			$engine->pushCommand(new SignalExecutionCommand($execution, $this->signal, $this->variables));
 		}
 		
@@ -134,7 +138,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 				new \DateTime('@' . $row['deployed_at'])
 			);
 			
-			$engine->pushCommand(new StartProcessInstanceCommand(
+			$uuids[] = $engine->executeCommand(new StartProcessInstanceCommand(
 				$definition,
 				$definition->findSignalStartEvent($row['signal_name']),
 				($this->sourceExecution === NULL) ? NULL : $this->sourceExecution->getBusinessKey(),
@@ -146,5 +150,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		{
 			$engine->pushCommand(new SignalExecutionCommand($this->sourceExecution));
 		}
+		
+		return $uuids;
 	}
 }

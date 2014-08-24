@@ -49,7 +49,19 @@ class ExecutionQuery
 	
 	public function executionId($id)
 	{
-		$this->executionId = new UUID($id);
+		$this->executionId = [new UUID($id)];
+		
+		return $this;
+	}
+	
+	public function executionIdIn(array $ids)
+	{
+		$this->executionId = [];
+		
+		foreach($ids as $id)
+		{
+			$this->executionId[] = new UUID($id);
+		}
 		
 		return $this;
 	}
@@ -250,12 +262,29 @@ class ExecutionQuery
 			$params[$p1] = $this->activityId;
 		}
 		
-		if($this->executionId !== NULL)
+		if(!empty($this->executionId))
 		{
-			$p1 = 'p' . (++$pp);
-			
-			$where[] = "e.`id` = :$p1";
-			$params[$p1] = $this->executionId;
+			if(count($this->executionId) == 1)
+			{
+				$p1 = 'p' . (++$pp);
+				
+				$where[] = "e.`id` = :$p1";
+				$params[$p1] = $this->executionId[0];
+			}
+			else
+			{
+				$ph = [];
+				
+				foreach($this->executionId as $id)
+				{
+					$p1 = 'p' . (++$pp);
+					
+					$ph[] = ":$p1";
+					$params[$p1] = $id;
+				}
+				
+				$where[] = "e.`id` IN (" . implode(', ', $ph) . ")";
+			}
 		}
 		
 		if($this->parentId !== NULL)
