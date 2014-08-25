@@ -20,7 +20,7 @@ class EndEventsTest extends BusinessProcessTestCase
 {
 	public function testSignalAndMessageEndAndStartEvents()
 	{
-		$this->deployFile('EndEventsTest.bpmn');
+		$this->deployDirectory('EndEventsTest');
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('test1');
 		

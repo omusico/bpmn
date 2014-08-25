@@ -172,4 +172,80 @@ class DeploymentBuilder implements \Countable, \IteratorAggregate
 		
 		return $this;
 	}
+	
+	/**
+	 * (Recursively) add a all files from the given directory to the deployment, paths will be relative
+	 * to the root directory.
+	 * 
+	 * @param string $dir
+	 * @return DeploymentBuilder
+	 * 
+	 * @throws \InvalidArgumentException When the given directory was not found.
+	 * @throws \RuntimeException When the given directory is not readable.
+	 */
+	public function addDirectory($dir)
+	{
+		$base = @realpath($dir);
+		
+		if(!is_dir($base))
+		{
+			throw new \InvalidArgumentException(sprintf('Directory not found: "%s"', $dir));
+		}
+		
+		if(!is_readable($base))
+		{
+			throw new \RuntimeException(sprintf('Directory not readable: "%s"', $dir));
+		}
+		
+		foreach($this->collectFiles($base, '') as $name => $file)
+		{
+			$this->resources[trim(str_replace('\\', '/', $name), '/')] = new UrlStream($file, 'rb');
+		}
+		
+		return $this;
+	}
+	
+	/**
+	 * Collect all files from the directory, uses recursion to grab files from sub-directories.
+	 * 
+	 * @param string $dir
+	 * @param string $basePath
+	 * @return array<string, string>
+	 */
+	protected function collectFiles($dir, $basePath)
+	{
+		$files = [];
+		$dh = opendir($dir);
+		
+		try
+		{
+			while(false !== ($entry = readdir($dh)))
+			{
+				if($entry == '.' || $entry == '..')
+				{
+					continue;
+				}
+				
+				$check = $dir . DIRECTORY_SEPARATOR . $entry;
+				
+				if(is_dir($check))
+				{
+					foreach($this->collectFiles($check, $basePath . '/' . $entry) as $k => $v)
+					{
+						$files[$k] = $v;
+					}
+				}
+				elseif(is_file($check))
+				{
+					$files[$basePath . '/' . $entry] = $check;
+				}
+			}
+			
+			return $files;
+		}
+		finally
+		{
+			closedir($dh);
+		}
+	}
 }
