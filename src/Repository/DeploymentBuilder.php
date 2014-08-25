@@ -111,9 +111,22 @@ class DeploymentBuilder implements \Countable, \IteratorAggregate
 	 * 
 	 * @param string $file
 	 * @return Deployment
+	 * 
+	 * @throws \InvalidArgumentException When the given archive could not be found.
+	 * @throws \RuntimeException When the given archive could not be read.
 	 */
 	public function addArchive($file)
 	{
+		if(!is_file($file))
+		{
+			throw new \InvalidArgumentException(sprintf('Archive not found: "%s"', $file));
+		}
+		
+		if(!is_readable($file))
+		{
+			throw new \RuntimeException(sprintf('Archive not readable: "%s"', $file));
+		}
+		
 		$zip = new \ZipArchive();
 		$zip->open($file);
 		
