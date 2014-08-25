@@ -11,9 +11,10 @@
 
 namespace KoolKode\BPMN\Repository;
 
+use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\Util\UUID;
 
-class Deployment
+class Deployment implements \JsonSerializable
 {
 	protected $id;
 	
@@ -21,11 +22,23 @@ class Deployment
 	
 	protected $deployDate;
 	
-	public function __construct(UUID $id, $name, \DateTimeImmutable $deployDate)
+	protected $engine;
+	
+	public function __construct(ProcessEngine $engine, UUID $id, $name, \DateTimeImmutable $deployDate)
 	{
+		$this->engine = $engine;
 		$this->id = $id;
 		$this->name = (string)$name;
 		$this->deployDate = $deployDate;
+	}
+	
+	public function jsonSerialize()
+	{
+		return [
+			'id' => (string)$id,
+			'name' => $this->name,
+			'deployDate' => $this->deployDate->format(\DateTime::ISO8601)
+		];
 	}
 	
 	public function getId()

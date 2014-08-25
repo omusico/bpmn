@@ -11,11 +11,28 @@
 
 namespace KoolKode\BPMN\Repository;
 
-class DeployedResource
+use KoolKode\Util\UUID;
+
+class DeployedResource implements \JsonSerializable
 {
 	protected $id;
 	
 	protected $name;
 	
-	protected $data;
+	protected $deployment;
+	
+	public function __construct(Deployment $deployment, UUID $id, $name)
+	{
+		$this->deployment = $deployment;
+		$this->id = $id;
+		$this->name = (string)$name;
+	}
+	
+	public function jsonSerialize()
+	{
+		return [
+			'id' => (string)$this->id,
+			'name' => $this->name
+		];
+	}
 }

@@ -107,6 +107,7 @@ class DeploymentQuery extends AbstractQuery
 	protected function unserializeDeployment(array $row)
 	{
 		return new Deployment(
+			$this->engine,
 			new UUID($row['id']),
 			$row['name'],
 			new \DateTimeImmutable('@' . $row['deployed_at'])
