@@ -35,7 +35,7 @@ class Deployment implements \JsonSerializable
 	public function jsonSerialize()
 	{
 		return [
-			'id' => (string)$id,
+			'id' => (string)$this->id,
 			'name' => $this->name,
 			'deployDate' => $this->deployDate->format(\DateTime::ISO8601)
 		];
