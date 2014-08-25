@@ -154,7 +154,7 @@ class DeploymentBuilder implements \Countable, \IteratorAggregate
 		}
 		finally
 		{
-			$zip->close();
+			@$zip->close();
 		}
 		
 		return $this;
