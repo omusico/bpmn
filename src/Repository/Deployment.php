@@ -55,4 +55,25 @@ class Deployment implements \JsonSerializable
 	{
 		return $this->deployDate;
 	}
+	
+	public function findResources()
+	{
+		$resources = [];
+		
+		$sql = "	SELECT `id`, `name`
+					FROM `#__resource`
+					WHERE `deployment_id` = :id
+					ORDER BY `name`
+		";
+		$stmt = $this->engine->prepareQuery($sql);
+		$stmt->bindValue('id', $this->id);
+		$stmt->execute();
+		
+		while(false !== ($row = $stmt->fetchNextRow()))
+		{
+			$resources[$row['name']] = new DeployedResource($this, new UUID($row['id']), $row['name']);
+		}
+		
+		return $resources;
+	}
 }
