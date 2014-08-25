@@ -121,11 +121,18 @@ class DeploymentBuilder implements \Countable, \IteratorAggregate
 		{
 			for($i = 0; $i < $zip->numFiles; $i++)
 			{
+				$stat = (array)$zip->statIndex($i);
+				
+				// This will skip empty files as well... need a better way to this eventually.
+				if(empty($stat['size']))
+				{
+					continue;
+				}
+				
 				$name = $zip->getNameIndex($i);
 				
 				// Cap memory at 256KB to allow for large deployments when necessary.
 				$stream = new StringStream('', 262144);
-				
 				$resource = $zip->getStream($name);
 				
 				try
