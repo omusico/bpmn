@@ -142,7 +142,8 @@ class ProcessDefinitionQuery extends AbstractQuery
 			$row['revision'],
 			unserialize(BinaryData::decode($row['definition'])),
 			$row['name'],
-			new \DateTimeImmutable('@' . $row['deployed_at'])
+			new \DateTimeImmutable('@' . $row['deployed_at']),
+			empty($row['deployment_id']) ? NULL : new UUID($row['deployment_id'])
 		);
 	}
 	

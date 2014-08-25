@@ -15,7 +15,7 @@ use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\NoneStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\Process\ProcessDefinition;
-use KoolKode\Util\Uuid;
+use KoolKode\Util\UUID;
 
 class BusinessProcessDefinition implements \JsonSerializable
 {
@@ -25,8 +25,9 @@ class BusinessProcessDefinition implements \JsonSerializable
 	protected $revision;
 	protected $model;
 	protected $deployed;
+	protected $deploymentId;
 	
-	public function __construct(UUID $id, $key, $revision, ProcessDefinition $model, $name, \DateTimeImmutable $deployed)
+	public function __construct(UUID $id, $key, $revision, ProcessDefinition $model, $name, \DateTimeImmutable $deployed, UUID $deploymentId = NULL)
 	{
 		$this->id = $id;
 		$this->key = $key;
@@ -34,6 +35,7 @@ class BusinessProcessDefinition implements \JsonSerializable
 		$this->revision = (int)$revision;
 		$this->model = $model;
 		$this->deployed = $deployed;
+		$this->deploymentId = $deploymentId;
 	}
 	
 	public function jsonSerialize()
@@ -43,7 +45,8 @@ class BusinessProcessDefinition implements \JsonSerializable
 			'key' => $this->key,
 			'revision' => $this->revision,
 			'name' => $this->name,
-			'deployDate' => $this->deployed->format(\DateTime::ISO8601)
+			'deployDate' => $this->deployed->format(\DateTime::ISO8601),
+			'deploymentId' => ($this->deploymentId === NULL) ? NULL : (string)$this->deploymentId
 		];
 	}
 	
@@ -69,12 +72,12 @@ class BusinessProcessDefinition implements \JsonSerializable
 	
 	public function getModel()
 	{
-		return unserialize(serialize($this->model));
+		return clone $this->model;
 	}
 	
 	public function getDeployed()
 	{
-		return clone $this->deployed;
+		return $this->deployed;
 	}
 	
 	public function findNoneStartEvent()
