@@ -5,16 +5,39 @@ DROP TABLE IF EXISTS `#__user_task`;
 DROP TABLE IF EXISTS `#__execution_variables`;
 DROP TABLE IF EXISTS `#__execution`;
 DROP TABLE IF EXISTS `#__process_definition`;
+DROP TABLE IF EXISTS `#__resource`;
+DROP TABLE IF EXISTS `#__deployment`;
+
+CREATE TABLE `#__deployment` (
+	`id` BINARY(16) NOT NULL,
+	`name` VARCHAR(250) NOT NULL,
+	`deployed_at` INT UNSIGNED NOT NULL,
+	PRIMARY KEY (`id`),
+	INDEX `#__deployment_lookup` (`name`, `deployed_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `#__resource` (
+	`id` BINARY(16) NOT NULL,
+	`deployment_id` BINARY(16) NOT NULL,
+	`name` VARCHAR(250) NOT NULL,
+	`data` LONGBLOB NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `#__resource_integrity` (`name`, `deployment_id`),
+	FOREIGN KEY (`deployment_id`) REFERENCES `#__deployment` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `#__process_definition` (
 	`id` BINARY(16) NOT NULL,
+	`deployment_id` BINARY(16) NULL,
 	`process_key` VARCHAR(250) NOT NULL,
 	`revision` INT UNSIGNED NOT NULL,
 	`definition` LONGBLOB NOT NULL,
 	`name` VARCHAR(250) NOT NULL,
 	`deployed_at` INT UNSIGNED NOT NULL,
 	PRIMARY KEY (`id`),
-	UNIQUE INDEX `#__process_definition_versioning` (`process_key`, `revision`)
+	UNIQUE INDEX `#__process_definition_versioning` (`process_key`, `revision`),
+	INDEX `#__process_definition_lookup` (`deployment_id`, `process_key`),
+	FOREIGN KEY (`deployment_id`) REFERENCES `#__deployment` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `#__process_subscription` (

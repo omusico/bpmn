@@ -5,17 +5,42 @@ DROP TABLE IF EXISTS `#__user_task`;
 DROP TABLE IF EXISTS `#__execution_variables`;
 DROP TABLE IF EXISTS `#__execution`;
 DROP TABLE IF EXISTS `#__process_definition`;
+DROP TABLE IF EXISTS `#__resource`;
+DROP TABLE IF EXISTS `#__deployment`;
+
+CREATE TABLE `#__deployment` (
+	`id` character(32) NOT NULL,
+	`name` varchar(250) NOT NULL,
+	`deployed_at` integer NOT NULL,
+	PRIMARY KEY (`id`)
+);
+
+CREATE INDEX `#__deployment_lookup` ON `#__deployment` (`name`, `deployed_at`);
+
+CREATE TABLE `#__resource` (
+	`id` character(32) NOT NULL,
+	`deployment_id` character(32) NOT NULL,
+	`name` varchar(250) NOT NULL,
+	`data` bytea NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE (`deployment_id`, `name`),
+	FOREIGN KEY (`deployment_id`) REFERENCES `#__deployment` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+);
 
 CREATE TABLE `#__process_definition` (
 	`id` character(32) NOT NULL,
+	`deployment_id` character(32) NULL,
 	`process_key` varchar(250) NOT NULL,
 	`revision` integer NOT NULL,
 	`definition` bytea NOT NULL,
 	`name` varchar(250) NOT NULL,
 	`deployed_at` integer NOT NULL,
 	PRIMARY KEY (`id`),
-	UNIQUE (`process_key`, `revision`)
+	UNIQUE (`process_key`, `revision`),
+	FOREIGN KEY (`deployment_id`) REFERENCES `#__deployment` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+CREATE INDEX `#__process_definition_lookup` ON `#__process_definition` (`deployment_id`, `process_key`) WHERE `deployment_id` IS NOT NULL;
 
 CREATE TABLE `#__process_subscription` (
 	`id` character(32) NOT NULL,

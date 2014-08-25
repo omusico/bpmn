@@ -44,6 +44,11 @@ class DiagramLoader
 		return $this->parseDiagram((new XmlDocumentBuilder())->buildDocument(new \SplFileInfo($file)));
 	}
 	
+	public function parseDiagramString($contents)
+	{
+		return $this->parseDiagram((new XmlDocumentBuilder())->buildDocument($contents));
+	}
+	
 	public function parseDiagram(\DOMDocument $xml)
 	{
 		try
@@ -72,7 +77,7 @@ class DiagramLoader
 			
 			if(empty($result))
 			{
-				throw new \RuntimeException('No executable process definitions found');
+				throw new \OutOfBoundsException('No executable process definitions found');
 			}
 			
 			return $result;

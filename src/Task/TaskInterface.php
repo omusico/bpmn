@@ -14,7 +14,7 @@ namespace KoolKode\BPMN\Task;
 use KoolKode\Util\UUID;
 
 /**
- * represents a user task instance.
+ * Represents a user task instance.
  * 
  * @author Martin Schröder
  */

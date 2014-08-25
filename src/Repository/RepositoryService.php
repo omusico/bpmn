@@ -14,6 +14,7 @@ namespace KoolKode\BPMN\Repository;
 use KoolKode\BPMN\BusinessProcessBuilder;
 use KoolKode\BPMN\DiagramLoader;
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Repository\Command\CreateDeploymentCommand;
 use KoolKode\BPMN\Repository\Command\DeployBusinessProcessCommand;
 
 class RepositoryService
@@ -25,25 +26,38 @@ class RepositoryService
 		$this->engine = $engine;
 	}
 	
+	public function createDeploymentQuery()
+	{
+		return new DeploymentQuery($this->engine);
+	}
+	
 	public function createProcessDefinitionQuery()
 	{
 		return new ProcessDefinitionQuery($this->engine);
 	}
 	
-	public function deployDiagram($file)
+	public function createDeployment($name)
 	{
-		$loader = new DiagramLoader();
-		$defs = [];
-		
-		foreach((array)$loader->parseDiagramFile($file) as $builder)
-		{
-			$defs = $this->deployBusinessProcess($builder);
-		}
-		
-		return $defs;
+		return new DeploymentBuilder($name);
 	}
 	
-	public function deployBusinessProcess(BusinessProcessBuilder $builder)
+	public function deployProcess(\SplFileInfo $file, $name = NULL)
+	{
+		$builder = new DeploymentBuilder(($name === NULL) ? $file->getFilename() : $name);
+		$builder->addExtensions($file->getExtension());
+		$builder->addResource($file->getFilename(), $file);
+		
+		return $this->deploy($builder);
+	}
+	
+	public function deploy(DeploymentBuilder $builder)
+	{
+		$id = $this->engine->executeCommand(new CreateDeploymentCommand($builder));
+		
+		return $this->createDeploymentQuery()->deploymentId($id)->findOne();
+	}
+	
+	public function deployProcessBuilder(BusinessProcessBuilder $builder)
 	{
 		return $this->engine->executeCommand(new DeployBusinessProcessCommand($builder));
 	}

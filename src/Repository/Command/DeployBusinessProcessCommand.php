@@ -18,7 +18,7 @@ use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\BusinessProcessDefinition;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
-use KoolKode\Util\Uuid;
+use KoolKode\Util\UUID;
 
 /**
  * Deploys a business process and takes care of versioning and start event subscriptions.
@@ -29,9 +29,12 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 {
 	protected $builder;
 	
-	public function __construct(BusinessProcessBuilder $builder)
+	protected $deploymentId;
+	
+	public function __construct(BusinessProcessBuilder $builder, UUID $deploymentId = NULL)
 	{
 		$this->builder = $builder;
+		$this->deploymentId = $deploymentId;
 	}
 	
 	public function getPriority()
@@ -57,12 +60,13 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$time = time();
 			
 		$sql = "	INSERT INTO `#__process_definition`
-						(`id`, `process_key`, `revision`, `definition`, `name`, `deployed_at`)
+						(`id`, `deployment_id`, `process_key`, `revision`, `definition`, `name`, `deployed_at`)
 					VALUES
-						(:id, :key, :revision, :model, :name, :deployed)
+						(:id, :deployment, :key, :revision, :model, :name, :deployed)
 		";
 		$stmt = $engine->prepareQuery($sql);
 		$stmt->bindValue('id', $id);
+		$stmt->bindValue('deployment', $this->deploymentId);
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->bindValue('revision', $revision + 1);
 		$stmt->bindValue('model', new BinaryData(serialize($model), 3));
@@ -81,7 +85,7 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 		$stmt->bindValue('key', $this->builder->getKey());
 		$stmt->execute();
 		
-		$engine->debug('Deployed business process {key} revision {revision} using id {id}', [
+		$engine->info('Deployed business process {key} revision {revision} using id {id}', [
 			'key' => $this->builder->getKey(),
 			'revision' => $revision + 1,
 			'id' => (string)$id

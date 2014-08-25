@@ -252,7 +252,9 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			'#__user_task',
 			'#__execution_variables',
 			'#__execution',
-			'#__process_definition'
+			'#__process_definition',
+			'#__resource',
+			'#__deployment'
 		];
 		
 		// Need to delete from tabls in correct order to prevent errors due to foreign key constraints.
@@ -269,7 +271,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			$file = dirname((new \ReflectionClass(get_class($this)))->getFileName()) . DIRECTORY_SEPARATOR . $file;
 		}
 		
-		return $this->repositoryService->deployDiagram($file);
+		return $this->repositoryService->deployProcess(new \SplFileInfo($file));
 	}
 	
 	protected function registerMessageHandler($processDefinitionKey, $nodeId, callable $handler)

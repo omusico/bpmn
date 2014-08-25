@@ -25,15 +25,17 @@ class ProcessDefinitionQuery extends AbstractQuery
 {
 	protected $processDefinitionId;
 	
+	protected $processDefinitionKey;
+	
+	protected $processDefinitionVersion;
+	
+	protected $deploymentId;
+	
 	protected $latestVersion;
 	
 	protected $messageEventSubscriptionNames;
 	
 	protected $signalEventSubscriptionNames;
-	
-	protected $processDefinitionKey;
-	
-	protected $processDefinitionVersion;
 	
 	protected $engine;
 	
@@ -45,6 +47,31 @@ class ProcessDefinitionQuery extends AbstractQuery
 	public function processDefinitionId($processDefinitionId)
 	{
 		$this->populateMultiProperty($this->processDefinitionId, $processDefinitionId, function($value) {
+			return new UUID($value);
+		});
+		
+		return $this;
+	}
+	
+	public function processDefinitionKey($key)
+	{
+		$this->populateMultiProperty($this->processDefinitionKey, $key);
+	
+		return $this;
+	}
+	
+	public function processDefinitionVersion($version)
+	{
+		$this->populateMultiProperty($this->processDefinitionVersion, $version, function($value) {
+			return (int)$value;
+		});
+	
+		return $this;
+	}
+	
+	public function deploymentId($id)
+	{
+		$this->populateMultiProperty($this->deploymentId, $id, function($value) {
 			return new UUID($value);
 		});
 		
@@ -70,22 +97,6 @@ class ProcessDefinitionQuery extends AbstractQuery
 	{
 		$this->signalEventSubscriptionNames[] = [];
 		$this->populateMultiProperty($this->signalEventSubscriptionNames[count($this->signalEventSubscriptionNames) - 1], $name);
-		
-		return $this;
-	}
-	
-	public function processDefinitionKey($key)
-	{
-		$this->populateMultiProperty($this->processDefinitionKey, $key);
-		
-		return $this;
-	}
-	
-	public function processDefinitionVersion($version)
-	{
-		$this->populateMultiProperty($this->processDefinitionVersion, $version, function($value) {
-			return (int)$value;
-		});
 		
 		return $this;
 	}
@@ -143,11 +154,12 @@ class ProcessDefinitionQuery extends AbstractQuery
 		}
 		else
 		{
-			$fields = 'd.*';
+			$fields = 'p.*';
 		}
 	
 		$sql = "	SELECT $fields
-					FROM `#__process_definition` AS d
+					FROM `#__process_definition` AS p
+					LEFT JOIN `#__deployment` AS d ON (d.`id` = p.`deployment_id`)
 		";
 	
 		$alias = 1;
@@ -155,13 +167,14 @@ class ProcessDefinitionQuery extends AbstractQuery
 		$where = [];
 		$params = [];
 		
-		$this->buildPredicate("d.`id`", $this->processDefinitionId, $where, $params);
-		$this->buildPredicate("d.`process_key`", $this->processDefinitionKey, $where, $params);
-		$this->buildPredicate("d.`revision`", $this->processDefinitionVersion, $where, $params);
+		$this->buildPredicate("p.`id`", $this->processDefinitionId, $where, $params);
+		$this->buildPredicate("p.`process_key`", $this->processDefinitionKey, $where, $params);
+		$this->buildPredicate("p.`revision`", $this->processDefinitionVersion, $where, $params);
+		$this->buildPredicate("d.`id`", $this->deploymentId, $where, $params);
 		
 		foreach((array)$this->messageEventSubscriptionNames as $name)
 		{
-			$joins[] = "INNER JOIN `#__process_subscription` AS s$alias ON (s$alias.`definition_id` = d.`id`)";
+			$joins[] = "INNER JOIN `#__process_subscription` AS s$alias ON (s$alias.`definition_id` = p.`id`)";
 			
 			$p1 = 'p' . count($params);
 			
@@ -175,7 +188,7 @@ class ProcessDefinitionQuery extends AbstractQuery
 		
 		foreach((array)$this->signalEventSubscriptionNames as $name)
 		{
-			$joins[] = "INNER JOIN `#__process_subscription` AS s$alias ON (s$alias.`definition_id` = d.`id`)";
+			$joins[] = "INNER JOIN `#__process_subscription` AS s$alias ON (s$alias.`definition_id` = p.`id`)";
 				
 			$p1 = 'p' . count($params);
 				
@@ -190,12 +203,12 @@ class ProcessDefinitionQuery extends AbstractQuery
 		if($this->latestVersion)
 		{
 			// Using an anti-join to improve query performance (no need for aggregate functions).
-			$joins[] = "	LEFT JOIN `#__process_definition` AS d2 ON (
-								d2.`process_key` = d.`process_key`
-								AND d2.`revision` > d.`revision`
+			$joins[] = "	LEFT JOIN `#__process_definition` AS p2 ON (
+								p2.`process_key` = p.`process_key`
+								AND p2.`revision` > p.`revision`
 							)
 			";
-			$where[] = "d2.`revision` IS NULL";
+			$where[] = "p2.`revision` IS NULL";
 		}
 		
 		foreach($joins as $join)

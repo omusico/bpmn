@@ -1,7 +1,5 @@
 <?php
 
-namespace KoolKode\BPMN\Engine;
-
 /*
  * This file is part of KoolKode BPMN.
  *
@@ -10,6 +8,10 @@ namespace KoolKode\BPMN\Engine;
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+namespace KoolKode\BPMN\Engine;
+
+use KoolKode\Stream\StreamInterface;
 
 class BinaryData
 {
@@ -23,6 +25,15 @@ class BinaryData
 	
 	public function __construct($data, $level = 1)
 	{
+		if(is_resource($data))
+		{
+			$data = stream_get_contents($data);
+		}
+		elseif($data instanceof StreamInterface)
+		{
+			$data = $data->getContents();
+		}
+		
 		$this->data = (string)$data;
 		$this->level = (int)$level;
 	}
