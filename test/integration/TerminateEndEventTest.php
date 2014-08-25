@@ -18,7 +18,7 @@ class TerminateEndEventTest extends BusinessProcessTestCase
 {
 	public function testTerminateBranch()
 	{
-		$this->deployFile('TerminateEndEventTest.bpmn');
+		$this->deployArchive('TerminateEndEventTest.zip');
 		
 		$process = $this->runtimeService->startProcessInstanceByKey('main');
 		$this->assertEquals(3, $this->runtimeService->createExecutionQuery()->count());
@@ -34,7 +34,7 @@ class TerminateEndEventTest extends BusinessProcessTestCase
 	
 	public function testNonTerminatingBranch()
 	{
-		$this->deployFile('TerminateEndEventTest.bpmn');
+		$this->deployArchive('TerminateEndEventTest.zip');
 	
 		$process = $this->runtimeService->startProcessInstanceByKey('main');
 		$this->assertEquals(3, $this->runtimeService->createExecutionQuery()->count());

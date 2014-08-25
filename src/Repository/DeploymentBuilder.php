@@ -54,12 +54,12 @@ class DeploymentBuilder implements \Countable, \IteratorAggregate
 	 * 
 	 * The deployment mechanism will parse ".bpmn" files by default.
 	 * 
-	 * @param string$extension
+	 * @param mixed $extensions Sinlge extension string or array of extensions.
 	 * @return DeploymentBuilder
 	 */
-	public function addExtensions($extension)
+	public function addExtensions($extensions)
 	{
-		$this->fileExtensions = array_unique(array_merge($this->fileExtensions, [strtolower($extension)]));
+		$this->fileExtensions = array_unique(array_merge($this->fileExtensions, array_map('strtolower', (array)$extensions)));
 		
 		return $this;
 	}
@@ -102,6 +102,53 @@ class DeploymentBuilder implements \Countable, \IteratorAggregate
 		}
 		
 		$this->resources[trim(str_replace('\\', '/', $name), '/')] = $in;
+		
+		return $this;
+	}
+	
+	/**
+	 * Add a ZIP archives file contents to the deployment.
+	 * 
+	 * @param string $file
+	 * @return Deployment
+	 */
+	public function addArchive($file)
+	{
+		$zip = new \ZipArchive();
+		$zip->open($file);
+		
+		try
+		{
+			for($i = 0; $i < $zip->numFiles; $i++)
+			{
+				$name = $zip->getNameIndex($i);
+				
+				// Cap memory at 256KB to allow for large deployments when necessary.
+				$stream = new StringStream('', 262144);
+				
+				$resource = $zip->getStream($name);
+				
+				try
+				{
+					while(!feof($resource))
+					{
+						$stream->write(fread($resource, 8192));
+					}
+					
+					$stream->rewind();
+				}
+				finally
+				{
+					@fclose($resource);
+				}
+				
+				$this->resources[trim(str_replace('\\', '/', $name), '/')] = $stream;
+			}
+		}
+		finally
+		{
+			$zip->close();
+		}
 		
 		return $this;
 	}

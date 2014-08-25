@@ -274,6 +274,20 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 		return $this->repositoryService->deployProcess(new \SplFileInfo($file));
 	}
 	
+	protected function deployArchive($file, array $extensions = [])
+	{
+		if(!preg_match("'^(?:(?:[a-z]:)|(/+)|([^:]+://))'i", $file))
+		{
+			$file = dirname((new \ReflectionClass(get_class($this)))->getFileName()) . DIRECTORY_SEPARATOR . $file;
+		}
+		
+		$builder = $this->repositoryService->createDeployment(pathinfo($file, PATHINFO_FILENAME));
+		$builder->addExtensions($extensions);
+		$builder->addArchive($file);
+	
+		return $this->repositoryService->deploy($builder);
+	}
+	
 	protected function registerMessageHandler($processDefinitionKey, $nodeId, callable $handler)
 	{
 		$args = array_slice(func_get_args(), 3);
