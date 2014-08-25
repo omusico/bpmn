@@ -81,7 +81,7 @@ class CreateDeploymentCommand extends AbstractBusinessCommand
 			{
 				foreach($parser->parseDiagramString($in) as $process)
 				{
-					$engine->pushCommand(new DeployBusinessProcessCommand($process));
+					$engine->pushCommand(new DeployBusinessProcessCommand($process, $id));
 				}
 			}
 		}
