@@ -12,7 +12,7 @@
 namespace KoolKode\BPMN\Runtime;
 
 use KoolKode\BPMN\Engine\ProcessEngine;
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\BPMN\Runtime\Command\GetExecutionVariablesCommand;
 use KoolKode\BPMN\Runtime\Command\MessageEventReceivedCommand;
 use KoolKode\BPMN\Runtime\Command\SetExecutionVariableCommand;
@@ -56,7 +56,7 @@ class RuntimeService
 		return $this->createExecutionQuery()->executionId($ids)->findAll();
 	}
 	
-	public function startProcessInstance(BusinessProcessDefinition $def, $businessKey = NULL, array $variables = [])
+	public function startProcessInstance(ProcessDefinition $def, $businessKey = NULL, array $variables = [])
 	{
 		$startNode = $def->findNoneStartEvent();
 		

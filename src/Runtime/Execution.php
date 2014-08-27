@@ -11,7 +11,7 @@
 
 namespace KoolKode\BPMN\Runtime;
 
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\Util\UUID;
 
 class Execution implements ExecutionInterface, \JsonSerializable
@@ -24,7 +24,7 @@ class Execution implements ExecutionInterface, \JsonSerializable
 	protected $ended;
 	protected $businessKey;
 	
-	public function __construct(BusinessProcessDefinition $definition, UUID $id, UUID $processInstanceId, UUID $parentId = NULL, $activityId = NULL, $ended = false, $businessKey = NULL)
+	public function __construct(ProcessDefinition $definition, UUID $id, UUID $processInstanceId, UUID $parentId = NULL, $activityId = NULL, $ended = false, $businessKey = NULL)
 	{
 		$this->definition = $definition;
 		$this->id = $id;

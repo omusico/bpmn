@@ -15,7 +15,7 @@ use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Util\UUID;
 
@@ -129,13 +129,14 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 		
 		while($row = $stmt->fetchNextRow())
 		{
-			$definition = new BusinessProcessDefinition(
+			$definition = new ProcessDefinition(
 				new UUID($row['id']),
 				$row['process_key'],
 				$row['revision'],
 				unserialize(BinaryData::decode($row['definition'])),
 				$row['name'],
-				new \DateTimeImmutable('@' . $row['deployed_at'])
+				new \DateTimeImmutable('@' . $row['deployed_at']),
+				empty($row['deployment_id']) ? NULL : new UUID($row['deployment_id'])
 			);
 			
 			$uuids[] = $engine->executeCommand(new StartProcessInstanceCommand(

@@ -14,7 +14,7 @@ namespace KoolKode\BPMN\Runtime;
 use KoolKode\BPMN\Engine\AbstractQuery;
 use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\Util\UnicodeString;
 use KoolKode\Util\UUID;
 
@@ -143,13 +143,14 @@ class ExecutionQuery extends AbstractQuery
 	
 	protected function unserializeExecution(array $row)
 	{
-		$def = new BusinessProcessDefinition(
+		$def = new ProcessDefinition(
 			new UUID($row['def_id']),
 			$row['def_key'],
 			$row['def_rev'],
 			unserialize(BinaryData::decode($row['def_data'])),
 			$row['def_name'],
-			new \DateTimeImmutable('@' . $row['def_deployed'])
+			new \DateTimeImmutable('@' . $row['def_deployed']),
+			empty($row['deployment_id']) ? NULL : new UUID($row['deployment_id'])
 		);
 		
 		return new Execution(
@@ -173,6 +174,7 @@ class ExecutionQuery extends AbstractQuery
 		{
 			$fields = '	e.*,
 						d.`id` AS def_id,
+						d.`deployment_id`,
 						d.`process_key` AS def_key,
 						d.`revision` AS def_rev,
 						d.`definition` AS def_data,

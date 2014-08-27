@@ -14,7 +14,7 @@ namespace KoolKode\BPMN\Runtime\Command;
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Engine\VirtualExecution;
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\Process\Command\ExecuteNodeCommand;
 use KoolKode\Process\Node;
 use KoolKode\Util\Uuid;
@@ -34,7 +34,7 @@ class StartProcessInstanceCommand extends AbstractBusinessCommand
 	
 	protected $variables;
 	
-	public function __construct(BusinessProcessDefinition $definition, Node $startNode, $businessKey = NULL, array $variables = [])
+	public function __construct(ProcessDefinition $definition, Node $startNode, $businessKey = NULL, array $variables = [])
 	{
 		$this->definition = $definition;
 		$this->startNode = $startNode->getId();

@@ -11,7 +11,7 @@
 
 namespace KoolKode\BPMN\Runtime;
 
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\Util\UUID;
 
 /**
@@ -53,7 +53,7 @@ interface ExecutionInterface
 	/**
 	 * Get the process definition.
 	 * 
-	 * @return BusinessProcessDefinition
+	 * @return ProcessDefinition
 	 */
 	public function getProcessDefinition();
 	

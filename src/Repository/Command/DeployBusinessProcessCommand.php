@@ -15,7 +15,7 @@ use KoolKode\BPMN\BusinessProcessBuilder;
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\BinaryData;
 use KoolKode\BPMN\Engine\ProcessEngine;
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\Util\UUID;
@@ -136,13 +136,14 @@ class DeployBusinessProcessCommand extends AbstractBusinessCommand
 			}
 		}
 		
-		return new BusinessProcessDefinition(
+		return new ProcessDefinition(
 			$id,
 			$this->builder->getKey(),
 			$revision + 1,
 			$model,
 			$model->getTitle(),
-			new \DateTimeImmutable('@' . $time)
+			new \DateTimeImmutable('@' . $time),
+			$this->deploymentId
 		);
 	}
 }

@@ -17,7 +17,7 @@ use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
 use KoolKode\Process\ProcessModel;
 use KoolKode\Util\UUID;
 
-class BusinessProcessDefinition implements \JsonSerializable
+class ProcessDefinition implements \JsonSerializable
 {
 	protected $id;
 	protected $key;

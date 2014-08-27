@@ -11,7 +11,7 @@
 
 namespace KoolKode\BPMN;
 
-use KoolKode\BPMN\Repository\BusinessProcessDefinition;
+use KoolKode\BPMN\Repository\ProcessDefinition;
 use KoolKode\BPMN\Test\BusinessProcessTestCase;
 
 class MultiVersionDeploymentTest extends BusinessProcessTestCase
@@ -38,7 +38,7 @@ class MultiVersionDeploymentTest extends BusinessProcessTestCase
 		
 		$result = $query->findAll();
 		$def = array_pop($result);
-		$this->assertTrue($def instanceof BusinessProcessDefinition);
+		$this->assertTrue($def instanceof ProcessDefinition);
 		$this->assertEquals('multi1', $def->getKey());
 		$this->assertEquals(2, $def->getRevision());
 	}
@@ -55,7 +55,7 @@ class MultiVersionDeploymentTest extends BusinessProcessTestCase
 		
 		$result = $query->findAll();
 		$def = array_pop($result);
-		$this->assertTrue($def instanceof BusinessProcessDefinition);
+		$this->assertTrue($def instanceof ProcessDefinition);
 		$this->assertEquals('multi1', $def->getKey());
 		$this->assertEquals(1, $def->getRevision());
 	}

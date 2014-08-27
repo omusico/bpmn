@@ -136,7 +136,7 @@ class ProcessDefinitionQuery extends AbstractQuery
 	
 	protected function unserializeProcessDefinition(array $row)
 	{
-		return new BusinessProcessDefinition(
+		return new ProcessDefinition(
 			new UUID($row['id']),
 			$row['process_key'],
 			$row['revision'],
