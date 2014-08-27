@@ -328,7 +328,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 			'id' => $execution->getId(),
 			'pid' => $pid,
 			'process' => $execution->getRootExecution()->getId(),
-			'def' => $execution->getProcessDefinition()->getId(),
+			'def' => $execution->getProcessModel()->getId(),
 			'state' => $execution->getState(),
 			'active' => $execution->getTimestamp(),
 			'node' => $nid,

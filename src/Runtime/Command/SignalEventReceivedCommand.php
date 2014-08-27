@@ -83,7 +83,7 @@ class SignalEventReceivedCommand extends AbstractBusinessCommand
 			
 			if($row['node'] !== NULL)
 			{
-				$execution->setNode($execution->getProcessDefinition()->findNode($row['node']));
+				$execution->setNode($execution->getProcessModel()->findNode($row['node']));
 				$execution->setTransition(NULL);
 					
 				$engine->syncExecutionState($execution);

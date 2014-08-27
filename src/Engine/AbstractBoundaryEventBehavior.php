@@ -61,9 +61,9 @@ abstract class AbstractBoundaryEventBehavior extends AbstractSignalableBehavior
 	
 	public function signalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
-		$definition = $execution->getProcessDefinition();
+		$model = $execution->getProcessModel();
 		$event = $execution->getNode();
-		$activity = $definition->findNode($this->attachedTo);
+		$activity = $model->findNode($this->attachedTo);
 		
 		if($this->interrupting)
 		{

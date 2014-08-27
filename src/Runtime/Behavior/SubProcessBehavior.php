@@ -41,13 +41,13 @@ class SubProcessBehavior extends AbstractScopeBehavior
 	{
 		$this->createScopedEventSubscriptions($execution);
 		
-		$definition = $execution->getProcessDefinition();
+		$model = $execution->getProcessModel();
 		
 		$execution->getEngine()->debug('Starting sub process "{process}"', [
 			'process' => $this->getStringValue($this->name, $execution->getExpressionContext())
 		]);
 		
-		$startNode = $definition->findNode($this->startNodeId);
+		$startNode = $model->findNode($this->startNodeId);
 		
 		if(!$startNode->getBehavior() instanceof NoneStartEventBehavior)
 		{
@@ -61,7 +61,7 @@ class SubProcessBehavior extends AbstractScopeBehavior
 		
 		$execution->waitForSignal();
 		
-		$sub = $execution->createNestedExecution($definition, false);
+		$sub = $execution->createNestedExecution($model, false);
 		$sub->execute($startNode);
 	}
 	

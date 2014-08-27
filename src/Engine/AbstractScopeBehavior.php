@@ -81,11 +81,11 @@ abstract class AbstractScopeBehavior extends AbstractSignalableBehavior
 	 */
 	public function findAttachedBoundaryEvents(VirtualExecution $execution)
 	{
-		$definition = $execution->getProcessDefinition();
+		$model = $execution->getProcessModel();
 		$ref = ($execution->getNode() === NULL) ? NULL : $execution->getNode()->getId();
 		$events = [];
 	
-		foreach($definition->findNodes() as $node)
+		foreach($model->findNodes() as $node)
 		{
 			$behavior = $node->getBehavior();
 				

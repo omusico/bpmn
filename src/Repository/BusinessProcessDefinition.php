@@ -14,7 +14,7 @@ namespace KoolKode\BPMN\Repository;
 use KoolKode\BPMN\Runtime\Behavior\MessageStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\NoneStartEventBehavior;
 use KoolKode\BPMN\Runtime\Behavior\SignalStartEventBehavior;
-use KoolKode\Process\ProcessDefinition;
+use KoolKode\Process\ProcessModel;
 use KoolKode\Util\UUID;
 
 class BusinessProcessDefinition implements \JsonSerializable
@@ -27,7 +27,7 @@ class BusinessProcessDefinition implements \JsonSerializable
 	protected $deployed;
 	protected $deploymentId;
 	
-	public function __construct(UUID $id, $key, $revision, ProcessDefinition $model, $name, \DateTimeImmutable $deployed, UUID $deploymentId = NULL)
+	public function __construct(UUID $id, $key, $revision, ProcessModel $model, $name, \DateTimeImmutable $deployed, UUID $deploymentId = NULL)
 	{
 		$this->id = $id;
 		$this->key = $key;

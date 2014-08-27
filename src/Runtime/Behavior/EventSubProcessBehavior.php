@@ -34,7 +34,7 @@ class EventSubProcessBehavior extends AbstractBoundaryEventBehavior
 	
 	public function createEventSubscription(VirtualExecution $execution, $activityId, Node $node)
 	{
-		$startNode = $execution->getProcessDefinition()->findNode($this->startNodeId);
+		$startNode = $execution->getProcessModel()->findNode($this->startNodeId);
 		$behavior = $startNode->getBehavior();
 		
 		if(!$behavior instanceof EventSubscriptionBehaviorInterface)
@@ -51,9 +51,9 @@ class EventSubProcessBehavior extends AbstractBoundaryEventBehavior
 	
 	protected function delegateSignalBehavior(VirtualExecution $execution, $signal, array $variables = [])
 	{
-		$definition = $execution->getProcessDefinition();
+		$model = $execution->getProcessModel();
 		$event = $execution->getNode();
-		$activity = $definition->findNode($this->attachedTo);
+		$activity = $model->findNode($this->attachedTo);
 		
 		$execution->setNode($activity);
 		$execution->setTransition(NULL);
@@ -61,7 +61,7 @@ class EventSubProcessBehavior extends AbstractBoundaryEventBehavior
 		
 		if($this->interrupting)
 		{
-			$sub = $execution->createNestedExecution($definition);
+			$sub = $execution->createNestedExecution($model);
 		}
 		else
 		{
@@ -73,6 +73,6 @@ class EventSubProcessBehavior extends AbstractBoundaryEventBehavior
 			$sub->setVariable($k, $v);
 		}
 		
-		return $sub->execute($definition->findNode($this->startNodeId));
+		return $sub->execute($model->findNode($this->startNodeId));
 	}
 }

@@ -40,7 +40,6 @@ use KoolKode\Expression\ExpressionInterface;
 use KoolKode\Expression\Parser\ExpressionLexer;
 use KoolKode\Expression\Parser\ExpressionParser;
 use KoolKode\Process\ExpressionTrigger;
-use KoolKode\Process\ProcessDefinition;
 use KoolKode\Process\ProcessBuilder;
 
 /**

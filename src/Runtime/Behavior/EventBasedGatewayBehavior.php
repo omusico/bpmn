@@ -23,9 +23,9 @@ class EventBasedGatewayBehavior extends AbstractSignalableBehavior
 {
 	public function executeBehavior(VirtualExecution $execution)
 	{
-		$def = $execution->getProcessDefinition();
+		$model = $execution->getProcessModel();
 		$gateway = $execution->getNode();
-		$transitions = $def->findOutgoingTransitions($gateway->getId());
+		$transitions = $model->findOutgoingTransitions($gateway->getId());
 		
 		if(count($transitions) < 2)
 		{
@@ -34,7 +34,7 @@ class EventBasedGatewayBehavior extends AbstractSignalableBehavior
 		
 		foreach($transitions as $trans)
 		{
-			$eventNode = $def->findNode($trans->getTo());
+			$eventNode = $model->findNode($trans->getTo());
 			$behavior = $eventNode->getBehavior();
 			
 			if(!$behavior instanceof IntermediateCatchEventInterface)

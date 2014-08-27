@@ -13,7 +13,7 @@ namespace KoolKode\BPMN\Engine;
 
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
 use KoolKode\Process\Execution;
-use KoolKode\Process\ProcessDefinition;
+use KoolKode\Process\ProcessModel;
 use KoolKode\Process\Transition;
 use KoolKode\Util\UUID;
 
@@ -26,9 +26,9 @@ class VirtualExecution extends Execution
 {
 	protected $businessKey;
 	
-	public function __construct(UUID $id, ProcessEngine $engine, ProcessDefinition $processDefinition, VirtualExecution $parentExecution = NULL)
+	public function __construct(UUID $id, ProcessEngine $engine, ProcessModel $model, VirtualExecution $parentExecution = NULL)
 	{
-		parent::__construct($id, $engine, $processDefinition, $parentExecution);
+		parent::__construct($id, $engine, $model, $parentExecution);
 		
 		if($parentExecution !== NULL)
 		{
