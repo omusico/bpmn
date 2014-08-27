@@ -80,6 +80,11 @@ class ProcessDefinition implements \JsonSerializable
 		return $this->deployed;
 	}
 	
+	public function getDeploymentId()
+	{
+		return $this->deploymentId;
+	}
+	
 	public function findNoneStartEvent()
 	{
 		foreach($this->model->findStartNodes() as $node)
