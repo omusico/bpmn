@@ -12,6 +12,7 @@
 namespace KoolKode\BPMN\Runtime\Event;
 
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Engine\ProcessEngineEvent;
 use KoolKode\BPMN\Runtime\ExecutionInterface;
 
 /**
@@ -19,7 +20,7 @@ use KoolKode\BPMN\Runtime\ExecutionInterface;
  * 
  * @author Martin Schröder
  */
-class CheckpointReachedEvent
+class CheckpointReachedEvent extends ProcessEngineEvent
 {
 	/**
 	 * Name of the element that triggered the checkpoint.
@@ -34,13 +35,6 @@ class CheckpointReachedEvent
 	 * @var ExecutionInterface
 	 */
 	public $execution;
-	
-	/**
-	 * Provides access to the process engine.
-	 * 
-	 * @var ProcessEngine
-	 */
-	public $engine;
 	
 	public function __construct($name, ExecutionInterface $execution, ProcessEngine $engine)
 	{

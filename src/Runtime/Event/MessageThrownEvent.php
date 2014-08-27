@@ -12,6 +12,7 @@
 namespace KoolKode\BPMN\Runtime\Event;
 
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Engine\ProcessEngineEvent;
 use KoolKode\BPMN\Runtime\ExecutionInterface;
 
 /**
@@ -19,7 +20,7 @@ use KoolKode\BPMN\Runtime\ExecutionInterface;
  * 
  * @author Martin Schröder
  */
-class MessageThrownEvent
+class MessageThrownEvent extends ProcessEngineEvent
 {
 	/**
 	 * The execution throwing the message.
@@ -27,13 +28,6 @@ class MessageThrownEvent
 	 * @var ExecutionInterface
 	 */
 	public $execution;
-	
-	/**
-	 * Provides access to the process engine.
-	 * 
-	 * @var ProcessEngine
-	 */
-	public $engine;
 	
 	public function __construct(ExecutionInterface $execution, ProcessEngine $engine)
 	{

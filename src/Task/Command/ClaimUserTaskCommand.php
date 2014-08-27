@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Task\Command;
 
 use KoolKode\BPMN\Engine\AbstractBusinessCommand;
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Task\Event\UserTaskClaimedEvent;
 use KoolKode\Util\UUID;
 
 /**
@@ -34,10 +35,7 @@ class ClaimUserTaskCommand extends AbstractBusinessCommand
 	
 	public function executeCommand(ProcessEngine $engine)
 	{
-		$task = $engine->getTaskService()
-					   ->createTaskQuery()
-					   ->taskId($this->taskId)
-					   ->findOne();
+		$task = $engine->getTaskService()->createTaskQuery()->taskId($this->taskId)->findOne();
 		
 		if($task->isClaimed())
 		{
@@ -54,6 +52,10 @@ class ClaimUserTaskCommand extends AbstractBusinessCommand
 		$stmt->bindValue('assignee', $this->assignee);
 		$stmt->bindValue('id', $task->getId());
 		$stmt->execute();
+		
+		$task = $engine->getTaskService()->createTaskQuery()->taskId($this->taskId)->findOne();
+		
+		$engine->notify(new UserTaskClaimedEvent($task, $engine));
 		
 		$engine->debug('User task "{task}" claimed by {assignee}', [
 			'task' => $task->getName(),

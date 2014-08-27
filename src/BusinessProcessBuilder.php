@@ -13,9 +13,8 @@ namespace KoolKode\BPMN;
 
 use KoolKode\BPMN\Delegate\Behavior\DelegateTaskBehavior;
 use KoolKode\BPMN\Delegate\Behavior\ExpressionTaskBehavior;
-use KoolKode\BPMN\Delegate\Behavior\ManualTaskBehavior;
 use KoolKode\BPMN\Delegate\Behavior\ScriptTaskBehavior;
-use KoolKode\BPMN\Delegate\Behavior\ServiceTaskBehavior;
+use KoolKode\BPMN\Delegate\Behavior\TaskBehavior;
 use KoolKode\BPMN\Runtime\Behavior\CallActivityBehavior;
 use KoolKode\BPMN\Runtime\Behavior\EventBasedGatewayBehavior;
 use KoolKode\BPMN\Runtime\Behavior\EventSubProcessBehavior;
@@ -210,9 +209,19 @@ class BusinessProcessBuilder
 		return $behavior;
 	}
 	
+	public function task($id, $name = NULL)
+	{
+		$behavior = new TaskBehavior();
+		$behavior->setName($this->stringExp($name));
+		
+		$this->builder->node($id)->behavior($behavior);
+		
+		return $behavior;
+	}
+	
 	public function serviceTask($id, $name = NULL)
 	{
-		$behavior = new ServiceTaskBehavior();
+		$behavior = new TaskBehavior();
 		$behavior->setName($this->stringExp($name));
 		
 		$this->builder->node($id)->behavior($behavior);
@@ -252,7 +261,7 @@ class BusinessProcessBuilder
 	
 	public function manualTask($id, $name = NULL)
 	{
-		$behavior = new ManualTaskBehavior();
+		$behavior = new TaskBehavior();
 		$behavior->setName($this->stringExp($name));
 	
 		$this->builder->node($id)->behavior($behavior);

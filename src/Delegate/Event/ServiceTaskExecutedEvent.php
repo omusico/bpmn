@@ -13,6 +13,7 @@ namespace KoolKode\BPMN\Delegate\Event;
 
 use KoolKode\BPMN\Delegate\DelegateExecutionInterface;
 use KoolKode\BPMN\Engine\ProcessEngine;
+use KoolKode\BPMN\Engine\ProcessEngineEvent;
 use KoolKode\Util\Uuid;
 
 /**
@@ -20,7 +21,7 @@ use KoolKode\Util\Uuid;
  * 
  * @author Martin Schröder
  */
-class ServiceTaskExecutedEvent
+class ServiceTaskExecutedEvent extends ProcessEngineEvent
 {
 	/**
 	 * Name of the task being executed.
@@ -35,13 +36,6 @@ class ServiceTaskExecutedEvent
 	 * @var DelegateExecutionInterface
 	 */
 	public $execution;
-	
-	/**
-	 * Provides access to the process engine.
-	 * 
-	 * @var ProcessEngine
-	 */
-	public $engine;
 	
 	public function __construct($name, DelegateExecutionInterface $execution, ProcessEngine $engine)
 	{

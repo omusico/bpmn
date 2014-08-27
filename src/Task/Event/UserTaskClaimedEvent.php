@@ -16,14 +16,14 @@ use KoolKode\BPMN\Engine\ProcessEngineEvent;
 use KoolKode\BPMN\Task\TaskInterface;
 
 /**
- * Is triggered whenever a user task has been completed successfully.
+ * Is triggered whenever a user task has been claimed.
  * 
  * @author Martin Schröder
  */
-class UserTaskCompletedEvent extends ProcessEngineEvent
+class UserTaskClaimedEvent extends ProcessEngineEvent
 {
 	/**
-	 * The task being completed.
+	 * The task being claimed.
 	 * 
 	 * @var TaskInterface
 	 */

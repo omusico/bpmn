@@ -12,7 +12,7 @@
 namespace KoolKode\BPMN\Test;
 
 use KoolKode\BPMN\Delegate\DelegateTaskRegistry;
-use KoolKode\BPMN\Delegate\Event\ServiceTaskExecutedEvent;
+use KoolKode\BPMN\Delegate\Event\TaskExecutedEvent;
 use KoolKode\BPMN\Engine\ProcessEngine;
 use KoolKode\BPMN\Repository\RepositoryService;
 use KoolKode\BPMN\Runtime\Event\MessageThrownEvent;
@@ -180,7 +180,7 @@ abstract class BusinessProcessTestCase extends \PHPUnit_Framework_TestCase
 			}
 		});
 		
-		$this->eventDispatcher->connect(function(ServiceTaskExecutedEvent $event) {
+		$this->eventDispatcher->connect(function(TaskExecutedEvent $event) {
 			
 			$execution = $this->runtimeService->createExecutionQuery()
 											  ->executionId($event->execution->getExecutionId())

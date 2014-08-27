@@ -11,6 +11,8 @@
 
 namespace KoolKode\BPMN\Delegate\Behavior;
 
+use KoolKode\BPMN\Delegate\DelegateExecution;
+use KoolKode\BPMN\Delegate\Event\TaskExecutedEvent;
 use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
@@ -48,9 +50,12 @@ class ScriptTaskBehavior extends AbstractScopeBehavior
 	{
 		$this->createScopedEventSubscriptions($execution);
 		
+		$engine = $execution->getEngine();
+		$name = $this->getStringValue($this->name, $execution->getExpressionContext());
+		
 		$execution->getEngine()->debug('Evaluate <{language}> script task "{task}"', [
 			'language' => $this->language,
-			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
+			'task' => $name
 		]);
 		
 		$result = eval($this->script);
@@ -60,7 +65,9 @@ class ScriptTaskBehavior extends AbstractScopeBehavior
 			$execution->setVariable($this->resultVariable, $result);
 		}
 		
-		$execution->getEngine()->pushCommand(new SignalExecutionCommand($execution));
+		$engine->notify(new TaskExecutedEvent($name, new DelegateExecution($execution), $engine));
+		$engine->pushCommand(new SignalExecutionCommand($execution));
+		
 		$execution->waitForSignal();
 	}
 }

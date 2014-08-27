@@ -11,6 +11,8 @@
 
 namespace KoolKode\BPMN\Delegate\Behavior;
 
+use KoolKode\BPMN\Delegate\DelegateExecution;
+use KoolKode\BPMN\Delegate\Event\TaskExecutedEvent;
 use KoolKode\BPMN\Engine\AbstractScopeBehavior;
 use KoolKode\BPMN\Engine\VirtualExecution;
 use KoolKode\BPMN\Runtime\Command\SignalExecutionCommand;
@@ -41,8 +43,11 @@ class ExpressionTaskBehavior extends AbstractScopeBehavior
 	{
 		$this->createScopedEventSubscriptions($execution);
 		
-		$execution->getEngine()->debug('Execute expression in service task "{task}"', [
-			'task' => $this->getStringValue($this->name, $execution->getExpressionContext())
+		$engine = $execution->getEngine();
+		$name = $this->getStringValue($this->name, $execution->getExpressionContext());
+		
+		$engine->debug('Execute expression in service task "{task}"', [
+			'task' => $name
 		]);
 		
 		$result = $this->getValue($this->expression, $execution->getExpressionContext());
@@ -52,7 +57,9 @@ class ExpressionTaskBehavior extends AbstractScopeBehavior
 			$execution->setVariable($this->resultVariable, $result);
 		}
 		
-		$execution->getEngine()->pushCommand(new SignalExecutionCommand($execution));
+		$engine->notify(new TaskExecutedEvent($name, new DelegateExecution($execution), $engine));
+		$engine->pushCommand(new SignalExecutionCommand($execution));
+		
 		$execution->waitForSignal();
 	}
 }

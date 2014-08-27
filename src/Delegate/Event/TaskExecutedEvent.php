@@ -17,11 +17,11 @@ use KoolKode\BPMN\Engine\ProcessEngineEvent;
 use KoolKode\Util\Uuid;
 
 /**
- * Is triggered whenever a manual task in a process is being executed.
+ * Is triggered whenever any kind of task has been executed (even manual or generic tasks).
  * 
  * @author Martin Schröder
  */
-class ManualTaskExecutedEvent extends ProcessEngineEvent
+class TaskExecutedEvent extends ProcessEngineEvent
 {
 	/**
 	 * Name of the task being executed.
