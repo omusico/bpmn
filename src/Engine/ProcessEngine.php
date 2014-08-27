@@ -2,12 +2,12 @@
 
 /*
  * This file is part of KoolKode BPMN.
-*
-* (c) Martin Schröder <m.schroeder2007@gmail.com>
-*
-* For the full copyright and license information, please view the LICENSE
-* file that was distributed with this source code.
-*/
+ *
+ * (c) Martin Schröder <m.schroeder2007@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace KoolKode\BPMN\Engine;
 
@@ -37,6 +37,8 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 	
 	protected $executions = [];
 	
+	protected $interceptors = [];
+	
 	protected $conn;
 	
 	protected $handleTransactions;
@@ -59,7 +61,7 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		
 		$this->conn = $conn;
 		$this->handleTransactions = $handleTransactions ? true : false;
-			
+		
 		$this->repositoryService = new RepositoryService($this);
 		$this->runtimeService = new RuntimeService($this);
 		$this->taskService = new TaskService($this);
@@ -130,6 +132,21 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		return $this->delegateTaskFactory->createDelegateTask($typeName);
 	}
 	
+	public function registerExecutionInterceptor(ExecutionInterceptorInterface $interceptor)
+	{
+		return $this->interceptors[] = $interceptor;
+	}
+	
+	public function unregisterExecutionInterceptor(ExecutionInterceptorInterface $interceptor)
+	{
+		if(false !== ($index = array_search($interceptor, $this->interceptors, true)))
+		{
+			unset($this->interceptors[$index]);
+		}
+		
+		return $interceptor;
+	}
+	
 	protected function performExecution(callable $callback)
 	{
 		$trans = false;
@@ -149,7 +166,11 @@ class ProcessEngine extends AbstractEngine implements ProcessEngineInterface
 		
 		try
 		{
-			$result = parent::performExecution($callback);
+			$chain = new ExecutionInterceptorChain(function() use($callback) {
+				return parent::performExecution($callback);
+			}, $this->executionDepth, $this->interceptors);
+			
+			$result = $chain->performExecution($this->executionDepth);
 			
 			foreach($this->executions as $info)
 			{
