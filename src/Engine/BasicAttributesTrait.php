@@ -61,7 +61,7 @@ trait BasicAttributesTrait
 		
 		if($value instanceof \DateTimeInterface)
 		{
-			return new \DateTimeImmutable('@' . $value->getTimestamp());
+			return new \DateTimeImmutable('@' . $value->getTimestamp(), $value->getTimezone());
 		}
 		
 		return new \DateTimeImmutable($value);
