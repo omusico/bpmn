@@ -12,7 +12,6 @@
 namespace KoolKode\BPMN\Engine;
 
 use KoolKode\Database\ConnectionInterface;
-use KoolKode\Database\LargeObjectStream;
 use KoolKode\Database\ParamEncoderInterface;
 use KoolKode\Stream\StringStream;
 
@@ -29,7 +28,7 @@ class BinaryDataParamEncoder implements ParamEncoderInterface
 		{
 			$isEncoded = true;
 			
-			return new LargeObjectStream(new StringStream($param->encode()));
+			return new StringStream($param->encode());
 		}
 	}
 }
