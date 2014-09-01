@@ -46,7 +46,7 @@ class DiagramLoader
 	
 	public function parseDiagramString($contents)
 	{
-		return $this->parseDiagram((new XmlDocumentBuilder())->buildDocument($contents));
+		return $this->parseDiagram((new XmlDocumentBuilder())->buildFromSource($contents));
 	}
 	
 	public function parseDiagram(\DOMDocument $xml)
