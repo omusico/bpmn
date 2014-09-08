@@ -35,4 +35,19 @@ class DeployedResource implements \JsonSerializable
 			'name' => $this->name
 		];
 	}
+	
+	public function getId()
+	{
+		return $this->id;
+	}
+	
+	public function getName()
+	{
+		return $this->name;
+	}
+	
+	public function getDeployment()
+	{
+		return $this->deployment;
+	}
 }
