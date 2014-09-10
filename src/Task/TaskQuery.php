@@ -258,7 +258,7 @@ class TaskQuery extends AbstractQuery
 		
 		if($this->taskUnassigned)
 		{
-			$where[] = 't.`claimed` IS NULL';
+			$where[] = 't.`claimed_by` IS NULL';
 		}
 		
 		if($this->dueAfter !== NULL || $this->dueBefore !== NULL)
