@@ -7,9 +7,9 @@ php:
   - hhvm-nightly
 
 env:
-  - 'DB=sqlite DB_DSN="sqlite::memory:"'
-  - 'DB=mysql DB_DSN="mysql:host=localhost;dbname=bpmn" DB_USERNAME=root'
-  - 'DB=pgsql DB_DSN="pgsql:host=localhost;dbname=bpmn" DB_USERNAME=postgres'
+  - 'DB=sqlite'
+  - 'DB=mysql'
+  - 'DB=pgsql'
 
 before_install:
   - 'composer selfupdate --no-interaction'
@@ -18,8 +18,9 @@ install:
   - 'composer install --no-interaction --dev --prefer-source'
   
 before_script:
-  - 'if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE bpmn;" -uroot; fi'
-  - 'if [[ "$DB" == "pgsql" ]]; then psql -c "CREATE DATABASE bpmn WITH ENCODING = ''UTF8'';" -U postgres; fi'
+  - 'if [[ "$DB" == "sqlite" ]]; then export DB_DSN="sqlite::memory:"; fi'
+  - 'if [[ "$DB" == "mysql" ]]; then export DB_DSN="mysql:host=localhost;dbname=bpmn"; export DB_USERNAME="root"; mysql -e "CREATE DATABASE bpmn;" -uroot; fi'
+  - 'if [[ "$DB" == "pgsql" ]]; then export DB_DSN="pgsql:host=localhost;dbname=bpmn"; export DB_USERNAME="postgres"; psql -c "CREATE DATABASE bpmn WITH ENCODING = ''UTF8'';" -U postgres; fi'
 
 script:
   - './vendor/bin/phpunit -c "./test/phpunit.xml" --coverage-text'
@@ -33,6 +34,6 @@ matrix:
     - php: hhvm-nightly
   exclude:
     - php: hhvm
-      env: 'DB=pgsql DB_DSN="pgsql:host=localhost;dbname=bpmn" DB_USERNAME=postgres'
+      env: 'DB=pgsql'
     - php: hhvm-nightly
-      env: 'DB=pgsql DB_DSN="pgsql:host=localhost;dbname=bpmn" DB_USERNAME=postgres'
+      env: 'DB=pgsql'
